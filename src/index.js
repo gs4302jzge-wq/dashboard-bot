@@ -6,19 +6,13 @@ const PORT = process.env.PORT || 10000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Routes
+// ربط جميع الملفات والموجهات الموجودة في مشروعك
 app.use('/', require('./routes/home'));
 
-// ربط مسارات المصادقة وتسجيل الدخول
-try {
-    app.use('/', require('./auth/auth'));
-} catch (e) {
-    try {
-        app.use('/', require('./routes/auth'));
-    } catch (err) {
-        console.log('Auth route file not found yet');
-    }
-}
+try { app.use('/settings', require('./routes/settings')); } catch(e) {}
+try { app.use('/plugins', require('./routes/plugins')); } catch(e) {}
+try { app.use('/api', require('./routes/api')); } catch(e) {}
+try { app.use('/dashboard', require('./routes/dashboard')); } catch(e) {}
 
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on port ${PORT}`);

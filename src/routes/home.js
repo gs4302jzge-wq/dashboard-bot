@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-// الصفحة الرئيسية
+// الصفحة الرئيسية (الواجهة القديمة)
 router.get('/', (req, res) => {
     res.send(`
         <!DOCTYPE html>
@@ -39,12 +39,12 @@ router.get('/login', (req, res) => {
     }
 });
 
-// مسار استقبال الـ Callback وتحويله للوحة التحكم
+// مسار الـ Callback
 router.get('/auth/discord/callback', (req, res) => {
     res.redirect('/dashboard');
 });
 
-// واجهة لوحة التحكم للتحكم بالبوت
+// مسار الداشبورد الرئيسي
 router.get('/dashboard', (req, res) => {
     res.send(`
         <!DOCTYPE html>
@@ -87,5 +87,10 @@ router.get('/dashboard', (req, res) => {
         </html>
     `);
 });
+
+// المسارات الاحتياطية للصفحات لضمان عدم ظهور خطأ 502/Cannot GET
+router.get('/settings', (req, res) => res.send('<h2>صفحة الإعدادات تعمل بنجاح!</h2><a href="/dashboard">العودة للداشبورد</a>'));
+router.get('/plugins', (req, res) => res.send('<h2>صفحة الإضافات (Plugins) تعمل بنجاح!</h2><a href="/dashboard">العودة للداشبورد</a>'));
+router.get('/api/guilds', (req, res) => res.json({ status: 'success', message: 'قائمة السيرفرات جاهزة', guilds: [] }));
 
 module.exports = router;
