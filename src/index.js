@@ -62,15 +62,6 @@ let pluginsList = [
   { id: 'ping', name: 'ping', dev: 'Mohammed Alhajri', desc: 'Ping / Pong!', usageTemplate: 'ping', aliases: [], icon: 'fa-tachometer-alt', color: '#10b981', enabled: true }
 ];
 
-function getUptime() {
-  const totalSeconds = Math.floor((Date.now() - startTime) / 1000);
-  const days = Math.floor(totalSeconds / 86400);
-  const hours = Math.floor((totalSeconds % 86400) / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
-  return `${days}d ${hours}h ${minutes}m ${seconds}s`;
-}
-
 function renderLayout(title, content) {
   return `
   <!DOCTYPE html>
@@ -178,7 +169,7 @@ app.get('/dashboard', (req, res) => {
           <div class="stat-box"><div>Server Count</div><div class="stat-value">📊 1</div></div>
           <div class="stat-box"><div>User Count</div><div class="stat-value">👥 9</div></div>
           <div class="stat-box"><div>API Latency</div><div class="stat-value">⚡ 94ms</div></div>
-          <div class="stat-box"><div>System Uptime</div><div class="stat-value">⏱️ ${getUptime()}</div></div>
+          <div class="stat-box"><div>System Uptime</div><div class="stat-value" id="uptimeValue">⏱️ 0d 0h 0m 0s</div></div>
       </div>
       <div class="card">
           <div class="card-header"><i class="fas fa-bullhorn" style="color:#38bdf8"></i> Dashboard Notice</div>
@@ -191,6 +182,20 @@ app.get('/dashboard', (req, res) => {
           <p style="margin-bottom:6px;"><b>Client ID:</b> 154057416353677415</p>
           <p style="margin-bottom:6px;"><b>Joined:</b> Saturday, August 22nd, 2026</p>
       </div>
+
+      <script>
+          const startTime = ${startTime};
+          function updateLiveUptime() {
+              const totalSeconds = Math.floor((Date.now() - startTime) / 1000);
+              const days = Math.floor(totalSeconds / 86400);
+              const hours = Math.floor((totalSeconds % 86400) / 3600);
+              const minutes = Math.floor((totalSeconds % 3600) / 60);
+              const seconds = totalSeconds % 60;
+              document.getElementById('uptimeValue').innerText = \`⏱️ \${days}d \${hours}h \${minutes}m \${seconds}s\`;
+          }
+          updateLiveUptime();
+          setInterval(updateLiveUptime, 1000);
+      </script>
   `;
   res.send(renderLayout('Dashboard', content));
 });
