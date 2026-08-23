@@ -8,6 +8,10 @@ app.use(express.urlencoded({ extended: true }));
 const startTime = Date.now();
 const guildCreatedAt = new Date('2025-05-15T00:00:00Z').getTime();
 
+// بيانات الصور ورابط ديسكورد المباشر
+const userAvatarUrl = "https://cdn.discordapp.com/embed/avatars/0.png"; // أفتار المستخدم
+const guildIconUrl = "https://cdn.discordapp.com/embed/avatars/1.png"; // شعار السيرفر
+
 let botConfig = {
     clientId: '154057416353677415',
     prefix: '-',
@@ -61,7 +65,7 @@ function renderLayout(title, content) {
             .navbar { background: #111827; padding: 15px 20px; border-bottom: 1px solid #1f2937; display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 100; }
             .sidebar-toggle { color: #fff; font-size: 20px; cursor: pointer; padding: 8px 12px; background: #1f2937; border-radius: 6px; }
             .user-profile { display: flex; align-items: center; gap: 10px; color: #fff; }
-            .user-avatar-placeholder { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #2563eb, #3b82f6); color: #fff; font-weight: bold; display: flex; align-items: center; justify-content: center; font-size: 16px; border: 2px solid #38bdf8; }
+            .user-avatar { width: 38px; height: 38px; border-radius: 50%; border: 2px solid #38bdf8; object-fit: cover; }
             
             .layout { display: flex; flex: 1; position: relative; }
             
@@ -108,7 +112,7 @@ function renderLayout(title, content) {
         <div class="navbar">
             <div class="sidebar-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></div>
             <div class="user-profile">
-                <div class="user-avatar-placeholder">N</div>
+                <img src="${userAvatarUrl}" class="user-avatar" alt="Avatar">
                 <span>nfyp_ <small style="color:#6b7280">Admin</small></span>
             </div>
         </div>
@@ -117,7 +121,7 @@ function renderLayout(title, content) {
             <div class="overlay-backdrop" id="backdrop" onclick="toggleSidebar()"></div>
             <div class="sidebar" id="sidebar">
                 <div class="sidebar-header">
-                    <div class="user-avatar-placeholder" style="width:45px; height:45px; font-size:20px;">N</div>
+                    <img src="${userAvatarUrl}" style="width:45px; height:45px; border-radius:50%; border:2px solid #38bdf8;" alt="Avatar">
                     <div>
                         <h4 style="color:#fff;">nfyp_</h4>
                         <span style="font-size:12px; color:#38bdf8;">Administrator</span>
@@ -231,7 +235,7 @@ app.get('/guilds', (req, res) => {
         
         <div class="card">
             <div style="display:flex; align-items:center; gap:15px; margin-bottom:20px; padding-bottom:15px; border-bottom:1px solid #1f2937;">
-                <div style="width:65px; height:65px; border-radius:50%; background:linear-gradient(135deg, #2563eb, #0284c7); display:flex; align-items:center; justify-content:center; font-size:26px; font-weight:bold; color:#fff; border:2px solid #38bdf8; box-shadow:0 0 15px rgba(56,189,248,0.3);">O</div>
+                <img src="${guildIconUrl}" style="width:65px; height:65px; border-radius:50%; border:2px solid #38bdf8; box-shadow:0 0 15px rgba(56,189,248,0.3); object-fit:cover;" alt="Guild Icon">
                 <div>
                     <h2 style="color:#fff;">Oscorp (OSCORP RP)</h2>
                     <p style="font-size:13px; color:#94a3b8;"><b>Guild ID:</b> 119830128491028391</p>
@@ -246,7 +250,6 @@ app.get('/guilds', (req, res) => {
                 <div class="stat-box"><div>Voice Channels</div><div class="stat-value">🔊 4</div></div>
             </div>
 
-            <!-- Server Created Duration 100x Ultra Fancy -->
             <div style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%); padding: 25px; border-radius: 16px; border: 1px solid #312e81; box-shadow: 0 10px 30px rgba(0,0,0,0.6); text-align: center; margin-top:20px; position:relative; overflow:hidden;">
                 <div style="position:absolute; top:-20px; right:-20px; width:100px; height:100px; background:rgba(56,189,248,0.1); border-radius:50%; filter:blur(20px);"></div>
                 <h4 style="color: #facc15; font-size: 16px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; font-weight:800;">
