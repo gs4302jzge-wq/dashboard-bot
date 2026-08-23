@@ -279,7 +279,7 @@ function toggleSidebar() {
 function getSidebarHtml(activePath) {
   const navItems = [
     { path: '/', label: 'Dashboard', icon: 'fa-solid fa-chart-pie' },
-    { path: '/welcome', label: 'Welcome & System', icon: 'fa-solid fa-hand-wave' },
+    { path: '/welcome', label: 'Welcome & System', icon: 'fa-solid fa-hand-sparkles' },
     { path: '/plugins', label: 'Plugins', icon: 'fa-solid fa-rocket' },
     { path: '/guilds', label: 'Guilds', icon: 'fa-solid fa-server' },
     { path: '/support', label: 'Support', icon: 'fa-solid fa-circle-question' },
@@ -289,7 +289,7 @@ function getSidebarHtml(activePath) {
   const navLinks = navItems.map(item => {
     const isActive = activePath === item.path;
     const activeStyle = isActive 
-      ? 'background: linear-gradient(90deg, rgba(56, 189, 248, 0.2), rgba(56, 189, 248, 0.05)); color: #38bdf8; font-weight: 600; border-left: 3px solid #38bdf8;' 
+      ? 'background: linear-gradient(90deg, rgba(56, 189, 248, 0.25), rgba(56, 189, 248, 0.05)); color: #38bdf8; font-weight: 600; border-left: 3px solid #38bdf8;' 
       : 'color: #94a3b8;';
     return `
       <a href="${item.path}" style="text-decoration:none; padding:12px 16px; border-radius:8px; display:flex; align-items:center; gap:14px; font-size:15px; transition:0.2s; ${activeStyle}">
@@ -389,21 +389,41 @@ app.get('/', (req, res) => {
   const uptime = getFormattedUptime();
 
   const content = `
-    <div style="margin-bottom: 20px;">
-      <h2 style="margin:0; font-size: 24px; font-weight:700;">Welcome, nfyp_</h2>
-      <p style="color: #94a3b8; margin: 4px 0 0 0; font-size: 14px;">Here's what's happening with <strong style="color:#fff;">OS | System</strong> today.</p>
+    <div style="margin-bottom: 20px; display:flex; justify-content:space-between; align-items:flex-end;">
+      <div>
+        <h2 style="margin:0; font-size: 26px; font-weight:800; background: linear-gradient(90deg, #ffffff, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Welcome, nfyp_</h2>
+        <p style="color: #94a3b8; margin: 6px 0 0 0; font-size: 14px;">Here's what's happening with <strong style="color:#fff;">OS | System</strong> today.</p>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <span style="background:rgba(34, 197, 94, 0.15); border:1px solid rgba(34, 197, 94, 0.3); color:#4ade80; padding:6px 12px; border-radius:20px; font-size:12px; font-weight:700; display:flex; align-items:center; gap:6px;">
+          <span style="width:8px; height:8px; background:#22c55e; border-radius:50%; box-shadow:0 0 8px #22c55e;"></span> System Operational
+        </span>
+      </div>
+    </div>
+
+    <!-- Fancy Banner Announcement -->
+    <div class="card" style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(15, 23, 42, 0.8)); border: 1px solid rgba(59, 130, 246, 0.3); padding:20px; position:relative; overflow:hidden;">
+      <div style="position:relative; z-index:2;">
+        <div style="display:flex; align-items:center; gap:8px; color:#38bdf8; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:1px; margin-bottom:6px;">
+          <i class="fa-solid fa-shield-halved"></i> Security & Moderation Hub
+        </div>
+        <h3 style="margin:0 0 8px 0; font-size:18px; color:#fff; font-weight:700;">Advanced Discord Bot Ecosystem Active</h3>
+        <p style="margin:0; font-size:13px; color:#cbd5e1; line-height:1.6; max-width:650px;">
+          All automated moderation systems,Slash Commands, and custom routing engines are working seamlessly in real-time.
+        </p>
+      </div>
     </div>
 
     <!-- Live Uptime Panel -->
-    <div class="card" style="padding:18px; margin-bottom:16px; background: linear-gradient(135deg, #0d1527, #0f1c38); border: 1px solid rgba(56, 189, 248, 0.2);">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+    <div class="card" style="padding:20px; margin-bottom:16px; background: linear-gradient(135deg, #0d1527, #0f1c38); border: 1px solid rgba(56, 189, 248, 0.25);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
         <div style="display:flex; align-items:center; gap:10px;">
-          <span style="width:10px; height:10px; background:#22c55e; border-radius:50%; box-shadow:0 0 10px #22c55e;"></span>
-          <h3 style="margin:0; font-size:16px; font-weight:700; color:#fff;">Live System Uptime</h3>
+          <span style="width:10px; height:10px; background:#38bdf8; border-radius:50%; box-shadow:0 0 10px #38bdf8;"></span>
+          <h3 style="margin:0; font-size:16px; font-weight:700; color:#fff;">Live System Uptime Tracker</h3>
         </div>
-        <span style="font-size:12px; color:#38bdf8; font-weight:600;"><i class="fa-solid fa-bolt"></i> Realtime Sync</span>
+        <span style="font-size:12px; color:#38bdf8; font-weight:600; background:rgba(56, 189, 248, 0.1); padding:4px 10px; border-radius:6px; border:1px solid rgba(56, 189, 248, 0.2);"><i class="fa-solid fa-bolt"></i> Realtime Sync</span>
       </div>
-      <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap:8px;">
+      <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap:10px;">
         <div class="uptime-unit"><div class="uptime-val" id="ut-years">${uptime.years}</div><div class="uptime-lbl">Years</div></div>
         <div class="uptime-unit"><div class="uptime-val" id="ut-months">${uptime.months}</div><div class="uptime-lbl">Months</div></div>
         <div class="uptime-unit"><div class="uptime-val" id="ut-days">${uptime.days}</div><div class="uptime-lbl">Days</div></div>
@@ -414,26 +434,48 @@ app.get('/', (req, res) => {
     </div>
 
     <!-- Stats Table Grid -->
-    <div class="card" style="padding:16px; margin-bottom:16px;">
-      <div style="margin-bottom:12px;">
-        <button class="btn btn-sky" style="padding:6px 14px; font-size:13px;" onclick="location.reload();"><i class="fa-solid fa-rotate"></i> Refresh Data</button>
+    <div class="card" style="padding:18px; margin-bottom:16px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <h4 style="margin:0; font-size:15px; font-weight:700; color:#cbd5e1;">Live System Overview</h4>
+        <button class="btn btn-sky" style="padding:6px 14px; font-size:12px;" onclick="location.reload();"><i class="fa-solid fa-rotate"></i> Refresh Data</button>
       </div>
-      <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:1px; background:rgba(255,255,255,0.08); border-radius:8px; overflow:hidden; border:1px solid rgba(255,255,255,0.08);">
-        <div style="background:#0d1527; padding:16px 12px; text-align:left;">
-          <div style="font-size:11px; color:#94a3b8; font-weight:600;">Server Count</div>
-          <div style="font-size:22px; font-weight:bold; color:#fff; margin-top:8px;"><i class="fa-solid fa-bars-staggered" style="font-size:16px; color:#94a3b8;"></i> ${guildCount}</div>
+      <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:1px; background:rgba(255,255,255,0.08); border-radius:10px; overflow:hidden; border:1px solid rgba(255,255,255,0.08);">
+        <div style="background:#0d1527; padding:18px 14px; text-align:left;">
+          <div style="font-size:11px; color:#94a3b8; font-weight:700; text-transform:uppercase;">Server Count</div>
+          <div style="font-size:24px; font-weight:bold; color:#fff; margin-top:8px; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-bars-staggered" style="font-size:18px; color:#38bdf8;"></i> ${guildCount}</div>
         </div>
-        <div style="background:#0d1527; padding:16px 12px; text-align:left;">
-          <div style="font-size:11px; color:#94a3b8; font-weight:600;">User Count</div>
-          <div style="font-size:22px; font-weight:bold; color:#fff; margin-top:8px;"><i class="fa-solid fa-users" style="font-size:16px; color:#94a3b8;"></i> ${userCount}</div>
+        <div style="background:#0d1527; padding:18px 14px; text-align:left;">
+          <div style="font-size:11px; color:#94a3b8; font-weight:700; text-transform:uppercase;">User Count</div>
+          <div style="font-size:24px; font-weight:bold; color:#fff; margin-top:8px; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-users" style="font-size:18px; color:#38bdf8;"></i> ${userCount}</div>
         </div>
-        <div style="background:#0d1527; padding:16px 12px; text-align:left;">
-          <div style="font-size:11px; color:#94a3b8; font-weight:600;">API Latency</div>
-          <div style="font-size:22px; font-weight:bold; color:#fff; margin-top:8px;"><i class="fa-solid fa-tower-broadcast" style="font-size:16px; color:#94a3b8;"></i> ${ping}ms</div>
+        <div style="background:#0d1527; padding:18px 14px; text-align:left;">
+          <div style="font-size:11px; color:#94a3b8; font-weight:700; text-transform:uppercase;">API Latency</div>
+          <div style="font-size:24px; font-weight:bold; color:#fff; margin-top:8px; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-tower-broadcast" style="font-size:18px; color:#38bdf8;"></i> ${ping}ms</div>
         </div>
-        <div style="background:#0d1527; padding:16px 12px; text-align:left;">
-          <div style="font-size:11px; color:#94a3b8; font-weight:600;">Plugins Active</div>
-          <div style="font-size:22px; font-weight:bold; color:#fff; margin-top:8px;"><i class="fa-solid fa-rocket" style="font-size:16px; color:#94a3b8;"></i> 23</div>
+        <div style="background:#0d1527; padding:18px 14px; text-align:left;">
+          <div style="font-size:11px; color:#94a3b8; font-weight:700; text-transform:uppercase;">Plugins Active</div>
+          <div style="font-size:24px; font-weight:bold; color:#fff; margin-top:8px; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-rocket" style="font-size:18px; color:#38bdf8;"></i> 23</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Features Overview List -->
+    <div class="card" style="padding:18px;">
+      <h4 style="margin:0 0 12px 0; font-size:15px; font-weight:700; color:#cbd5e1;">Quick System Status</h4>
+      <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:12px;">
+        <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); padding:12px; border-radius:8px; display:flex; align-items:center; gap:12px;">
+          <i class="fa-solid fa-circle-check" style="color:#22c55e; font-size:18px;"></i>
+          <div>
+            <div style="font-size:13px; font-weight:700; color:#fff;">Slash Commands Engine</div>
+            <div style="font-size:11px; color:#94a3b8;">Fully synchronized with Discord API</div>
+          </div>
+        </div>
+        <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); padding:12px; border-radius:8px; display:flex; align-items:center; gap:12px;">
+          <i class="fa-solid fa-circle-check" style="color:#22c55e; font-size:18px;"></i>
+          <div>
+            <div style="font-size:13px; font-weight:700; color:#fff;">Dynamic Aliases Router</div>
+            <div style="font-size:11px; color:#94a3b8;">Instant update across all active plugins</div>
+          </div>
         </div>
       </div>
     </div>
@@ -465,7 +507,7 @@ app.get('/welcome', (req, res) => {
     </div>
 
     <div class="card">
-      <h3 style="margin-top:0; font-size:18px; color:#fff;"><i class="fa-solid fa-envelope-open-text" style="color:#38bdf8;"></i> Welcome Banner Configurations</h3>
+      <h3 style="margin-top:0; font-size:18px; color:#fff;"><i class="fa-solid fa-hand-sparkles" style="color:#38bdf8;"></i> Welcome Banner Configurations</h3>
       <p style="color:#94a3b8; font-size:13px; line-height:1.6;">Configure default English templates for new member join events.</p>
 
       <div style="display:flex; flex-direction:column; gap:14px; margin-top:16px;">
