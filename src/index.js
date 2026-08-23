@@ -1,5 +1,5 @@
 const express = require('express');
-const { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder } = require('discord.js');
+const { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 
 const app = express();
 const PORT = process.env.PORT || 10000;
@@ -26,19 +26,44 @@ const client = new Client({
 
 const BOT_TOKEN = process.env.DISCORD_TOKEN;
 
+// Embed Utility Templates
+const createSuccessEmbed = (title, description) => {
+  return new EmbedBuilder()
+    .setColor('#38bdf8')
+    .setTitle(`✨ ${title}`)
+    .setDescription(description)
+    .setFooter({ text: 'OS | System Security', iconURL: client.user?.displayAvatarURL() })
+    .setTimestamp();
+};
+
+const createErrorEmbed = (description) => {
+  return new EmbedBuilder()
+    .setColor('#f43f5e')
+    .setTitle('❌ خطأ في التنفيذ')
+    .setDescription(description)
+    .setFooter({ text: 'OS | System Security', iconURL: client.user?.displayAvatarURL() });
+};
+
+const createWarnEmbed = (title, usage) => {
+  return new EmbedBuilder()
+    .setColor('#f59e0b')
+    .setTitle(`⚠️ ${title}`)
+    .addFields({ name: 'طريقة الاستخدام الصحيحة:', value: `\`\`\`${usage}\`\`\`` })
+    .setFooter({ text: 'OS | System Assistance', iconURL: client.user?.displayAvatarURL() });
+};
+
 async function registerSlashCommands(clientId) {
   const commands = [
-    new SlashCommandBuilder().setName('ban').setDescription('Ban a user').addUserOption(opt => opt.setName('user').setDescription('User to ban').setRequired(true)),
-    new SlashCommandBuilder().setName('clear').setDescription('Clear messages').addIntegerOption(opt => opt.setName('amount').setDescription('Number of messages').setRequired(true)),
-    new SlashCommandBuilder().setName('coin').setDescription('Flip a coin'),
-    new SlashCommandBuilder().setName('kick').setDescription('Kick a user').addUserOption(opt => opt.setName('user').setDescription('User to kick').setRequired(true))
+    new SlashCommandBuilder().setName('ban').setDescription('حظر عضو من السيرفر').addUserOption(opt => opt.setName('user').setDescription('العضو المراد حظره').setRequired(true)),
+    new SlashCommandBuilder().setName('clear').setDescription('مسح الرسائل من الشات').addIntegerOption(opt => opt.setName('amount').setDescription('عدد الرسائل (1-100)').setRequired(true)),
+    new SlashCommandBuilder().setName('coin').setDescription('قرعة رمي العملة'),
+    new SlashCommandBuilder().setName('kick').setDescription('طرد عضو من السيرفر').addUserOption(opt => opt.setName('user').setDescription('العضو المراد طرده').setRequired(true))
   ].map(cmd => cmd.toJSON());
 
   const rest = new REST({ version: '10' }).setToken(BOT_TOKEN);
   try {
-    console.log('Registering Slash Commands...');
     await rest.put(Routes.applicationCommands(clientId), { body: commands });
-    console.log('Slash Commands Registered Successfully!');
+    console.log('💎 Slash Commands Registered Successfully!');
   } catch (err) {
     console.error('Failed to register Slash Commands:', err);
   }
@@ -46,110 +71,143 @@ async function registerSlashCommands(clientId) {
 
 client.on('interactionCreate', async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
-
   const { commandName } = interaction;
 
   if (commandName === 'ban') {
     if (!interaction.member.permissions.has('BanMembers')) {
-      return interaction.reply({ content: '❌ لا تملك صلاحية حظر الأعضاء.', ephemeral: true });
+      return interaction.reply({ embeds: [createErrorEmbed('لا تمتلك صلاحية **حظر الأعضاء** لاستخدام هذا الأمر.')], ephemeral: true });
     }
     const user = interaction.options.getUser('user');
     const member = await interaction.guild.members.fetch(user.id).catch(() => null);
-    if (!member) return interaction.reply({ content: '⚠️ العضو غير موجود بالسيرفر.', ephemeral: true });
+    if (!member) return interaction.reply({ embeds: [createErrorEmbed('تعذر العثور على العضو في هذا السيرفر.')], ephemeral: true });
     try {
       await member.ban();
-      interaction.reply(`🔨 تم حظر **${user.tag}** بنجاح.`);
+      interaction.reply({ embeds: [createSuccessEmbed('تم حظر العضو بنجاح', `🔨 تم تنفيذ القرار وحظر **${user.tag}** من السيرفر.`)] });
     } catch {
-      interaction.reply({ content: '❌ تعذر حظر العضو.', ephemeral: true });
+      interaction.reply({ embeds: [createErrorEmbed('تعذر حظر العضو، تأكد من أن رتبة البوت أعلى من رتبة العضو.')], ephemeral: true });
     }
   }
 
   else if (commandName === 'clear') {
     if (!interaction.member.permissions.has('ManageMessages')) {
-      return interaction.reply({ content: '❌ لا تملك صلاحية مسح الرسائل.', ephemeral: true });
+      return interaction.reply({ embeds: [createErrorEmbed('لا تمتلك صلاحية **إدارة الرسائل**.')], ephemeral: true });
     }
     const amount = interaction.options.getInteger('amount');
     if (amount < 1 || amount > 100) {
-      return interaction.reply({ content: '⚠️ ادخل عدداً بين 1 و 100.', ephemeral: true });
+      return interaction.reply({ embeds: [createErrorEmbed('يرجى تحديد عدد رسائل بين **1** و **100**.')], ephemeral: true });
     }
     try {
       await interaction.channel.bulkDelete(amount, true);
-      interaction.reply({ content: `🧹 تم مسح **${amount}** رسالة.`, ephemeral: true });
+      interaction.reply({ embeds: [createSuccessEmbed('تطهير الشات', `🧹 تم مسح **${amount}** رسالة بنجاح من القناة.`)], ephemeral: true });
     } catch {
-      interaction.reply({ content: '❌ حدث خطأ أثناء مسح الرسائل.', ephemeral: true });
+      interaction.reply({ embeds: [createErrorEmbed('حدث خطأ أثناء محاولة مسح الرسائل (قد تكون الرسائل أقدم من 14 يوماً).')], ephemeral: true });
     }
   }
 
   else if (commandName === 'coin') {
-    const result = Math.random() < 0.5 ? '🪙 ملك (Heads)' : '🪙 كتابة (Tails)';
-    interaction.reply(`النتيجة: **${result}**`);
+    const isHeads = Math.random() < 0.5;
+    const resultEmbed = new EmbedBuilder()
+      .setColor('#f59e0b')
+      .setTitle('🪙 نتيجة القرعة')
+      .setDescription(`استقرت العملة على: **${isHeads ? '👑 ملك (Heads)' : '📜 كتابة (Tails)'}**`)
+      .setFooter({ text: 'OS | System Games', iconURL: client.user?.displayAvatarURL() });
+    interaction.reply({ embeds: [resultEmbed] });
   }
 
   else if (commandName === 'kick') {
     if (!interaction.member.permissions.has('KickMembers')) {
-      return interaction.reply({ content: '❌ لا تملك صلاحية طرد الأعضاء.', ephemeral: true });
+      return interaction.reply({ embeds: [createErrorEmbed('لا تمتلك صلاحية **طرد الأعضاء**.')], ephemeral: true });
     }
     const user = interaction.options.getUser('user');
     const member = await interaction.guild.members.fetch(user.id).catch(() => null);
-    if (!member) return interaction.reply({ content: '⚠️ العضو غير موجود بالسيرفر.', ephemeral: true });
+    if (!member) return interaction.reply({ embeds: [createErrorEmbed('تعذر العثور على العضو.')], ephemeral: true });
     try {
       await member.kick();
-      interaction.reply(`👞 تم طرد **${user.tag}** بنجاح.`);
+      interaction.reply({ embeds: [createSuccessEmbed('تم طرد العضو', `👞 تم طرد **${user.tag}** بنجاح من السيرفر.`)] });
     } catch {
-      interaction.reply({ content: '❌ تعذر طرد العضو.', ephemeral: true });
+      interaction.reply({ embeds: [createErrorEmbed('تعذر طرد العضو.')], ephemeral: true });
     }
   }
 });
 
+// Non-Prefix & Prefix Command Handling
 client.on('messageCreate', async (message) => {
-  if (message.author.bot || !message.content.startsWith(PREFIX)) return;
+  if (message.author.bot) return;
 
-  const args = message.content.slice(PREFIX.length).trim().split(/ +/);
-  const commandName = args.shift().toLowerCase();
+  let rawContent = message.content.trim();
+  let usedPrefix = false;
 
-  const isCommand = (name) => {
-    return commandName === name || (pluginsStore[name] && pluginsStore[name].includes(commandName));
+  if (rawContent.startsWith(PREFIX)) {
+    rawContent = rawContent.slice(PREFIX.length).trim();
+    usedPrefix = true;
+  }
+
+  const args = rawContent.split(/ +/);
+  const inputCmd = args.shift()?.toLowerCase();
+  if (!inputCmd) return;
+
+  const matchPlugin = (pluginKey) => {
+    if (inputCmd === pluginKey) return true;
+    if (pluginsStore[pluginKey] && pluginsStore[pluginKey].includes(inputCmd)) return true;
+    return false;
   };
 
-  if (isCommand('ban')) {
-    if (!message.member.permissions.has('BanMembers')) return message.reply('❌ لا تملك صلاحية.');
+  if (matchPlugin('ban')) {
+    if (!message.member.permissions.has('BanMembers')) {
+      return message.reply({ embeds: [createErrorEmbed('لا تمتلك صلاحية **حظر الأعضاء**.')] });
+    }
     const member = message.mentions.members.first();
-    if (!member) return message.reply('⚠️ الاستخدام: `-ban {@user}`');
+    if (!member) {
+      return message.reply({ embeds: [createWarnEmbed('صيغة أمر الحظر', `-ban @user  أو  ban @user`)] });
+    }
     try {
       await member.ban();
-      message.channel.send(`🔨 تم حظر **${member.user.tag}**.`);
+      message.channel.send({ embeds: [createSuccessEmbed('تم حظر العضو بنجاح', `🔨 تم حظر **${member.user.tag}** من السيرفر.`)] });
     } catch {
-      message.reply('❌ تعذر حظر العضو.');
+      message.reply({ embeds: [createErrorEmbed('تعذر حظر هذا العضو.')] });
     }
   }
 
-  else if (isCommand('clear')) {
-    if (!message.member.permissions.has('ManageMessages')) return message.reply('❌ لا تملك صلاحية.');
+  else if (matchPlugin('clear')) {
+    if (!message.member.permissions.has('ManageMessages')) {
+      return message.reply({ embeds: [createErrorEmbed('لا تمتلك صلاحية **إدارة الرسائل**.')] });
+    }
     const amount = parseInt(args[0]);
-    if (isNaN(amount) || amount < 1 || amount > 100) return message.reply('⚠️ الاستخدام: `-clear {العدد}`');
+    if (isNaN(amount) || amount < 1 || amount > 100) {
+      return message.reply({ embeds: [createWarnEmbed('صيغة أمر المسح', `-clear {العدد}  أو  clear {العدد}`)] });
+    }
     try {
-      await message.channel.bulkDelete(amount, true);
-      const msg = await message.channel.send(`🧹 تم مسح **${amount}** رسالة.`);
-      setTimeout(() => msg.delete().catch(() => {}), 3000);
+      await message.channel.bulkDelete(amount + 1, true);
+      const msg = await message.channel.send({ embeds: [createSuccessEmbed('تطهير الشات', `🧹 تم مسح **${amount}** رسالة بنجاح.`)] });
+      setTimeout(() => msg.delete().catch(() => {}), 4000);
     } catch {
-      message.reply('❌ حدث خطأ أثناء مسح الرسائل.');
+      message.reply({ embeds: [createErrorEmbed('حدث خطأ أثناء مسح الرسائل.')] });
     }
   }
 
-  else if (isCommand('coin')) {
-    const result = Math.random() < 0.5 ? '🪙 ملك' : '🪙 كتابة';
-    message.reply(`النتيجة: **${result}**`);
+  else if (matchPlugin('coin')) {
+    const isHeads = Math.random() < 0.5;
+    const resultEmbed = new EmbedBuilder()
+      .setColor('#f59e0b')
+      .setTitle('🪙 نتيجة القرعة')
+      .setDescription(`استقرت العملة على: **${isHeads ? '👑 ملك (Heads)' : '📜 كتابة (Tails)'}**`)
+      .setFooter({ text: 'OS | System Games', iconURL: client.user?.displayAvatarURL() });
+    message.reply({ embeds: [resultEmbed] });
   }
 
-  else if (isCommand('kick')) {
-    if (!message.member.permissions.has('KickMembers')) return message.reply('❌ لا تملك صلاحية.');
+  else if (matchPlugin('kick')) {
+    if (!message.member.permissions.has('KickMembers')) {
+      return message.reply({ embeds: [createErrorEmbed('لا تمتلك صلاحية **طرد الأعضاء**.')] });
+    }
     const member = message.mentions.members.first();
-    if (!member) return message.reply('⚠️ الاستخدام: `-kick {@user}`');
+    if (!member) {
+      return message.reply({ embeds: [createWarnEmbed('صيغة أمر الطرد', `-kick @user  أو  kick @user`)] });
+    }
     try {
       await member.kick();
-      message.channel.send(`👞 تم طرد **${member.user.tag}**.`);
+      message.channel.send({ embeds: [createSuccessEmbed('تم طرد العضو', `👞 تم طرد **${member.user.tag}** بنجاح.`)] });
     } catch {
-      message.reply('❌ تعذر طرد العضو.');
+      message.reply({ embeds: [createErrorEmbed('تعذر طرد العضو.')] });
     }
   }
 });
@@ -411,7 +469,7 @@ app.get('/', (req, res) => {
         <div style="background:#0d1527; padding:16px 12px; text-align:left;">
           <div style="font-size:11px; color:#94a3b8; font-weight:600;">Prefix</div>
           <div style="font-size:22px; font-weight:bold; color:#fff; margin-top:8px; display:flex; align-items:center; gap:8px;">
-            <i class="fa-solid fa-bullhorn" style="font-size:16px; color:#94a3b8;"></i> -
+            <i class="fa-solid fa-bullhorn" style="font-size:16px; color:#94a3b8;"></i> - / Non-prefix
           </div>
         </div>
       </div>
@@ -422,10 +480,10 @@ app.get('/', (req, res) => {
 
 app.get('/plugins', (req, res) => {
   const pluginsData = [
-    { id: "ban", name: "Ban", icon: "fa-solid fa-hammer", iconBg: "rgba(239, 68, 68, 0.2)", iconColor: "#ef4444", iconBorder: "rgba(239, 68, 68, 0.4)", developer: "Mohammed Alhajri", description: "Bans a user from the server.", usage: "-ban {@user}", aliases: pluginsStore.ban, enabled: true },
-    { id: "clear", name: "clear", icon: "fa-solid fa-trash-can", iconBg: "rgba(20, 184, 166, 0.2)", iconColor: "#14b8a6", iconBorder: "rgba(20, 184, 166, 0.4)", developer: "Mohammed Alhajri", description: "Clears messages from a channel.", usage: "-clear {amount}", aliases: pluginsStore.clear, enabled: true },
-    { id: "coin", name: "coin", icon: "fa-solid fa-coins", iconBg: "rgba(245, 158, 11, 0.2)", iconColor: "#f59e0b", iconBorder: "rgba(245, 158, 11, 0.4)", developer: "Mohammed Alhajri", description: "Simple coin flip command", usage: "-coin", aliases: pluginsStore.coin, enabled: true },
-    { id: "kick", name: "kick", icon: "fa-solid fa-user-minus", iconBg: "rgba(249, 115, 22, 0.2)", iconColor: "#f97316", iconBorder: "rgba(249, 115, 22, 0.4)", developer: "Mohammed Alhajri", description: "Kicks a user from the server.", usage: "-kick {@user}", aliases: pluginsStore.kick, enabled: true }
+    { id: "ban", name: "Ban", icon: "fa-solid fa-hammer", iconBg: "rgba(239, 68, 68, 0.2)", iconColor: "#ef4444", iconBorder: "rgba(239, 68, 68, 0.4)", developer: "Mohammed Alhajri", description: "Bans a user from the server.", usage: "-ban {@user} or ban {@user}", aliases: pluginsStore.ban, enabled: true },
+    { id: "clear", name: "clear", icon: "fa-solid fa-trash-can", iconBg: "rgba(20, 184, 166, 0.2)", iconColor: "#14b8a6", iconBorder: "rgba(20, 184, 166, 0.4)", developer: "Mohammed Alhajri", description: "Clears messages from a channel.", usage: "-clear {amount} or clear {amount}", aliases: pluginsStore.clear, enabled: true },
+    { id: "coin", name: "coin", icon: "fa-solid fa-coins", iconBg: "rgba(245, 158, 11, 0.2)", iconColor: "#f59e0b", iconBorder: "rgba(245, 158, 11, 0.4)", developer: "Mohammed Alhajri", description: "Simple coin flip command", usage: "-coin or coin", aliases: pluginsStore.coin, enabled: true },
+    { id: "kick", name: "kick", icon: "fa-solid fa-user-minus", iconBg: "rgba(249, 115, 22, 0.2)", iconColor: "#f97316", iconBorder: "rgba(249, 115, 22, 0.4)", developer: "Mohammed Alhajri", description: "Kicks a user from the server.", usage: "-kick {@user} or kick {@user}", aliases: pluginsStore.kick, enabled: true }
   ];
 
   const pluginCards = pluginsData.map(p => {
