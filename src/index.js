@@ -309,10 +309,11 @@ app.get('/', (req, res) => {
   res.send(layout('Dashboard - OS | System', content, '/'));
 });
 
-// 2. Plugins Page (Exact Replica of provided Image)
+// 2. Plugins Page (With Edit Aliases Modal)
 app.get('/plugins', (req, res) => {
   const pluginsData = [
     {
+      id: "ban",
       name: "Ban",
       icon: "fa-solid fa-hammer",
       iconBg: "rgba(239, 68, 68, 0.2)",
@@ -321,11 +322,12 @@ app.get('/plugins', (req, res) => {
       developer: "Mohammed Alhajri",
       description: "Bans a user from the server.",
       usage: "-ban {@user}",
-      aliases: "خلخو",
+      aliases: ["خلخو"],
       aliasesColor: "#38bdf8",
       enabled: true
     },
     {
+      id: "clear",
       name: "clear",
       icon: "fa-solid fa-trash-can",
       iconBg: "rgba(20, 184, 166, 0.2)",
@@ -334,11 +336,12 @@ app.get('/plugins', (req, res) => {
       developer: "Mohammed Alhajri",
       description: "Clears messages from a channel.",
       usage: "-clear {amount}",
-      aliases: "None",
+      aliases: [],
       aliasesColor: "#94a3b8",
       enabled: true
     },
     {
+      id: "coin",
       name: "coin",
       icon: "fa-solid fa-coins",
       iconBg: "rgba(245, 158, 11, 0.2)",
@@ -347,11 +350,12 @@ app.get('/plugins', (req, res) => {
       developer: "Mohammed Alhajri",
       description: "Simple coin flip command",
       usage: "-coin",
-      aliases: "None",
+      aliases: [],
       aliasesColor: "#94a3b8",
       enabled: true
     },
     {
+      id: "kick",
       name: "kick",
       icon: "fa-solid fa-user-minus",
       iconBg: "rgba(249, 115, 22, 0.2)",
@@ -360,7 +364,7 @@ app.get('/plugins', (req, res) => {
       developer: "Mohammed Alhajri",
       description: "Kicks a user from the server.",
       usage: "-kick {@user}",
-      aliases: "None",
+      aliases: [],
       aliasesColor: "#94a3b8",
       enabled: true
     }
@@ -368,7 +372,6 @@ app.get('/plugins', (req, res) => {
 
   const pluginCards = pluginsData.map(p => `
     <div class="card" style="padding:20px; margin-bottom:18px;">
-      <!-- Card Header -->
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
         <div style="display:flex; align-items:center; gap:14px;">
           <div style="width:42px; height:42px; border-radius:10px; background:${p.iconBg}; border:1px solid ${p.iconBorder}; color:${p.iconColor}; display:flex; align-items:center; justify-content:center; font-size:18px;">
@@ -383,17 +386,15 @@ app.get('/plugins', (req, res) => {
         </label>
       </div>
 
-      <!-- Card Details -->
       <div style="font-size:13px; color:#cbd5e1; line-height:1.8; margin-bottom:16px;">
         <div><strong>Developer:</strong> ${p.developer}</div>
         <div><strong>Description:</strong> ${p.description}</div>
         <div><strong>Usage:</strong> <span style="background:rgba(56, 189, 248, 0.12); color:#38bdf8; padding:2px 8px; border-radius:4px; font-family:monospace; font-size:12px;">${p.usage}</span></div>
-        <div><strong>Aliases:</strong> <span style="color:${p.aliasesColor}; font-weight:600;">${p.aliases}</span></div>
+        <div><strong>Aliases:</strong> <span style="color:${p.aliases.length > 0 ? p.aliasesColor : '#94a3b8'}; font-weight:600;">${p.aliases.length > 0 ? p.aliases.join(', ') : 'None'}</span></div>
       </div>
 
-      <!-- Card Actions -->
       <div style="display:flex; gap:10px;">
-        <button class="btn" style="background:#2563eb; font-size:12px; padding:6px 14px;"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+        <button class="btn" onclick="openEditModal('${p.id}', '${p.name}', ${JSON.stringify(p.aliases)})" style="background:#2563eb; font-size:12px; padding:6px 14px;"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
         <button class="btn btn-danger" style="font-size:12px; padding:6px 14px;"><i class="fa-solid fa-trash"></i> Remove</button>
       </div>
     </div>
@@ -402,6 +403,96 @@ app.get('/plugins', (req, res) => {
   const content = `
     <h2 style="margin-bottom: 18px; font-size:26px; font-weight:700;">Plugins</h2>
     <div>${pluginCards}</div>
+
+    <!-- Edit Aliases Modal -->
+    <div id="editAliasModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; align-items:center; justify-content:center; padding:15px; box-sizing:border-box;">
+      <div class="card" style="width:100%; max-width:400px; margin:0; background:#0b1220; border:1px solid rgba(255,255,255,0.12); box-shadow:0 10px 30px rgba(0,0,0,0.8); border-radius:12px; padding:20px;">
+        
+        <h3 style="margin-top:0; color:#fff; font-size:17px; font-weight:700; display:flex; align-items:center; gap:8px;">
+          <i class="fa-solid fa-pen-to-square" style="color:#38bdf8; font-size:16px;"></i> Edit Aliases
+        </h3>
+        
+        <div style="color:#cbd5e1; font-size:13px; font-weight:600; margin-bottom:12px;">Aliases (up to 5)</div>
+
+        <div id="aliasesContainer" style="display:flex; flex-direction:column; gap:10px; margin-bottom:12px;"></div>
+
+        <div id="limitWarning" style="color:#ef4444; font-size:11px; font-weight:700; margin-bottom:12px; display:none; text-transform:uppercase;">
+          YOU HAVE REACHED 5 LIMIT ONLY
+        </div>
+
+        <button id="addAliasBtn" onclick="addAliasField()" class="btn" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#cbd5e1; width:100%; justify-content:center; margin-bottom:16px; font-size:13px; padding:8px;">
+          <i class="fa-solid fa-plus"></i> Add Alias
+        </button>
+
+        <div style="display:flex; justify-content:flex-end; gap:10px;">
+          <button onclick="closeEditModal()" class="btn" style="background:rgba(255,255,255,0.08); color:#cbd5e1; font-size:12px; padding:6px 16px;">Cancel</button>
+          <button onclick="saveAliases()" class="btn" style="background:#22c55e; color:#fff; font-size:12px; padding:6px 16px;"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+        </div>
+
+      </div>
+    </div>
+
+    <script>
+      let currentPluginId = '';
+      let currentAliases = [];
+
+      function openEditModal(id, name, aliases) {
+        currentPluginId = id;
+        currentAliases = [...aliases];
+        renderAliasInputs();
+        document.getElementById('editAliasModal').style.display = 'flex';
+      }
+
+      function closeEditModal() {
+        document.getElementById('editAliasModal').style.display = 'none';
+      }
+
+      function renderAliasInputs() {
+        const container = document.getElementById('aliasesContainer');
+        container.innerHTML = '';
+
+        currentAliases.forEach((alias, index) => {
+          const div = document.createElement('div');
+          div.style.cssText = 'display:flex; align-items:center; gap:8px;';
+          div.innerHTML = \`
+            <input type="text" value="\${alias}" oninput="currentAliases[\${index}] = this.value" style="flex:1; background:#060a14; border:1px solid rgba(255,255,255,0.15); color:#fff; padding:8px 12px; border-radius:6px; font-size:13px; outline:none;">
+            <button onclick="removeAliasField(\${index})" style="background:#ef4444; border:none; color:#fff; width:34px; height:34px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:13px;">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          \`;
+          container.appendChild(div);
+        });
+
+        const limitWarning = document.getElementById('limitWarning');
+        const addBtn = document.getElementById('addAliasBtn');
+
+        if (currentAliases.length >= 5) {
+          limitWarning.style.display = 'block';
+          addBtn.style.opacity = '0.5';
+          addBtn.style.pointerEvents = 'none';
+        } else {
+          limitWarning.style.display = 'none';
+          addBtn.style.opacity = '1';
+          addBtn.style.pointerEvents = 'auto';
+        }
+      }
+
+      function addAliasField() {
+        if (currentAliases.length < 5) {
+          currentAliases.push('');
+          renderAliasInputs();
+        }
+      }
+
+      function removeAliasField(index) {
+        currentAliases.splice(index, 1);
+        renderAliasInputs();
+      }
+
+      function saveAliases() {
+        closeEditModal();
+      }
+    </script>
   `;
 
   res.send(layout('Plugins - OS | System', content, '/plugins'));
