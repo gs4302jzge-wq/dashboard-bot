@@ -1,21 +1,16 @@
 const express = require('express');
-const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 10000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// بيانات وهمية متكاملة للربط
+const startTime = Date.now();
+
 let botConfig = {
     clientId: '154057416353677415',
-    clientSecret: '••••••••••••',
-    callbackUrl: 'https://discord-bot-dashboard-v2-1-bihd.onrender.com/login/api',
-    admin: '8725365706673784',
-    token: '••••••••••••',
     prefix: '-',
-    port: '1337',
-    theme: 'default.css'
+    port: '1337'
 };
 
 let pluginsList = [
@@ -26,7 +21,15 @@ let pluginsList = [
     { id: 'ping', name: 'ping', dev: 'Mohammed Alhajri', desc: 'Ping / Pong!', usage: '-ping', aliases: 'None', enabled: true }
 ];
 
-// دالة الهيكل العام الداكن (Dark Theme UI)
+function getUptime() {
+    const totalSeconds = Math.floor((Date.now() - startTime) / 1000);
+    const days = Math.floor(totalSeconds / 86400);
+    const hours = Math.floor((totalSeconds % 86400) / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+}
+
 function renderLayout(title, content) {
     return `
     <!DOCTYPE html>
@@ -39,46 +42,63 @@ function renderLayout(title, content) {
         <style>
             * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
             body { background-color: #0b0f19; color: #94a3b8; display: flex; flex-direction: column; min-height: 100vh; }
-            .navbar { background: #111827; padding: 15px 20px; border-bottom: 1px solid #1f2937; display: flex; align-items: center; justify-content: space-between; }
-            .sidebar-toggle { color: #fff; font-size: 20px; cursor: pointer; }
+            
+            /* Banner GIF Zikr */
+            .dhikr-banner { background: linear-gradient(90deg, #1e1b4b, #312e81, #1e1b4b); color: #facc15; text-align: center; padding: 10px; font-weight: bold; font-size: 15px; border-bottom: 1px solid #4338ca; letter-spacing: 0.5px; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+            
+            .navbar { background: #111827; padding: 15px 20px; border-bottom: 1px solid #1f2937; display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 100; }
+            .sidebar-toggle { color: #fff; font-size: 22px; cursor: pointer; padding: 5px 10px; background: #1f2937; border-radius: 6px; }
             .user-profile { display: flex; align-items: center; gap: 10px; color: #fff; }
-            .user-avatar { width: 35px; height: 35px; border-radius: 50%; background: #3b82f6; display: flex; align-items: center; justify-content: center; font-weight: bold; }
-            .layout { display: flex; flex: 1; }
-            .sidebar { width: 240px; background: #111827; border-right: 1px solid #1f2937; padding: 20px 0; }
+            .user-avatar { width: 35px; height: 35px; border-radius: 50%; background: #2563eb; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+            
+            .layout { display: flex; flex: 1; position: relative; }
+            .sidebar { width: 240px; background: #111827; border-right: 1px solid #1f2937; padding: 20px 0; transition: all 0.3s ease; }
             .sidebar a { display: flex; align-items: center; gap: 12px; padding: 12px 25px; color: #94a3b8; text-decoration: none; font-weight: 500; transition: 0.2s; }
             .sidebar a:hover, .sidebar a.active { background: #1f2937; color: #38bdf8; border-left: 4px solid #38bdf8; }
+            
             .main-content { flex: 1; padding: 25px; background: #0b0f19; overflow-y: auto; }
             .card { background: #111827; border: 1px solid #1f2937; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
             .card-header { font-size: 18px; font-weight: bold; color: #f3f4f6; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
-            .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+            .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; }
             .stat-box { background: #111827; border: 1px solid #1f2937; border-radius: 8px; padding: 15px; text-align: center; }
-            .stat-value { font-size: 22px; font-weight: bold; color: #f3f4f6; margin-top: 5px; }
+            .stat-value { font-size: 20px; font-weight: bold; color: #38bdf8; margin-top: 5px; }
+            
             .btn { background: #2563eb; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; text-decoration: none; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; }
             .btn-danger { background: #dc2626; }
             .btn-success { background: #16a34a; }
-            .form-group { margin-bottom: 15px; }
-            .form-group label { display: block; margin-bottom: 6px; color: #d1d5db; font-size: 14px; }
-            .form-control { width: 100%; padding: 10px; background: #1f2937; border: 1px solid #374151; border-radius: 6px; color: #fff; outline: none; }
+            
             .switch { position: relative; display: inline-block; width: 44px; height: 22px; }
             .switch input { opacity: 0; width: 0; height: 0; }
             .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #374151; transition: .4s; border-radius: 22px; }
             .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
             input:checked + .slider { background-color: #2563eb; }
             input:checked + .slider:before { transform: translateX(22px); }
+            
             .footer { text-align: center; padding: 20px; background: #111827; border-top: 1px solid #1f2937; font-size: 13px; color: #6b7280; }
-            @media (max-width: 768px) { .layout { flex-direction: column; } .sidebar { width: 100%; } }
+
+            /* Mobile Sidebar Hidden by default */
+            @media (max-width: 768px) {
+                .layout { flex-direction: column; }
+                .sidebar { display: none; width: 100%; border-right: none; border-bottom: 1px solid #1f2937; }
+                .sidebar.active { display: block; }
+            }
         </style>
     </head>
     <body>
+        <div class="dhikr-banner">
+            ✨ ✨
+        </div>
+
         <div class="navbar">
-            <div class="sidebar-toggle"><i class="fas fa-bars"></i></div>
+            <div class="sidebar-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></div>
             <div class="user-profile">
                 <div class="user-avatar">N</div>
                 <span>nfyp_ <small style="color:#6b7280">Admin</small></span>
             </div>
         </div>
+
         <div class="layout">
-            <div class="sidebar">
+            <div class="sidebar" id="sidebar">
                 <a href="/dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
                 <a href="/plugins"><i class="fas fa-puzzle-piece"></i> Plugins</a>
                 <a href="/guilds"><i class="fas fa-server"></i> Guilds</a>
@@ -89,44 +109,24 @@ function renderLayout(title, content) {
                 ${content}
             </div>
         </div>
+
         <div class="footer">
             Discord BOT Dashboard V2 - Mohammed Alhajri
         </div>
+
+        <script>
+            function toggleSidebar() {
+                const sb = document.getElementById('sidebar');
+                sb.classList.toggle('active');
+            }
+        </script>
     </body>
     </html>
     `;
 }
 
-// 1. Landing / Login Page
-app.get('/', (req, res) => {
-    res.send(`
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Welcome - OS | System</title>
-        <style>
-            body { background: #0d131f; color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-            .login-card { background: #1e293b; padding: 40px; border-radius: 12px; text-align: center; width: 320px; border: 1px solid #334155; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-            .avatar { width: 80px; height: 80px; border-radius: 50%; background: #475569; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; font-size: 32px; }
-            .btn-login { display: block; margin-top: 25px; padding: 12px; background: #3b82f6; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; }
-        </style>
-    </head>
-    <body>
-        <div class="login-card">
-            <h2>Welcome:</h2>
-            <h1 style="color: #38bdf8; margin-bottom: 15px;">OS | System</h1>
-            <div class="avatar">⚙️</div>
-            <p style="font-size: 13px; color: #94a3b8;">Discord BOT Dashboard<br>Created by: Mohammed Alhajri</p>
-            <a href="/dashboard" class="btn-login">Login »</a>
-        </div>
-    </body>
-    </html>
-    `);
-});
+app.get('/', (req, res) => res.redirect('/dashboard'));
 
-// 2. Dashboard Page
 app.get('/dashboard', (req, res) => {
     const content = `
         <h2 style="color:#fff; margin-bottom: 5px;">Welcome, nfyp_</h2>
@@ -136,29 +136,32 @@ app.get('/dashboard', (req, res) => {
             <div class="stat-box"><div>Server Count</div><div class="stat-value">📊 1</div></div>
             <div class="stat-box"><div>User Count</div><div class="stat-value">👥 9</div></div>
             <div class="stat-box"><div>API Latency</div><div class="stat-value">⚡ 94ms</div></div>
-            <div class="stat-box"><div>Prefix</div><div class="stat-value">📢 -</div></div>
+            <div class="stat-box"><div>System Uptime</div><div class="stat-value">⏱️ ${getUptime()}</div></div>
         </div>
 
         <div class="card">
-            <div class="card-header"><i class="fas fa-bullhorn"></i> Dashboard</div>
-            <p>Welcome to Discord BOT Dashboard V2, this is an early version of the final product! Please report any issues you find!</p>
-            <p style="margin-top:10px;"><b>Version:</b> 3.0</p>
+            <div class="card-header"><i class="fas fa-server" style="color:#38bdf8"></i> Active Server: Oscorp (OSCORP RP)</div>
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:10px; margin-top:10px;">
+                <p><b>Guild ID:</b> 1198301284910283</p>
+                <p><b>Owner:</b> nfyp_</p>
+                <p><b>Channels:</b> 14</p>
+                <p><b>Roles:</b> 8</p>
+                <p><b>Region:</b> Dubai / Middle East</p>
+            </div>
         </div>
 
         <div class="card">
-            <div class="card-header"><i class="fas fa-info-circle"></i> OS | System - Details</div>
-            <p><b>Username:</b> OS | System#3523</p>
-            <p><b>Client ID:</b> 154057416353677415</p>
-            <p><b>Joined:</b> Saturday, August 22nd, 2026</p>
+            <div class="card-header"><i class="fas fa-bullhorn"></i> Announcement</div>
+            <p>Welcome to Discord BOT Dashboard V2! Toggle button and uptime tracker are now live.</p>
+            <p style="margin-top:10px;"><b>Version:</b> 3.5</p>
         </div>
     `;
     res.send(renderLayout('Dashboard', content));
 });
 
-// 3. Plugins Page
 app.get('/plugins', (req, res) => {
     let pluginsHTML = pluginsList.map(p => `
-        <div class="card" style="margin-bottom:15px;">
+        <div class="card">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <h3>🛠️ ${p.name}</h3>
                 <label class="switch">
@@ -168,18 +171,15 @@ app.get('/plugins', (req, res) => {
             </div>
             <p style="margin: 8px 0; font-size: 14px;"><b>Developer:</b> ${p.dev}</p>
             <p style="margin: 8px 0; font-size: 14px;"><b>Description:</b> ${p.desc}</p>
-            <p style="margin: 8px 0; font-size: 14px;"><b>Usage:</b> <code>${p.usage}</code></p>
             <p style="margin: 8px 0; font-size: 14px;"><b>Aliases:</b> <span style="color:#38bdf8">${p.aliases}</span></p>
             <div style="margin-top:10px;">
                 <button onclick="editAlias('${p.id}', '${p.aliases}')" class="btn"><i class="fas fa-edit"></i> Edit</button>
-                <button onclick="fetch('/api/plugins/remove/${p.id}', {method:'POST'}).then(()=>location.reload())" class="btn btn-danger"><i class="fas fa-trash"></i> Remove</button>
             </div>
         </div>
     `).join('');
 
     const content = `
         <h2 style="color:#fff; margin-bottom: 10px;">Plugins</h2>
-        <p style="margin-bottom: 20px;">Configure and enable plugins that you would like to use!</p>
         ${pluginsHTML}
         <script>
             function editAlias(id, old) {
@@ -197,7 +197,6 @@ app.get('/plugins', (req, res) => {
     res.send(renderLayout('Plugins', content));
 });
 
-// API Routes handling Plugin changes
 app.post('/api/plugins/toggle/:id', (req, res) => {
     const p = pluginsList.find(x => x.id === req.params.id);
     if(p) p.enabled = !p.enabled;
@@ -210,79 +209,30 @@ app.post('/api/plugins/alias/:id', (req, res) => {
     res.json({ success: true });
 });
 
-app.post('/api/plugins/remove/:id', (req, res) => {
-    pluginsList = pluginsList.filter(x => x.id !== req.params.id);
-    res.json({ success: true });
-});
-
-// 4. Guilds Page
 app.get('/guilds', (req, res) => {
-    const content = `
+    res.send(renderLayout('Guilds', `
         <h2 style="color:#fff; margin-bottom: 10px;">Guilds</h2>
-        <p style="margin-bottom: 20px;">See all the Guilds (Servers) that your BOT is in.</p>
         <div class="card">
-            <div style="display:flex; align-items:center; justify-content:space-between;">
-                <div style="display:flex; align-items:center; gap:15px;">
-                    <div style="width:50px; height:50px; border-radius:50%; background:#374151; display:flex; align-items:center; justify-content:center; font-weight:bold; color:#fff;">O</div>
-                    <div>
-                        <h3 style="color:#fff;">Oscorp</h3>
-                        <p style="font-size:13px;">Member Count: 9</p>
-                    </div>
-                </div>
-                <button class="btn btn-danger" onclick="alert('Left Guild')">Leave Guild</button>
-            </div>
+            <h3>Oscorp</h3>
+            <p>Members: 9</p>
         </div>
-    `;
-    res.send(renderLayout('Guilds', content));
+    `));
 });
 
-// 5. Support Page
 app.get('/support', (req, res) => {
-    const content = `
+    res.send(renderLayout('Support', `
         <h2 style="color:#fff; margin-bottom: 10px;">Support</h2>
-        <p style="margin-bottom: 20px;">Contact us using any of the following methods!</p>
-        <div class="card">
-            <div class="card-header"><i class="fas fa-envelope"></i> Contact</div>
-            <p style="margin-bottom:8px;"><b>Email:</b> mail@MohammedAlhajri-dev.com</p>
-            <p style="margin-bottom:8px;"><b>Twitter:</b> @i661y</p>
-            <p style="margin-bottom:8px;"><b>Instagram:</b> @i661y</p>
-            <p style="margin-bottom:8px;"><b>Discord Server:</b> <a href="#" class="btn" style="padding:2px 8px; font-size:12px;">Invite</a></p>
-            <p style="margin-bottom:8px;"><b>Discord:</b> Mohammed Alhajri</p>
-        </div>
-    `;
-    res.send(renderLayout('Support', content));
+        <div class="card"><p>Contact: Mohammed Alhajri</p></div>
+    `));
 });
 
-// 6. Settings Page
 app.get('/settings', (req, res) => {
-    const content = `
+    res.send(renderLayout('Settings', `
         <h2 style="color:#fff; margin-bottom: 10px;">Settings</h2>
-        <p style="margin-bottom: 20px;">Customize your BOT and update settings within the dashboard!</p>
-        <form method="POST" action="/settings/save" class="card">
-            <div class="card-header"><i class="fas fa-sliders-h"></i> Config Settings</div>
-            <div class="form-group">
-                <label>Client ID:</label>
-                <input type="text" name="clientId" class="form-control" value="${botConfig.clientId}">
-            </div>
-            <div class="form-group">
-                <label>Prefix:</label>
-                <input type="text" name="prefix" class="form-control" value="${botConfig.prefix}">
-            </div>
-            <div class="form-group">
-                <label>Port:</label>
-                <input type="text" name="port" class="form-control" value="${botConfig.port}">
-            </div>
-            <button type="submit" class="btn btn-success">Save</button>
-        </form>
-    `;
-    res.send(renderLayout('Settings', content));
-});
-
-app.post('/settings/save', (req, res) => {
-    botConfig = { ...botConfig, ...req.body };
-    res.redirect('/settings');
+        <div class="card"><p>Prefix: ${botConfig.prefix}</p></div>
+    `));
 });
 
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server is running on port ${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 });
