@@ -10,6 +10,30 @@ app.use(express.urlencoded({ extended: true }));
 const PREFIX = '-';
 const BOT_START_TIME = Date.now();
 
+// Welcome Settings Store (In-Memory Isolation)
+let welcomeSettings = {
+  enabled: true,
+  sendMsgEnabled: true,
+  welcomeMessage: 'Welcome [user] to [server]! You are member #[memberCount].',
+  sendType: 'channel', // 'dm' or 'channel'
+  selectedChannel: '',
+  sendImgEnabled: true,
+  imgType: 'with_text',
+  canvas: {
+    bg: 'transparent',
+    avatarShape: 'circle',
+    avatarX: 115,
+    avatarY: 32,
+    usernameX: 115,
+    usernameY: 97,
+    textX: 115,
+    textY: 117,
+    textColor: '#ffffff',
+    textVal: 'Welcome to Our Server'
+  },
+  leaveMsgEnabled: false
+};
+
 // Storage for plugins aliases dynamically set from dashboard
 const pluginsStore = {
   setnick: [], ban: [], unban: [], kick: [], vkick: [],
@@ -89,7 +113,7 @@ const createErrorEmbed = (description) => {
     .setFooter({ text: 'OS | System Security', iconURL: client.user?.displayAvatarURL() });
 };
 
-// Global Command ID Resolver (Supports Base Name & Dynamic Aliases with Arabic & Any Characters)
+// Global Command ID Resolver
 function resolveCommandId(input) {
   if (!input) return null;
   const cleanInput = input.trim().toLowerCase();
@@ -108,7 +132,7 @@ function resolveCommandId(input) {
   return null;
 }
 
-// Register Slash Commands Register Function
+// Register Slash Commands
 async function registerSlashCommands() {
   if (!client.user || !BOT_TOKEN) return;
   const slashList = [];
@@ -145,7 +169,31 @@ async function registerSlashCommands() {
   }
 }
 
-// Unified Command Router & Execution Engine
+// Handle Automatic Welcome Event in Discord
+client.on('guildMemberAdd', async (member) => {
+  if (!welcomeSettings.enabled) return;
+
+  try {
+    let msg = welcomeSettings.welcomeMessage || 'Welcome [user] to [server]!';
+    msg = msg.replace(/\[user\]/g, `<@${member.id}>`)
+             .replace(/\[userName\]/g, member.user.username)
+             .replace(/\[server\]/g, member.guild.name)
+             .replace(/\[memberCount\]/g, member.guild.memberCount);
+
+    if (welcomeSettings.sendMsgEnabled) {
+      if (welcomeSettings.sendType === 'dm') {
+        await member.send(msg).catch(() => null);
+      } else if (welcomeSettings.sendType === 'channel' && welcomeSettings.selectedChannel) {
+        const ch = member.guild.channels.cache.get(welcomeSettings.selectedChannel);
+        if (ch) await ch.send(msg).catch(() => null);
+      }
+    }
+  } catch (e) {
+    console.error('Welcome Execution Error:', e);
+  }
+});
+
+// Unified Command Router
 async function handleExecution(commandId, target, options) {
   const guild = target.guild;
   const channel = target.channel;
@@ -182,7 +230,7 @@ async function handleExecution(commandId, target, options) {
       const member = await guild.members.fetch(user.id).catch(() => null);
       if (member) {
         await member.kick().catch(() => null);
-        return target.reply({ embeds: [createSuccessEmbed('👢 Member Kicked', `Successfully kicked **${user.tag}**.`)] });
+        return target.reply({ embeds: [createSuccessEmbed('BOOT Member Kicked', `Successfully kicked **${user.tag}**.`)] });
       }
     }
     else if (commandId === 'vkick') {
@@ -243,7 +291,7 @@ client.on('interactionCreate', async (interaction) => {
   }
 });
 
-// Text Prefix & Direct Aliases Event Listener (Supports With & Without Prefix)
+// Message Event
 client.on('messageCreate', async (message) => {
   if (message.author.bot) return;
 
@@ -284,6 +332,25 @@ if (BOT_TOKEN) {
   });
   client.login(BOT_TOKEN).catch(err => console.error('❌ Login Error:', err.message));
 }
+
+// REST API Endpoints
+app.get('/api/uptime', (req, res) => res.json(getFormattedUptime()));
+
+app.post('/api/aliases', (req, res) => {
+  const { pluginId, aliases } = req.body;
+  if (pluginId && Array.isArray(aliases)) {
+    pluginsStore[pluginId] = aliases.map(a => a.trim()).filter(a => a !== '');
+    return res.json({ success: true, updated: pluginsStore[pluginId] });
+  }
+  res.status(400).json({ success: false, error: 'Invalid Parameters' });
+});
+
+app.get('/api/welcome', (req, res) => res.json(welcomeSettings));
+
+app.post('/api/welcome', (req, res) => {
+  welcomeSettings = { ...welcomeSettings, ...req.body };
+  res.json({ success: true, settings: welcomeSettings });
+});
 
 // UI Components
 const sidebarScript = `
@@ -354,24 +421,27 @@ function layout(title, content, currentPath) {
     <title>${title}</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-      body { margin: 0; padding: 0; background-color: #080d1a; color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; min-height: 100vh; }
+      body { margin: 0; padding: 0; background-color: #0b0f19; color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; min-height: 100vh; }
       .top-banner { text-align: center; padding: 10px; background: linear-gradient(90deg, #090e1c, #0f172a, #090e1c); color: #fcd34d; font-size: 14px; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.06); }
-      .navbar { display: flex; justify-content: space-between; align-items: center; padding: 14px 22px; background-color: #0b1224; border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
+      .navbar { display: flex; justify-content: space-between; align-items: center; padding: 14px 22px; background-color: #0d1322; border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
       .menu-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #f8fafc; width: 40px; height: 40px; border-radius: 10px; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-      .container { padding: 20px; max-width: 900px; margin: 0 auto; }
-      .card { background: #0d1527; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 20px; margin-bottom: 16px; }
+      .container { padding: 20px; max-width: 900px; margin: 0 auto; padding-bottom: 90px; }
+      .card { background: #131b2e; border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 12px; padding: 18px; margin-bottom: 14px; }
       .btn { background: #2563eb; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; }
       .btn-sky { background: #0284c7; }
-      .btn-danger { background: #ef4444; }
-      .toggle-switch { position: relative; display: inline-block; width: 46px; height: 24px; }
+      .toggle-switch { position: relative; display: inline-block; width: 44px; height: 22px; }
       .toggle-switch input { opacity: 0; width: 0; height: 0; }
       .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #334155; transition: .3s; border-radius: 24px; }
-      .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
-      input:checked + .slider { background-color: #3b82f6; }
+      .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+      input:checked + .slider { background-color: #22c55e; }
       input:checked + .slider:before { transform: translateX(22px); }
-      .uptime-unit { background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 10px; padding: 12px; text-align: center; }
-      .uptime-val { font-size: 20px; font-weight: 800; color: #38bdf8; }
-      .uptime-lbl { font-size: 11px; color: #94a3b8; text-transform: uppercase; margin-top: 4px; font-weight: 600; }
+      .var-badge { color: #f43f5e; font-family: monospace; font-size: 13px; cursor: pointer; }
+      .var-badge:hover { text-decoration: underline; }
+      .radio-opt { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: #cbd5e1; cursor: pointer; }
+      .radio-opt input { accent-color: #5865F2; cursor: pointer; }
+      .tab-btn { background: transparent; border: none; color: #94a3b8; padding: 8px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+      .tab-btn.active { background: #5865F2; color: #fff; }
+      .unsaved-bar { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #090e1a; border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; gap: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); z-index: 1000; width: 90%; max-width: 600px; }
     </style>
   </head>
   <body>
@@ -393,22 +463,6 @@ function layout(title, content, currentPath) {
   `;
 }
 
-// REST API for Live Uptime
-app.get('/api/uptime', (req, res) => res.json(getFormattedUptime()));
-
-// Instant Aliases POST Handler (supports Arabic and instant saving)
-app.post('/api/aliases', (req, res) => {
-  const { pluginId, aliases } = req.body;
-  if (pluginId && Array.isArray(aliases)) {
-    pluginsStore[pluginId] = aliases
-      .map(a => a.trim())
-      .filter(a => a !== '');
-      
-    return res.json({ success: true, updated: pluginsStore[pluginId] });
-  }
-  res.status(400).json({ success: false, error: 'Invalid Parameters' });
-});
-
 // Main Dashboard Page
 app.get('/', (req, res) => {
   const guildCount = client.guilds?.cache?.size || 1;
@@ -422,23 +476,6 @@ app.get('/', (req, res) => {
         <h2 style="margin:0; font-size: 26px; font-weight:800; background: linear-gradient(90deg, #ffffff, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Welcome, nfyp_</h2>
         <p style="color: #94a3b8; margin: 6px 0 0 0; font-size: 14px;">Here's what's happening with <strong style="color:#fff;">OS | System</strong> today.</p>
       </div>
-      <div style="display:flex; gap:8px;">
-        <span style="background:rgba(34, 197, 94, 0.15); border:1px solid rgba(34, 197, 94, 0.3); color:#4ade80; padding:6px 12px; border-radius:20px; font-size:12px; font-weight:700; display:flex; align-items:center; gap:6px;">
-          <span style="width:8px; height:8px; background:#22c55e; border-radius:50%; box-shadow:0 0 8px #22c55e;"></span> System Operational
-        </span>
-      </div>
-    </div>
-
-    <div class="card" style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(15, 23, 42, 0.8)); border: 1px solid rgba(59, 130, 246, 0.3); padding:20px; position:relative; overflow:hidden;">
-      <div style="position:relative; z-index:2;">
-        <div style="display:flex; align-items:center; gap:8px; color:#38bdf8; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:1px; margin-bottom:6px;">
-          <i class="fa-solid fa-shield-halved"></i> Security & Moderation Hub
-        </div>
-        <h3 style="margin:0 0 8px 0; font-size:18px; color:#fff; font-weight:700;">Advanced Discord Bot Ecosystem Active</h3>
-        <p style="margin:0; font-size:13px; color:#cbd5e1; line-height:1.6; max-width:650px;">
-          All automated moderation systems, Dynamic Aliases Router, and Slash Commands are working seamlessly in real-time.
-        </p>
-      </div>
     </div>
 
     <div class="card" style="padding:20px; margin-bottom:16px; background: linear-gradient(135deg, #0d1527, #0f1c38); border: 1px solid rgba(56, 189, 248, 0.25);">
@@ -447,96 +484,221 @@ app.get('/', (req, res) => {
           <span style="width:10px; height:10px; background:#38bdf8; border-radius:50%; box-shadow:0 0 10px #38bdf8;"></span>
           <h3 style="margin:0; font-size:16px; font-weight:700; color:#fff;">Live System Uptime Tracker</h3>
         </div>
-        <span style="font-size:12px; color:#38bdf8; font-weight:600; background:rgba(56, 189, 248, 0.1); padding:4px 10px; border-radius:6px; border:1px solid rgba(56, 189, 248, 0.2);"><i class="fa-solid fa-bolt"></i> Realtime Sync</span>
       </div>
       <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap:10px;">
-        <div class="uptime-unit"><div class="uptime-val" id="ut-years">${uptime.years}</div><div class="uptime-lbl">Years</div></div>
-        <div class="uptime-unit"><div class="uptime-val" id="ut-months">${uptime.months}</div><div class="uptime-lbl">Months</div></div>
-        <div class="uptime-unit"><div class="uptime-val" id="ut-days">${uptime.days}</div><div class="uptime-lbl">Days</div></div>
-        <div class="uptime-unit"><div class="uptime-val" id="ut-hours">${uptime.hours}</div><div class="uptime-lbl">Hours</div></div>
-        <div class="uptime-unit"><div class="uptime-val" id="ut-minutes">${uptime.minutes}</div><div class="uptime-lbl">Minutes</div></div>
-        <div class="uptime-unit"><div class="uptime-val" id="ut-seconds">${uptime.seconds}</div><div class="uptime-lbl">Seconds</div></div>
+        <div class="uptime-unit" style="background:rgba(15, 23, 42, 0.8); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:12px; text-align:center;"><div style="font-size:20px; font-weight:800; color:#38bdf8;" id="ut-years">${uptime.years}</div><div style="font-size:11px; color:#94a3b8; text-transform:uppercase; margin-top:4px;">Years</div></div>
+        <div class="uptime-unit" style="background:rgba(15, 23, 42, 0.8); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:12px; text-align:center;"><div style="font-size:20px; font-weight:800; color:#38bdf8;" id="ut-months">${uptime.months}</div><div style="font-size:11px; color:#94a3b8; text-transform:uppercase; margin-top:4px;">Months</div></div>
+        <div class="uptime-unit" style="background:rgba(15, 23, 42, 0.8); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:12px; text-align:center;"><div style="font-size:20px; font-weight:800; color:#38bdf8;" id="ut-days">${uptime.days}</div><div style="font-size:11px; color:#94a3b8; text-transform:uppercase; margin-top:4px;">Days</div></div>
+        <div class="uptime-unit" style="background:rgba(15, 23, 42, 0.8); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:12px; text-align:center;"><div style="font-size:20px; font-weight:800; color:#38bdf8;" id="ut-hours">${uptime.hours}</div><div style="font-size:11px; color:#94a3b8; text-transform:uppercase; margin-top:4px;">Hours</div></div>
+        <div class="uptime-unit" style="background:rgba(15, 23, 42, 0.8); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:12px; text-align:center;"><div style="font-size:20px; font-weight:800; color:#38bdf8;" id="ut-minutes">${uptime.minutes}</div><div style="font-size:11px; color:#94a3b8; text-transform:uppercase; margin-top:4px;">Minutes</div></div>
+        <div class="uptime-unit" style="background:rgba(15, 23, 42, 0.8); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:12px; text-align:center;"><div style="font-size:20px; font-weight:800; color:#38bdf8;" id="ut-seconds">${uptime.seconds}</div><div style="font-size:11px; color:#94a3b8; text-transform:uppercase; margin-top:4px;">Seconds</div></div>
       </div>
     </div>
-
-    <div class="card" style="padding:18px; margin-bottom:16px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-        <h4 style="margin:0; font-size:15px; font-weight:700; color:#cbd5e1;">Live System Overview</h4>
-        <button class="btn btn-sky" style="padding:6px 14px; font-size:12px;" onclick="location.reload();"><i class="fa-solid fa-rotate"></i> Refresh Data</button>
-      </div>
-      <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:1px; background:rgba(255,255,255,0.08); border-radius:10px; overflow:hidden; border:1px solid rgba(255,255,255,0.08);">
-        <div style="background:#0d1527; padding:18px 14px; text-align:left;">
-          <div style="font-size:11px; color:#94a3b8; font-weight:700; text-transform:uppercase;">Server Count</div>
-          <div style="font-size:24px; font-weight:bold; color:#fff; margin-top:8px; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-bars-staggered" style="font-size:18px; color:#38bdf8;"></i> ${guildCount}</div>
-        </div>
-        <div style="background:#0d1527; padding:18px 14px; text-align:left;">
-          <div style="font-size:11px; color:#94a3b8; font-weight:700; text-transform:uppercase;">User Count</div>
-          <div style="font-size:24px; font-weight:bold; color:#fff; margin-top:8px; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-users" style="font-size:18px; color:#38bdf8;"></i> ${userCount}</div>
-        </div>
-        <div style="background:#0d1527; padding:18px 14px; text-align:left;">
-          <div style="font-size:11px; color:#94a3b8; font-weight:700; text-transform:uppercase;">API Latency</div>
-          <div style="font-size:24px; font-weight:bold; color:#fff; margin-top:8px; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-tower-broadcast" style="font-size:18px; color:#38bdf8;"></i> ${ping}ms</div>
-        </div>
-        <div style="background:#0d1527; padding:18px 14px; text-align:left;">
-          <div style="font-size:11px; color:#94a3b8; font-weight:700; text-transform:uppercase;">Plugins Active</div>
-          <div style="font-size:24px; font-weight:bold; color:#fff; margin-top:8px; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-rocket" style="font-size:18px; color:#38bdf8;"></i> 23</div>
-        </div>
-      </div>
-    </div>
-
-    <script>
-      setInterval(async () => {
-        try {
-          const res = await fetch('/api/uptime');
-          const data = await res.json();
-          document.getElementById('ut-years').innerText = data.years;
-          document.getElementById('ut-months').innerText = data.months;
-          document.getElementById('ut-days').innerText = data.days;
-          document.getElementById('ut-hours').innerText = data.hours;
-          document.getElementById('ut-minutes').innerText = data.minutes;
-          document.getElementById('ut-seconds').innerText = data.seconds;
-        } catch(e){}
-      }, 1000);
-    </script>
   `;
   res.send(layout('Dashboard - OS | System', content, '/'));
 });
 
-// Welcome Page
+// ProBot Welcome Page
 app.get('/welcome', (req, res) => {
+  const guildChannels = client.guilds.cache.first()?.channels?.cache?.filter(c => c.type === 0) || [];
+  let channelOptions = '<option value="">Select Channel..</option>';
+  guildChannels.forEach(c => {
+    const isSel = welcomeSettings.selectedChannel === c.id ? 'selected' : '';
+    channelOptions += `<option value="${c.id}" ${isSel}># ${c.name}</option>`;
+  });
+
   const content = `
-    <div style="margin-bottom: 20px;">
-      <h2 style="margin:0; font-size: 24px; font-weight:700;">Welcome & System Greetings</h2>
-      <p style="color: #94a3b8; margin: 4px 0 0 0; font-size: 14px;">Manage custom English welcome messages and server announcements.</p>
+    <!-- Top Welcome Header Bar -->
+    <div class="card" style="display:flex; justify-content:space-between; align-items:center; padding:14px 20px;">
+      <h2 style="margin:0; font-size:18px; font-weight:700; color:#fff;">Welcome & Goodbye</h2>
+      <label class="toggle-switch">
+        <input type="checkbox" id="mainWelcomeToggle" ${welcomeSettings.enabled ? 'checked' : ''} onchange="markUnsaved()">
+        <span class="slider"></span>
+      </label>
     </div>
 
+    <!-- Section 1: Send a message when a user joins the server -->
     <div class="card">
-      <h3 style="margin-top:0; font-size:18px; color:#fff;"><i class="fa-solid fa-hand-sparkles" style="color:#38bdf8;"></i> Welcome Banner Configurations</h3>
-      <p style="color:#94a3b8; font-size:13px; line-height:1.6;">Configure default English templates for new member join events.</p>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <span style="font-size:14px; font-weight:600; color:#fff;">Send a message when a user joins the server</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="sendMsgToggle" ${welcomeSettings.sendMsgEnabled ? 'checked' : ''} onchange="toggleMsgSection(); markUnsaved();">
+          <span class="slider"></span>
+        </label>
+      </div>
 
-      <div style="display:flex; flex-direction:column; gap:14px; margin-top:16px;">
-        <div>
-          <label style="display:block; font-size:12px; font-weight:600; color:#cbd5e1; margin-bottom:6px;">WELCOME TITLE</label>
-          <input type="text" value="Welcome to the Official OS Community Server!" style="width:100%; box-sizing:border-box; background:#060a14; border:1px solid rgba(255,255,255,0.12); color:#fff; padding:10px 14px; border-radius:8px; font-size:13px; outline:none;">
+      <div id="msgSectionBody" style="display:${welcomeSettings.sendMsgEnabled ? 'block' : 'none'}; border-top:1px solid rgba(255,255,255,0.06); padding-top:14px;">
+        <textarea id="welcomeText" oninput="markUnsaved()" rows="4" style="width:100%; box-sizing:border-box; background:#080d1a; border:1px solid rgba(255,255,255,0.12); color:#fff; padding:12px; border-radius:8px; font-size:13px; outline:none; resize:vertical; font-family:inherit;">${welcomeSettings.welcomeMessage}</textarea>
+
+        <div style="margin-top:14px;">
+          <div style="font-size:12px; font-weight:700; color:#94a3b8; margin-bottom:8px;">Variables:</div>
+          <div style="display:flex; flex-direction:column; gap:6px; font-size:12px;">
+            <div><span class="var-badge" onclick="addVar('[user]')">[user]</span> <span style="color:#64748b;">Mentions the member</span></div>
+            <div><span class="var-badge" onclick="addVar('[userName]')">[userName]</span> <span style="color:#64748b;">Member name without mentioning</span></div>
+            <div><span class="var-badge" onclick="addVar('[memberCount]')">[memberCount]</span> <span style="color:#64748b;">Amount of members reached</span></div>
+            <div><span class="var-badge" onclick="addVar('[server]')">[server]</span> <span style="color:#64748b;">Server name</span></div>
+          </div>
         </div>
 
-        <div>
-          <label style="display:block; font-size:12px; font-weight:600; color:#cbd5e1; margin-bottom:6px;">WELCOME BODY PHRASE</label>
-          <textarea rows="3" style="width:100%; box-sizing:border-box; background:#060a14; border:1px solid rgba(255,255,255,0.12); color:#fff; padding:10px 14px; border-radius:8px; font-size:13px; outline:none; font-family:inherit;">We are thrilled to have you here! Make sure to read the server guidelines and grab your self-roles in the information channel. Enjoy your stay!</textarea>
-        </div>
+        <div style="margin-top:18px;">
+          <div style="font-size:12px; font-weight:700; color:#cbd5e1; margin-bottom:10px;">Send:</div>
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <label class="radio-opt">
+              <input type="radio" name="sendType" value="dm" ${welcomeSettings.sendType === 'dm' ? 'checked' : ''} onchange="toggleChannelDropdown(); markUnsaved();">
+              SEND AS DM
+            </label>
+            <label class="radio-opt">
+              <input type="radio" name="sendType" value="channel" ${welcomeSettings.sendType === 'channel' ? 'checked' : ''} onchange="toggleChannelDropdown(); markUnsaved();">
+              SEND TO A CHANNEL
+            </label>
+          </div>
 
-        <div>
-          <label style="display:block; font-size:12px; font-weight:600; color:#cbd5e1; margin-bottom:6px;">FOOTER ANNOUNCEMENT</label>
-          <input type="text" value="OS System Security • Automated Verification Enabled" style="width:100%; box-sizing:border-box; background:#060a14; border:1px solid rgba(255,255,255,0.12); color:#fff; padding:10px 14px; border-radius:8px; font-size:13px; outline:none;">
-        </div>
-
-        <div style="display:flex; justify-content:flex-end; margin-top:8px;">
-          <button class="btn" style="background:#22c55e;"><i class="fa-solid fa-floppy-disk"></i> Save Configurations</button>
+          <div id="channelSelectWrap" style="margin-top:10px; display:${welcomeSettings.sendType === 'channel' ? 'block' : 'none'};">
+            <select id="welcomeChannel" onchange="markUnsaved()" style="width:100%; max-width:320px; background:#080d1a; border:1px solid rgba(255,255,255,0.12); color:#fff; padding:10px; border-radius:8px; font-size:13px; outline:none;">
+              ${channelOptions}
+            </select>
+          </div>
         </div>
       </div>
     </div>
+
+    <!-- Section 2: Send an image when a user joins the server -->
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <span style="font-size:14px; font-weight:600; color:#fff;">Send an image when a user joins the server</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="sendImgToggle" ${welcomeSettings.sendImgEnabled ? 'checked' : ''} onchange="toggleImgSection(); markUnsaved();">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div id="imgSectionBody" style="display:${welcomeSettings.sendImgEnabled ? 'block' : 'none'}; border-top:1px solid rgba(255,255,255,0.06); padding-top:14px;">
+        <div style="display:flex; gap:12px; margin-bottom:16px;">
+          <label class="radio-opt"><input type="radio" name="imgMode" value="with_text" checked onchange="markUnsaved()"> WITH TEXT MESSAGE</label>
+          <label class="radio-opt"><input type="radio" name="imgMode" value="before_text" onchange="markUnsaved()"> BEFORE TEXT MESSAGE</label>
+          <label class="radio-opt"><input type="radio" name="imgMode" value="to_channel" onchange="markUnsaved()"> TO A CHANNEL</label>
+        </div>
+
+        <!-- Dynamic ProBot Canvas Box -->
+        <div style="background:#090e1a; border:1px dashed rgba(255,255,255,0.15); border-radius:10px; padding:20px; text-align:center; position:relative; margin-bottom:16px;">
+          <div id="canvasPreview" style="width:100%; max-width:400px; height:180px; margin:0 auto; background:#1e293b; border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; position:relative; box-shadow:0 8px 20px rgba(0,0,0,0.5);">
+            <div style="width:60px; height:60px; border-radius:50%; background:#5865F2; display:flex; align-items:center; justify-content:center; color:#fff; font-size:28px;">
+              <i class="fa-brands fa-discord"></i>
+            </div>
+            <div id="canvasPreviewText" style="font-weight:700; font-size:15px; color:#fff;">Welcome to Our Server</div>
+          </div>
+        </div>
+
+        <!-- Controls Toolbar -->
+        <div style="display:flex; gap:8px; margin-bottom:16px; background:#080d1a; padding:6px; border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
+          <button class="tab-btn active" onclick="switchImgTab(this)"><i class="fa-solid fa-image"></i> Background</button>
+          <button class="tab-btn" onclick="switchImgTab(this)"><i class="fa-solid fa-user-circle"></i> Avatar</button>
+          <button class="tab-btn" onclick="switchImgTab(this)"><i class="fa-solid fa-signature"></i> Username</button>
+          <button class="tab-btn" onclick="switchImgTab(this)"><i class="fa-solid fa-font"></i> Text</button>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+          <div>
+            <label style="display:block; font-size:11px; font-weight:700; color:#94a3b8; margin-bottom:4px;">TEXT CONTENT</label>
+            <input type="text" id="canvasTextVal" value="${welcomeSettings.canvas.textVal}" oninput="updateCanvasText(); markUnsaved();" style="width:100%; box-sizing:border-box; background:#080d1a; border:1px solid rgba(255,255,255,0.12); color:#fff; padding:8px 10px; border-radius:6px; font-size:12px; outline:none;">
+          </div>
+          <div>
+            <label style="display:block; font-size:11px; font-weight:700; color:#94a3b8; margin-bottom:4px;">TEXT COLOR</label>
+            <input type="color" value="#ffffff" onchange="markUnsaved()" style="width:100%; height:35px; background:transparent; border:none; cursor:pointer;">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 3: Send a message when a user leaves the server -->
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:14px; font-weight:600; color:#fff;">Send a message when a user leaves the server</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="leaveMsgToggle" ${welcomeSettings.leaveMsgEnabled ? 'checked' : ''} onchange="markUnsaved()">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Floating Unsaved Changes Warning Bar (ProBot Style) -->
+    <div id="unsavedBar" class="unsaved-bar" style="display:none;">
+      <div style="color:#fcd34d; font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px;">
+        <i class="fa-solid fa-triangle-exclamation"></i> Careful — you have unsaved changes!
+      </div>
+      <div style="display:flex; gap:10px;">
+        <button onclick="location.reload()" style="background:rgba(255,255,255,0.1); border:none; color:#cbd5e1; padding:6px 14px; border-radius:6px; font-size:12px; cursor:pointer;">Cancel</button>
+        <button onclick="saveWelcomeSettings()" style="background:#5865F2; border:none; color:#fff; padding:6px 16px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer;">Save Changes</button>
+      </div>
+    </div>
+
+    <script>
+      function markUnsaved() {
+        document.getElementById('unsavedBar').style.display = 'flex';
+      }
+
+      function toggleMsgSection() {
+        const checked = document.getElementById('sendMsgToggle').checked;
+        document.getElementById('msgSectionBody').style.display = checked ? 'block' : 'none';
+      }
+
+      function toggleImgSection() {
+        const checked = document.getElementById('sendImgToggle').checked;
+        document.getElementById('imgSectionBody').style.display = checked ? 'block' : 'none';
+      }
+
+      function toggleChannelDropdown() {
+        const isChannel = document.querySelector('input[name="sendType"]:checked').value === 'channel';
+        document.getElementById('channelSelectWrap').style.display = isChannel ? 'block' : 'none';
+      }
+
+      function addVar(v) {
+        const txt = document.getElementById('welcomeText');
+        txt.value += ' ' + v;
+        markUnsaved();
+      }
+
+      function updateCanvasText() {
+        const val = document.getElementById('canvasTextVal').value;
+        document.getElementById('canvasPreviewText').innerText = val || 'Welcome';
+      }
+
+      function switchImgTab(btn) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      }
+
+      async function saveWelcomeSettings() {
+        const payload = {
+          enabled: document.getElementById('mainWelcomeToggle').checked,
+          sendMsgEnabled: document.getElementById('sendMsgToggle').checked,
+          welcomeMessage: document.getElementById('welcomeText').value,
+          sendType: document.querySelector('input[name="sendType"]:checked').value,
+          selectedChannel: document.getElementById('welcomeChannel').value,
+          sendImgEnabled: document.getElementById('sendImgToggle').checked,
+          leaveMsgEnabled: document.getElementById('leaveMsgToggle').checked,
+          canvas: {
+            textVal: document.getElementById('canvasTextVal').value
+          }
+        };
+
+        try {
+          const res = await fetch('/api/welcome', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          if (res.ok) {
+            location.reload();
+          }
+        } catch(e) {
+          alert('Failed to save settings.');
+        }
+      }
+    </script>
   `;
-  res.send(layout('Welcome & System - OS | System', content, '/welcome'));
+
+  res.send(layout('Welcome & Goodbye - ProBot Style', content, '/welcome'));
 });
 
 // Plugins Page
@@ -575,13 +737,13 @@ app.get('/plugins', (req, res) => {
       : `<span style="color:#94a3b8; font-weight:600;">None</span>`;
 
     return `
-    <div class="card" style="padding:20px; margin-bottom:18px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-        <div style="display:flex; align-items:center; gap:14px;">
-          <div style="width:42px; height:42px; border-radius:10px; background:${p.iconBg}; border:1px solid rgba(255,255,255,0.08); color:${p.iconColor}; display:flex; align-items:center; justify-content:center; font-size:18px;">
+    <div class="card" style="padding:18px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div style="width:38px; height:38px; border-radius:8px; background:${p.iconBg}; color:${p.iconColor}; display:flex; align-items:center; justify-content:center; font-size:16px;">
             <i class="${p.icon}"></i>
           </div>
-          <h3 style="margin:0; font-size:20px; font-weight:700; color:#fff;">${p.name}</h3>
+          <h3 style="margin:0; font-size:18px; font-weight:700; color:#fff;">${p.name}</h3>
         </div>
         <label class="toggle-switch">
           <input type="checkbox" checked>
@@ -589,39 +751,31 @@ app.get('/plugins', (req, res) => {
         </label>
       </div>
 
-      <div style="font-size:13px; color:#cbd5e1; line-height:1.8; margin-bottom:16px;">
+      <div style="font-size:12px; color:#cbd5e1; line-height:1.7; margin-bottom:14px;">
         <div><strong>Developer:</strong> Mohammed Alhajri</div>
         <div><strong>Description:</strong> ${p.desc}</div>
-        <div><strong>Usage:</strong> <span style="background:rgba(56, 189, 248, 0.12); color:#38bdf8; padding:2px 8px; border-radius:4px; font-family:monospace; font-size:12px;">${p.usage}</span></div>
+        <div><strong>Usage:</strong> <span style="background:rgba(56, 189, 248, 0.12); color:#38bdf8; padding:2px 6px; border-radius:4px; font-family:monospace;">${p.usage}</span></div>
         <div><strong>Aliases:</strong> ${aliasesDisplay}</div>
       </div>
 
-      <div style="display:flex; gap:10px;">
-        <button class="btn" onclick="openEditModal('${p.id}', '${p.name}', ${jsonAliases})" style="background:#2563eb; font-size:12px; padding:6px 14px;"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
-      </div>
+      <button class="btn" onclick="openEditModal('${p.id}', '${p.name}', ${jsonAliases})" style="background:#2563eb; font-size:12px; padding:6px 14px;"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
     </div>
   `}).join('');
 
   const content = `
-    <h2 style="margin-bottom: 18px; font-size:26px; font-weight:700;">Plugins Management</h2>
+    <h2 style="margin-bottom: 18px; font-size:24px; font-weight:700;">Plugins Management</h2>
     <div>${pluginCards}</div>
 
     <div id="editAliasModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; align-items:center; justify-content:center; padding:15px; box-sizing:border-box;">
-      <div class="card" style="width:100%; max-width:400px; margin:0; background:#0b1220; border:1px solid rgba(255,255,255,0.12); box-shadow:0 10px 30px rgba(0,0,0,0.8); border-radius:12px; padding:20px;">
-        <h3 style="margin-top:0; color:#fff; font-size:17px; font-weight:700; display:flex; align-items:center; gap:8px;">
-          <i class="fa-solid fa-pen-to-square" style="color:#38bdf8; font-size:16px;"></i> Edit Aliases
-        </h3>
-        <div style="color:#cbd5e1; font-size:13px; font-weight:600; margin-bottom:12px;">Aliases (up to 5)</div>
+      <div class="card" style="width:100%; max-width:400px; margin:0; background:#0b1220; border:1px solid rgba(255,255,255,0.12); border-radius:12px; padding:20px;">
+        <h3 style="margin-top:0; color:#fff; font-size:16px; font-weight:700;"><i class="fa-solid fa-pen-to-square" style="color:#38bdf8;"></i> Edit Aliases</h3>
         <div id="aliasesContainer" style="display:flex; flex-direction:column; gap:10px; margin-bottom:12px;"></div>
-        <div id="limitWarning" style="color:#ef4444; font-size:11px; font-weight:700; margin-bottom:12px; display:none; text-transform:uppercase;">
-          YOU HAVE REACHED 5 LIMIT ONLY
-        </div>
-        <button id="addAliasBtn" onclick="addAliasField()" class="btn" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#cbd5e1; width:100%; justify-content:center; margin-bottom:16px; font-size:13px; padding:8px;">
+        <button id="addAliasBtn" onclick="addAliasField()" class="btn" style="background:rgba(255,255,255,0.06); color:#cbd5e1; width:100%; justify-content:center; margin-bottom:16px;">
           <i class="fa-solid fa-plus"></i> Add Alias
         </button>
         <div style="display:flex; justify-content:flex-end; gap:10px;">
-          <button onclick="closeEditModal()" class="btn" style="background:rgba(255,255,255,0.08); color:#cbd5e1; font-size:12px; padding:6px 16px;">Cancel</button>
-          <button id="saveBtn" onclick="saveAliases()" class="btn" style="background:#22c55e; color:#fff; font-size:12px; padding:6px 16px;"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+          <button onclick="closeEditModal()" class="btn" style="background:rgba(255,255,255,0.08); color:#cbd5e1;">Cancel</button>
+          <button id="saveBtn" onclick="saveAliases()" class="btn" style="background:#22c55e;"><i class="fa-solid fa-floppy-disk"></i> Save</button>
         </div>
       </div>
     </div>
@@ -649,25 +803,10 @@ app.get('/plugins', (req, res) => {
           div.style.cssText = 'display:flex; align-items:center; gap:8px;';
           div.innerHTML = \`
             <input type="text" value="\${alias}" oninput="currentAliases[\${index}] = this.value" placeholder="e.g. n or nick or نك" style="flex:1; background:#060a14; border:1px solid rgba(255,255,255,0.15); color:#fff; padding:8px 12px; border-radius:6px; font-size:13px; outline:none;">
-            <button onclick="removeAliasField(\${index})" style="background:#ef4444; border:none; color:#fff; width:34px; height:34px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:13px;">
-              <i class="fa-solid fa-trash"></i>
-            </button>
+            <button onclick="removeAliasField(\${index})" style="background:#ef4444; border:none; color:#fff; width:34px; height:34px; border-radius:6px; cursor:pointer; font-size:13px;"><i class="fa-solid fa-trash"></i></button>
           \`;
           container.appendChild(div);
         });
-
-        const limitWarning = document.getElementById('limitWarning');
-        const addBtn = document.getElementById('addAliasBtn');
-
-        if (currentAliases.length >= 5) {
-          limitWarning.style.display = 'block';
-          addBtn.style.opacity = '0.5';
-          addBtn.style.pointerEvents = 'none';
-        } else {
-          limitWarning.style.display = 'none';
-          addBtn.style.opacity = '1';
-          addBtn.style.pointerEvents = 'auto';
-        }
       }
 
       function addAliasField() {
@@ -683,31 +822,18 @@ app.get('/plugins', (req, res) => {
       }
 
       async function saveAliases() {
-        const saveBtn = document.getElementById('saveBtn');
-        saveBtn.disabled = true;
-        saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
-
         try {
           const response = await fetch('/api/aliases', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              pluginId: currentPluginId,
-              aliases: currentAliases
-            })
+            body: JSON.stringify({ pluginId: currentPluginId, aliases: currentAliases })
           });
 
           if (response.ok) {
             location.reload();
-          } else {
-            alert('Failed to save aliases.');
-            saveBtn.disabled = false;
-            saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save';
           }
         } catch {
-          alert('Error connecting to server');
-          saveBtn.disabled = false;
-          saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save';
+          alert('Error saving aliases');
         }
       }
     </script>
@@ -738,7 +864,6 @@ app.get('/guilds', (req, res) => {
 app.get('/support', (req, res) => {
   const content = `
     <h2>Support & Contact</h2>
-    <p style="color: #94a3b8;">Official support channel for OS | System</p>
     <div class="card">
       <div><strong>Developer:</strong> Mohammed Alhajri</div>
     </div>
