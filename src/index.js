@@ -79,79 +79,97 @@ function renderLayout(title, content) {
       <title>${title} - OS | System</title>
       <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
       <style>
-          * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-          body { background-color: #0b0f19; color: #94a3b8; display: flex; flex-direction: column; min-height: 100vh; }
-          .dhikr-banner { background: linear-gradient(90deg, #0f172a, #1e1b4b, #0f172a); color: #facc15; text-align: center; padding: 12px; font-weight: bold; font-size: 16px; border-bottom: 1px solid #312e81; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-          .navbar { background: #111827; padding: 15px 20px; border-bottom: 1px solid #1f2937; display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 100; }
-          .sidebar-toggle { color: #fff; font-size: 20px; cursor: pointer; padding: 8px 12px; background: #1f2937; border-radius: 6px; }
-          .user-profile { display: flex; align-items: center; gap: 10px; color: #fff; }
+          * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+          body { background-color: #0b0e14; color: #94a3b8; display: flex; flex-direction: column; min-height: 100vh; }
+          .navbar { background: #0f131d; padding: 12px 18px; border-bottom: 1px solid #1a202c; display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 100; }
+          .sidebar-toggle { color: #fff; font-size: 18px; cursor: pointer; padding: 6px 10px; background: transparent; border-radius: 4px; }
+          .user-profile { display: flex; align-items: center; gap: 8px; color: #fff; }
           .layout { display: flex; flex: 1; position: relative; }
           .sidebar { 
-              position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background: #111827; border-right: 1px solid #1f2937; 
+              position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background: #0f131d; border-right: 1px solid #1a202c; 
               padding: 20px 0; z-index: 999; transition: all 0.3s ease; box-shadow: 5px 0 25px rgba(0,0,0,0.5);
           }
           .sidebar.active { left: 0; }
-          .sidebar-header { padding: 0 20px 20px 20px; border-bottom: 1px solid #1f2937; margin-bottom: 15px; display: flex; align-items: center; gap: 12px; }
+          .sidebar-header { padding: 0 20px 20px 20px; border-bottom: 1px solid #1a202c; margin-bottom: 15px; display: flex; align-items: center; gap: 12px; }
           .sidebar a { display: flex; align-items: center; gap: 12px; padding: 14px 25px; color: #94a3b8; text-decoration: none; font-weight: 500; transition: 0.2s; }
-          .sidebar a:hover, .sidebar a.active { background: #1f2937; color: #38bdf8; border-left: 4px solid #38bdf8; }
+          .sidebar a:hover, .sidebar a.active { background: #1a202c; color: #38bdf8; border-left: 4px solid #38bdf8; }
           .overlay-backdrop { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.7); z-index: 998; }
           .overlay-backdrop.active { display: block; }
-          .main-content { flex: 1; padding: 25px; background: #0b0f19; overflow-y: auto; }
-          .card { background: #111827; border: 1px solid #1f2937; border-radius: 10px; padding: 20px; margin-bottom: 20px; }
-          .card-header { font-size: 18px; font-weight: bold; color: #f3f4f6; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
-          .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
-          .stat-box { background: #111827; border: 1px solid #1f2937; border-radius: 8px; padding: 15px; text-align: center; }
-          .stat-value { font-size: 20px; font-weight: bold; color: #38bdf8; margin-top: 5px; }
+          .main-content { flex: 1; padding: 18px; background: #0b0e14; overflow-y: auto; }
+          
+          .card { background: #0f131d; border: 1px solid #1a202c; border-radius: 8px; padding: 16px; margin-bottom: 14px; }
+          .card-header { font-size: 16px; font-weight: 600; color: #ffffff; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+          
+          /* Combined Stats Card */
+          .stats-card-container { background: #0f131d; border: 1px solid #1a202c; border-radius: 8px; overflow: hidden; margin-bottom: 14px; }
+          .refresh-btn-bar { padding: 10px 12px; border-bottom: 1px solid #1a202c; }
+          .btn-refresh { background: #1d4ed8; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+          .stats-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); }
+          .stat-item { padding: 16px 10px; text-align: center; border-right: 1px solid #1a202c; }
+          .stat-item:last-child { border-right: none; }
+          .stat-title { font-size: 11px; font-weight: 600; color: #94a3b8; margin-bottom: 8px; white-space: nowrap; }
+          .stat-val { font-size: 16px; font-weight: 700; color: #ffffff; display: flex; align-items: center; justify-content: center; gap: 5px; }
+
+          /* Uptime Card */
+          .uptime-badge { display: inline-flex; align-items: center; gap: 6px; background: #064e3b; color: #34d399; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; margin-bottom: 12px; }
+          .uptime-dot { width: 6px; height: 6px; background: #34d399; border-radius: 50%; }
+
           .btn { background: #2563eb; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; text-decoration: none; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; }
           .btn-danger { background: #ef4444; }
           .btn-success { background: #16a34a; }
-          .form-control { width: 100%; padding: 10px; background: #1f2937; border: 1px solid #374151; border-radius: 6px; color: #fff; outline: none; margin-top: 5px; }
+          .form-control { width: 100%; padding: 10px; background: #1a202c; border: 1px solid #2d3748; border-radius: 6px; color: #fff; outline: none; margin-top: 5px; }
           .switch { position: relative; display: inline-block; width: 44px; height: 22px; }
           .switch input { opacity: 0; width: 0; height: 0; }
-          .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #374151; transition: .4s; border-radius: 22px; }
+          .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #2d3748; transition: .4s; border-radius: 22px; }
           .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
           input:checked + .slider { background-color: #2563eb; }
           input:checked + .slider:before { transform: translateX(22px); }
           .link-blue { color: #38bdf8; text-decoration: none; font-weight: bold; }
           .link-blue:hover { text-decoration: underline; }
-          .img-avatar-fixed { width: 38px; height: 38px; border-radius: 50%; border: 2px solid #38bdf8; object-fit: cover; background-color: #1e293b; }
+          .img-avatar-fixed { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; background-color: #1e293b; }
           .img-guild-fixed { width: 65px; height: 65px; border-radius: 50%; border: 2px solid #38bdf8; box-shadow: 0 0 15px rgba(56,189,248,0.3); object-fit: cover; background-color: #1e293b; }
-          .footer { text-align: center; padding: 20px; background: #111827; border-top: 1px solid #1f2937; font-size: 13px; color: #6b7280; }
+          .footer { text-align: center; padding: 15px; background: #0f131d; border-top: 1px solid #1a202c; font-size: 12px; color: #6b7280; }
 
-          .info-list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #1f2937; border: 1px solid #374151; border-radius: 8px; margin-bottom: 8px; }
-          .info-list-item:last-child { margin-bottom: 0; }
-          .info-label { display: flex; align-items: center; gap: 10px; color: #94a3b8; font-weight: 500; }
-          .info-value { color: #fff; font-weight: 600; font-family: monospace; background: #0f172a; padding: 4px 10px; border-radius: 6px; border: 1px solid #1e293b; }
+          /* Details List */
+          .details-list { list-style: none; padding-left: 5px; margin-top: 10px; }
+          .details-list li { color: #cbd5e1; font-size: 14px; margin-bottom: 8px; font-weight: 500; }
+          .details-list li b { color: #ffffff; }
 
           .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); z-index: 2000; align-items: center; justify-content: center; }
           .modal-overlay.active { display: flex; }
-          .modal-box { background: #111827; border: 1px solid #1f2937; border-radius: 12px; width: 90%; max-width: 450px; padding: 20px; color: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
-          .modal-header { display: flex; justify-content: space-between; align-items: center; font-size: 18px; font-weight: bold; margin-bottom: 15px; border-bottom: 1px solid #1f2937; padding-bottom: 10px; }
+          .modal-box { background: #0f131d; border: 1px solid #1a202c; border-radius: 12px; width: 90%; max-width: 450px; padding: 20px; color: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
+          .modal-header { display: flex; justify-content: space-between; align-items: center; font-size: 18px; font-weight: bold; margin-bottom: 15px; border-bottom: 1px solid #1a202c; padding-bottom: 10px; }
           .alias-item { display: flex; gap: 8px; margin-bottom: 10px; }
           .alias-item input { flex: 1; }
           .alias-limit-msg { color: #ef4444; font-size: 12px; font-weight: bold; margin-top: 5px; display: none; text-transform: uppercase; }
+
+          @media (max-width: 600px) {
+              .stats-grid-4 { grid-template-columns: repeat(2, 1fr); }
+              .stat-item { border-bottom: 1px solid #1a202c; }
+              .stat-item:nth-child(2) { border-right: none; }
+              .stat-item:nth-child(3) { border-bottom: none; }
+              .stat-item:nth-child(4) { border-bottom: none; border-right: none; }
+          }
       </style>
   </head>
   <body>
-      <div class="dhikr-banner">✨ سبحان الله وبحمده ، سبحان الله العظيم ✨</div>
       <div class="navbar">
           <div class="sidebar-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></div>
           <div class="user-profile">
               <img src="${userAvatarUrl}" class="img-avatar-fixed" />
-              <span>nfyp_ <small style="color:#6b7280">Admin</small></span>
           </div>
       </div>
       <div class="layout">
           <div class="overlay-backdrop" id="backdrop" onclick="toggleSidebar()"></div>
           <div class="sidebar" id="sidebar">
               <div class="sidebar-header">
-                  <img src="${userAvatarUrl}" class="img-avatar-fixed" style="width:45px; height:45px;" />
+                  <img src="${userAvatarUrl}" class="img-avatar-fixed" style="width:40px; height:40px;" />
                   <div>
                       <h4 style="color:#fff;">nfyp_</h4>
                       <span style="font-size:12px; color:#38bdf8;">Administrator</span>
                   </div>
               </div>
-              <a href="/dashboard"><i class="fas fa-home"></i> Dashboard</a>
+              <a href="/dashboard" class="active"><i class="fas fa-home"></i> Dashboard</a>
               <a href="/plugins"><i class="fas fa-rocket"></i> Plugins</a>
               <a href="/guilds"><i class="fas fa-server"></i> Guilds</a>
               <a href="/support"><i class="fas fa-question-circle"></i> Support</a>
@@ -175,33 +193,68 @@ app.get('/', (req, res) => res.redirect('/dashboard'));
 
 app.get('/dashboard', (req, res) => {
   const content = `
-      <h2 style="color:#fff; margin-bottom: 5px;">Welcome, nfyp_</h2>
-      <p style="margin-bottom: 20px;">Here's what's happening with <b>OS | System</b> today.</p>
-      <div class="grid">
-          <div class="stat-box"><div>Server Count</div><div class="stat-value">📊 1</div></div>
-          <div class="stat-box"><div>User Count</div><div class="stat-value">👥 9</div></div>
-          <div class="stat-box"><div>API Latency</div><div class="stat-value">⚡ 94ms</div></div>
-          <div class="stat-box"><div>System Uptime</div><div class="stat-value" id="uptimeValue">⏱️ 0d 0h 0m 0s</div></div>
+      <h3 style="color:#fff; font-size:18px; font-weight:600; margin-bottom:4px;">Welcome, nfyp_</h3>
+      <p style="font-size:13px; color:#94a3b8; margin-bottom:16px;">Here's what's happening with <b>OS | System</b> today.</p>
+      
+      <div class="stats-card-container">
+          <div class="refresh-btn-bar">
+              <button class="btn-refresh" onclick="location.reload()">
+                  <i class="fas fa-sync-alt" style="font-size:12px;"></i> Refresh Data
+              </button>
+          </div>
+          <div class="stats-grid-4">
+              <div class="stat-item">
+                  <div class="stat-title">Server Count (Guilds)</div>
+                  <div class="stat-val"><i class="fas fa-bars" style="font-size:13px; color:#94a3b8;"></i> 1</div>
+              </div>
+              <div class="stat-item">
+                  <div class="stat-title">User Count (All Guilds)</div>
+                  <div class="stat-val"><i class="fas fa-users" style="font-size:13px; color:#94a3b8;"></i> 9</div>
+              </div>
+              <div class="stat-item">
+                  <div class="stat-title">API Latency</div>
+                  <div class="stat-val"><i class="fas fa-broadcast-tower" style="font-size:13px; color:#94a3b8;"></i> 94ms</div>
+              </div>
+              <div class="stat-item">
+                  <div class="stat-title">Prefix</div>
+                  <div class="stat-val"><i class="fas fa-bullhorn" style="font-size:13px; color:#94a3b8;"></i> -</div>
+              </div>
+          </div>
       </div>
+
       <div class="card">
-          <div class="card-header"><i class="fas fa-bullhorn" style="color:#38bdf8"></i> Dashboard Notice</div>
-          <p>Welcome to Discord BOT Dashboard V2, this is an early version of the final product! Please report any issues you find!</p>
-          <p style="margin-top:10px;"><b>Version:</b> 3.5</p>
+          <div class="uptime-badge">
+              <div class="uptime-dot"></div> Uptime
+          </div>
+          <div style="color:#ffffff; font-size:14px; font-weight:500;">
+              <i class="fas fa-sync-alt" style="font-size:12px; margin-right:6px; color:#94a3b8;"></i>
+              <span id="uptimeValue">0d 0h 0m 0s</span>
+          </div>
       </div>
+
+      <div style="margin-top:22px; margin-bottom:14px;">
+          <h2 style="color:#ffffff; font-size:20px; font-weight:700;">Dashboard</h2>
+          <p style="font-size:13px; color:#94a3b8; margin-top:2px;">Find the latest news with Discord BOT Dashboard and information about "OS | System"</p>
+      </div>
+
       <div class="card">
-          <div class="card-header"><i class="fas fa-robot" style="color:#38bdf8"></i> OS | System - Details</div>
-          <div class="info-list-item">
-              <span class="info-label"><i class="fas fa-user-tag" style="color:#38bdf8;"></i> Username</span>
-              <span class="info-value">OS | System#3523</span>
-          </div>
-          <div class="info-list-item">
-              <span class="info-label"><i class="fas fa-key" style="color:#38bdf8;"></i> Client ID</span>
-              <span class="info-value">154057416353677415</span>
-          </div>
-          <div class="info-list-item">
-              <span class="info-label"><i class="fas fa-calendar-alt" style="color:#38bdf8;"></i> Joined</span>
-              <span class="info-value">Saturday, August 22nd, 2026</span>
-          </div>
+          <div class="card-header">🎉 Welcome</div>
+          <p style="font-size:13px; color:#cbd5e1; line-height:1.5;">Welcome to Discord BOT Dashboard V2, this is an early version of the final product! Please report any issues you find!</p>
+          <p style="font-size:13px; color:#ffffff; font-weight:600; margin-top:12px;">Version: 3.0</p>
+      </div>
+
+      <div class="card">
+          <div class="card-header">🔎 OS | System - Details</div>
+          <ul class="details-list">
+              <li>• <b>Username:</b> OS | System#3523</li>
+              <li>• <b>Client ID:</b> 154057416353677415</li>
+              <li>• <b>Joined:</b> Saturday, August 22nd, 2026, 4:24 AM</li>
+          </ul>
+      </div>
+
+      <div class="card">
+          <div class="card-header">📣 News</div>
+          <p style="font-size:13px; color:#cbd5e1; line-height:1.5;">The Discord BOT Dashboard Marketplace is here, you can find plugins and modules created by developers worldwide!</p>
       </div>
 
       <script>
@@ -212,7 +265,7 @@ app.get('/dashboard', (req, res) => {
               const hours = Math.floor((totalSeconds % 86400) / 3600);
               const minutes = Math.floor((totalSeconds % 3600) / 60);
               const seconds = totalSeconds % 60;
-              document.getElementById('uptimeValue').innerText = \`⏱️ \${days}d \${hours}h \${minutes}m \${seconds}s\`;
+              document.getElementById('uptimeValue').innerText = \`\${days}d \${hours}h \${minutes}m \${seconds}s\`;
           }
           updateLiveUptime();
           setInterval(updateLiveUptime, 1000);
@@ -241,7 +294,7 @@ app.get('/plugins', (req, res) => {
           </div>
           <p style="margin: 12px 0 6px 0; font-size: 14px;"><b>Developer:</b> ${p.dev}</p>
           <p style="margin: 6px 0; font-size: 14px;"><b>Description:</b> ${p.desc}</p>
-          <p style="margin: 6px 0; font-size: 14px;"><b>Usage:</b> <code style="background:#1f2937; padding:2px 6px; border-radius:4px; color:#38bdf8;">${dynamicUsage}</code></p>
+          <p style="margin: 6px 0; font-size: 14px;"><b>Usage:</b> <code style="background:#1a202c; padding:2px 6px; border-radius:4px; color:#38bdf8;">${dynamicUsage}</code></p>
           <p style="margin: 6px 0; font-size: 14px;"><b>Aliases:</b> <span style="color:#38bdf8">${aliasStr}</span></p>
           <div style="margin-top:15px; display:flex; gap:10px;">
               <button onclick="openAliasModal('${p.id}')" class="btn"><i class="fas fa-edit"></i> Edit</button>
@@ -267,7 +320,7 @@ app.get('/plugins', (req, res) => {
               <div style="margin-top:15px; display:flex; justify-content:space-between; align-items:center;">
                   <button class="btn" type="button" id="addAliasBtn" onclick="addAliasField()"><i class="fas fa-plus"></i> Add Alias</button>
                   <div style="display:flex; gap:8px;">
-                      <button class="btn" style="background:#374151;" onclick="closeAliasModal()">Cancel</button>
+                      <button class="btn" style="background:#2d3748;" onclick="closeAliasModal()">Cancel</button>
                       <button class="btn btn-success" onclick="saveAliases()"><i class="fas fa-save"></i> Save</button>
                   </div>
               </div>
@@ -347,7 +400,7 @@ app.get('/guilds', (req, res) => {
       <h2 style="color:#fff; margin-bottom: 10px;">Guilds</h2>
       <p style="margin-bottom: 20px;">See all the Guilds (Servers) that your BOT is in.</p>
       <div class="card">
-          <div style="display:flex; align-items:center; gap:15px; margin-bottom:20px; padding-bottom:15px; border-bottom:1px solid #1f2937;">
+          <div style="display:flex; align-items:center; gap:15px; margin-bottom:20px; padding-bottom:15px; border-bottom:1px solid #1a202c;">
               <img src="${guildIconUrl}" class="img-guild-fixed" />
               <div>
                   <h2 style="color:#fff;">Oscorp (OSCORP RP)</h2>
@@ -355,23 +408,23 @@ app.get('/guilds', (req, res) => {
                   <p style="font-size:13px; color:#94a3b8;"><b>Owner:</b> nfyp_</p>
               </div>
           </div>
-          <div class="grid">
-              <div class="stat-box"><div>Total Members</div><div class="stat-value">👥 9</div></div>
-              <div class="stat-box"><div>Total Roles</div><div class="stat-value">🛡️ 8</div></div>
-              <div class="stat-box"><div>Text Channels</div><div class="stat-value">💬 10</div></div>
-              <div class="stat-box"><div>Voice Channels</div><div class="stat-value">🔊 4</div></div>
+          <div class="stats-grid-4" style="border:1px solid #1a202c; border-radius:8px;">
+              <div class="stat-item"><div class="stat-title">Total Members</div><div class="stat-val">👥 9</div></div>
+              <div class="stat-item"><div class="stat-title">Total Roles</div><div class="stat-val">🛡️ 8</div></div>
+              <div class="stat-item"><div class="stat-title">Text Channels</div><div class="stat-val">💬 10</div></div>
+              <div class="stat-item"><div class="stat-title">Voice Channels</div><div class="stat-val">🔊 4</div></div>
           </div>
-          <div style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%); padding: 25px; border-radius: 16px; border: 1px solid #312e81; box-shadow: 0 10px 30px rgba(0,0,0,0.6); text-align: center; margin-top:20px; position:relative; overflow:hidden;">
+          <div style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%); padding: 25px; border-radius: 16px; border: 1px solid #312e81; box-shadow: 0 10px 30px rgba(0,0,0,0.6); text-align: center; margin-top:20px;">
               <h4 style="color: #facc15; font-size: 16px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; font-weight:800;">
                   <i class="fas fa-crown" style="margin-right: 8px; color:#facc15;"></i> SERVER CREATED DURATION
               </h4>
               <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
-                  <div style="background:#111827; border:1px solid #374151; padding:10px 14px; border-radius:10px; min-width:70px;"><span id="timer-years" style="font-size:22px; font-weight:bold; color:#38bdf8;">0</span><div style="font-size:10px; color:#94a3b8;">Years</div></div>
-                  <div style="background:#111827; border:1px solid #374151; padding:10px 14px; border-radius:10px; min-width:70px;"><span id="timer-months" style="font-size:22px; font-weight:bold; color:#38bdf8;">0</span><div style="font-size:10px; color:#94a3b8;">Months</div></div>
-                  <div style="background:#111827; border:1px solid #374151; padding:10px 14px; border-radius:10px; min-width:70px;"><span id="timer-days" style="font-size:22px; font-weight:bold; color:#38bdf8;">0</span><div style="font-size:10px; color:#94a3b8;">Days</div></div>
-                  <div style="background:#111827; border:1px solid #374151; padding:10px 14px; border-radius:10px; min-width:70px;"><span id="timer-hours" style="font-size:22px; font-weight:bold; color:#38bdf8;">0</span><div style="font-size:10px; color:#94a3b8;">Hours</div></div>
-                  <div style="background:#111827; border:1px solid #374151; padding:10px 14px; border-radius:10px; min-width:70px;"><span id="timer-mins" style="font-size:22px; font-weight:bold; color:#38bdf8;">0</span><div style="font-size:10px; color:#94a3b8;">Mins</div></div>
-                  <div style="background:#111827; border:1px solid #374151; padding:10px 14px; border-radius:10px; min-width:70px;"><span id="timer-secs" style="font-size:22px; font-weight:bold; color:#38bdf8;">0</span><div style="font-size:10px; color:#94a3b8;">Secs</div></div>
+                  <div style="background:#0f131d; border:1px solid #2d3748; padding:10px 14px; border-radius:10px; min-width:70px;"><span id="timer-years" style="font-size:22px; font-weight:bold; color:#38bdf8;">0</span><div style="font-size:10px; color:#94a3b8;">Years</div></div>
+                  <div style="background:#0f131d; border:1px solid #2d3748; padding:10px 14px; border-radius:10px; min-width:70px;"><span id="timer-months" style="font-size:22px; font-weight:bold; color:#38bdf8;">0</span><div style="font-size:10px; color:#94a3b8;">Months</div></div>
+                  <div style="background:#0f131d; border:1px solid #2d3748; padding:10px 14px; border-radius:10px; min-width:70px;"><span id="timer-days" style="font-size:22px; font-weight:bold; color:#38bdf8;">0</span><div style="font-size:10px; color:#94a3b8;">Days</div></div>
+                  <div style="background:#0f131d; border:1px solid #2d3748; padding:10px 14px; border-radius:10px; min-width:70px;"><span id="timer-hours" style="font-size:22px; font-weight:bold; color:#38bdf8;">0</span><div style="font-size:10px; color:#94a3b8;">Hours</div></div>
+                  <div style="background:#0f131d; border:1px solid #2d3748; padding:10px 14px; border-radius:10px; min-width:70px;"><span id="timer-mins" style="font-size:22px; font-weight:bold; color:#38bdf8;">0</span><div style="font-size:10px; color:#94a3b8;">Mins</div></div>
+                  <div style="background:#0f131d; border:1px solid #2d3748; padding:10px 14px; border-radius:10px; min-width:70px;"><span id="timer-secs" style="font-size:22px; font-weight:bold; color:#38bdf8;">0</span><div style="font-size:10px; color:#94a3b8;">Secs</div></div>
               </div>
           </div>
       </div>
@@ -446,30 +499,25 @@ app.get('/settings', (req, res) => {
           <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Save Settings</button>
       </form>
 
-      <div class="card" style="border: 1px solid #374151; background: linear-gradient(180deg, #111827 0%, #0f172a 100%);">
+      <div class="card" style="border: 1px solid #2d3748; background: #0f131d;">
           <div class="card-header"><i class="fab fa-discord" style="color:#5865F2"></i> Authorized Discord Account</div>
           
-          <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:15px; background:#1e293b; padding:18px; border-radius:12px; border:1px solid #334155; margin-bottom:18px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:15px; background:#1a202c; padding:18px; border-radius:8px; border:1px solid #2d3748; margin-bottom:18px;">
               <div style="display:flex; align-items:center; gap:15px;">
-                  <img src="${userAvatarUrl}" class="img-avatar-fixed" style="width:58px; height:58px; border:2px solid #5865F2; box-shadow:0 0 10px rgba(88,101,242,0.3);" />
+                  <img src="${userAvatarUrl}" class="img-avatar-fixed" style="width:50px; height:50px;" />
                   <div>
-                      <h3 style="color:#fff; font-size:17px; display:flex; align-items:center; gap:8px;">
+                      <h3 style="color:#fff; font-size:16px;">
                           ${currentUser.global_name} 
-                          <span style="font-size:12px; color:#38bdf8; background:#0f172a; border:1px solid #0284c7; padding:2px 8px; border-radius:12px;">@${currentUser.username}</span>
+                          <span style="font-size:12px; color:#38bdf8;">@${currentUser.username}</span>
                       </h3>
-                      <p style="font-size:13px; color:#94a3b8; margin-top:5px;"><i class="fas fa-id-badge" style="margin-right:4px;"></i> <b>User ID:</b> ${currentUser.id}</p>
+                      <p style="font-size:13px; color:#94a3b8; margin-top:4px;"><b>User ID:</b> ${currentUser.id}</p>
                   </div>
-              </div>
-              <div style="background:#0f172a; padding:8px 14px; border-radius:8px; border:1px solid #1e293b; text-align:right;">
-                  <span style="font-size:12px; color:#10b981; font-weight:bold; display:flex; align-items:center; gap:6px;">
-                      <i class="fas fa-check-circle"></i> Connected
-                  </span>
               </div>
           </div>
 
           <div style="display:flex; justify-content:flex-end;">
               <form method="POST" action="/logout">
-                  <button type="submit" class="btn btn-danger" style="background:linear-gradient(135deg, #ef4444 0%, #dc2626 100%); padding:10px 20px; font-weight:bold; box-shadow:0 4px 12px rgba(239,68,68,0.3);">
+                  <button type="submit" class="btn btn-danger">
                       <i class="fas fa-sign-out-alt"></i> Log Out Account
                   </button>
               </form>
