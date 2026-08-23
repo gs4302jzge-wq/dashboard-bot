@@ -423,21 +423,7 @@ app.get('/settings', (req, res) => {
       <h2 style="color:#fff; margin-bottom: 10px;">Settings</h2>
       <p style="margin-bottom: 20px;">Customize your BOT and update settings within the dashboard!</p>
       
-      <div class="card" style="margin-bottom: 25px;">
-          <div class="card-header"><i class="fab fa-discord" style="color:#5865F2"></i> Authorized Discord Account</div>
-          <div style="display:flex; align-items:center; gap:18px; margin-bottom:15px; background:#1f2937; padding:15px; border-radius:10px; border:1px solid #374151;">
-              <img src="${userAvatarUrl}" class="img-avatar-fixed" style="width:55px; height:55px;" />
-              <div>
-                  <h3 style="color:#fff; font-size:16px;">${currentUser.global_name} <span style="font-size:12px; color:#38bdf8; background:#0f172a; padding:2px 8px; border-radius:12px; margin-left:5px;">@${currentUser.username}</span></h3>
-                  <p style="font-size:13px; color:#94a3b8; margin-top:4px;"><b>User ID:</b> ${currentUser.id}</p>
-              </div>
-          </div>
-          <form method="POST" action="/logout">
-              <button type="submit" class="btn btn-danger"><i class="fas fa-sign-out-alt"></i> Log Out Account</button>
-          </form>
-      </div>
-
-      <form method="POST" action="/settings/save" class="card">
+      <form method="POST" action="/settings/save" class="card" style="margin-bottom: 25px;">
           <div class="card-header"><i class="fas fa-sliders-h" style="color:#38bdf8"></i> BOT Config</div>
           <div style="margin-bottom: 15px;">
               <label style="display:block; color:#d1d5db; margin-bottom:5px;">Bot Prefix:</label>
@@ -445,6 +431,36 @@ app.get('/settings', (req, res) => {
           </div>
           <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Save Settings</button>
       </form>
+
+      <div class="card" style="border: 1px solid #374151; background: linear-gradient(180deg, #111827 0%, #0f172a 100%);">
+          <div class="card-header"><i class="fab fa-discord" style="color:#5865F2"></i> Authorized Discord Account</div>
+          
+          <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:15px; background:#1e293b; padding:18px; border-radius:12px; border:1px solid #334155; margin-bottom:18px;">
+              <div style="display:flex; align-items:center; gap:15px;">
+                  <img src="${userAvatarUrl}" class="img-avatar-fixed" style="width:58px; height:58px; border:2px solid #5865F2; box-shadow:0 0 10px rgba(88,101,242,0.3);" />
+                  <div>
+                      <h3 style="color:#fff; font-size:17px; display:flex; align-items:center; gap:8px;">
+                          ${currentUser.global_name} 
+                          <span style="font-size:12px; color:#38bdf8; background:#0f172a; border:1px solid #0284c7; padding:2px 8px; border-radius:12px;">@${currentUser.username}</span>
+                      </h3>
+                      <p style="font-size:13px; color:#94a3b8; margin-top:5px;"><i class="fas fa-id-badge" style="margin-right:4px;"></i> <b>User ID:</b> ${currentUser.id}</p>
+                  </div>
+              </div>
+              <div style="background:#0f172a; padding:8px 14px; border-radius:8px; border:1px solid #1e293b; text-align:right;">
+                  <span style="font-size:12px; color:#10b981; font-weight:bold; display:flex; align-items:center; gap:6px;">
+                      <i class="fas fa-check-circle"></i> Connected
+                  </span>
+              </div>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end;">
+              <form method="POST" action="/logout">
+                  <button type="submit" class="btn btn-danger" style="background:linear-gradient(135deg, #ef4444 0%, #dc2626 100%); padding:10px 20px; font-weight:bold; box-shadow:0 4px 12px rgba(239,68,68,0.3);">
+                      <i class="fas fa-sign-out-alt"></i> Log Out Account
+                  </button>
+              </form>
+          </div>
+      </div>
   `;
   res.send(renderLayout('Settings', content));
 });
