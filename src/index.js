@@ -26,6 +26,14 @@ if (BOT_TOKEN) {
   });
 }
 
+// Memory Store for Aliases
+const pluginsStore = {
+  ban: [],
+  clear: [],
+  coin: [],
+  kick: []
+};
+
 const sidebarScript = `
 <script>
 function toggleSidebar() {
@@ -226,6 +234,16 @@ function layout(title, content, currentPath) {
   `;
 }
 
+// API endpoint to save aliases
+app.post('/api/aliases', (req, res) => {
+  const { pluginId, aliases } = req.body;
+  if (pluginId && Array.isArray(aliases)) {
+    pluginsStore[pluginId] = aliases.filter(a => a.trim() !== '');
+    return res.json({ success: true });
+  }
+  res.status(400).json({ success: false });
+});
+
 // 1. Dashboard Page
 app.get('/', (req, res) => {
   const guildCount = client.guilds?.cache?.size || 1;
@@ -309,7 +327,7 @@ app.get('/', (req, res) => {
   res.send(layout('Dashboard - OS | System', content, '/'));
 });
 
-// 2. Plugins Page (Fixed Edit Aliases Button & Removed خلخو)
+// 2. Plugins Page
 app.get('/plugins', (req, res) => {
   const pluginsData = [
     {
@@ -322,8 +340,7 @@ app.get('/plugins', (req, res) => {
       developer: "Mohammed Alhajri",
       description: "Bans a user from the server.",
       usage: "-ban {@user}",
-      aliases: [],
-      aliasesColor: "#94a3b8",
+      aliases: pluginsStore.ban,
       enabled: true
     },
     {
@@ -336,8 +353,7 @@ app.get('/plugins', (req, res) => {
       developer: "Mohammed Alhajri",
       description: "Clears messages from a channel.",
       usage: "-clear {amount}",
-      aliases: [],
-      aliasesColor: "#94a3b8",
+      aliases: pluginsStore.clear,
       enabled: true
     },
     {
@@ -350,8 +366,7 @@ app.get('/plugins', (req, res) => {
       developer: "Mohammed Alhajri",
       description: "Simple coin flip command",
       usage: "-coin",
-      aliases: [],
-      aliasesColor: "#94a3b8",
+      aliases: pluginsStore.coin,
       enabled: true
     },
     {
@@ -364,14 +379,17 @@ app.get('/plugins', (req, res) => {
       developer: "Mohammed Alhajri",
       description: "Kicks a user from the server.",
       usage: "-kick {@user}",
-      aliases: [],
-      aliasesColor: "#94a3b8",
+      aliases: pluginsStore.kick,
       enabled: true
     }
   ];
 
   const pluginCards = pluginsData.map(p => {
     const jsonAliases = JSON.stringify(p.aliases).replace(/"/g, '&quot;');
+    const aliasesDisplay = p.aliases.length > 0 
+      ? `<span style="color:#38bdf8; font-weight:600;">${p.aliases.join(', ')}</span>` 
+      : `<span style="color:#94a3b8; font-weight:600;">None</span>`;
+
     return `
     <div class="card" style="padding:20px; margin-bottom:18px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
@@ -392,7 +410,7 @@ app.get('/plugins', (req, res) => {
         <div><strong>Developer:</strong> ${p.developer}</div>
         <div><strong>Description:</strong> ${p.description}</div>
         <div><strong>Usage:</strong> <span style="background:rgba(56, 189, 248, 0.12); color:#38bdf8; padding:2px 8px; border-radius:4px; font-family:monospace; font-size:12px;">${p.usage}</span></div>
-        <div><strong>Aliases:</strong> <span style="color:${p.aliases.length > 0 ? p.aliasesColor : '#94a3b8'}; font-weight:600;">${p.aliases.length > 0 ? p.aliases.join(', ') : 'None'}</span></div>
+        <div><strong>Aliases:</strong> ${aliasesDisplay}</div>
       </div>
 
       <div style="display:flex; gap:10px;">
@@ -428,7 +446,7 @@ app.get('/plugins', (req, res) => {
 
         <div style="display:flex; justify-content:flex-end; gap:10px;">
           <button onclick="closeEditModal()" class="btn" style="background:rgba(255,255,255,0.08); color:#cbd5e1; font-size:12px; padding:6px 16px;">Cancel</button>
-          <button onclick="saveAliases()" class="btn" style="background:#22c55e; color:#fff; font-size:12px; padding:6px 16px;"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+          <button id="saveBtn" onclick="saveAliases()" class="btn" style="background:#22c55e; color:#fff; font-size:12px; padding:6px 16px;"><i class="fa-solid fa-floppy-disk"></i> Save</button>
         </div>
 
       </div>
@@ -491,8 +509,33 @@ app.get('/plugins', (req, res) => {
         renderAliasInputs();
       }
 
-      function saveAliases() {
-        closeEditModal();
+      async function saveAliases() {
+        const saveBtn = document.getElementById('saveBtn');
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+
+        try {
+          const response = await fetch('/api/aliases', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              pluginId: currentPluginId,
+              aliases: currentAliases
+            })
+          });
+
+          if (response.ok) {
+            location.reload();
+          } else {
+            alert('Failed to save aliases');
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save';
+          }
+        } catch (err) {
+          alert('Error connecting to server');
+          saveBtn.disabled = false;
+          saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save';
+        }
       }
     </script>
   `;
