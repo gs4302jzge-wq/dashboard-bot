@@ -8,10 +8,6 @@ app.use(express.urlencoded({ extended: true }));
 const startTime = Date.now();
 const guildCreatedAt = new Date('2025-05-15T00:00:00Z').getTime();
 
-// رابط صورة البروفايل وصورة السيرفر (يمكن تعديل الرابط بوضع رابط مستضيفك)
-const userAvatarUrl = "https://cdn.discordapp.com/embed/avatars/0.png";
-const guildIconUrl = "https://cdn.discordapp.com/icons/119830128491028391/a_guild_icon.png";
-
 let botConfig = {
     clientId: '154057416353677415',
     prefix: '-',
@@ -19,11 +15,11 @@ let botConfig = {
 };
 
 let pluginsList = [
-    { id: 'ban', name: 'Ban', dev: 'Mohammed Alhajri', desc: 'Bans a user from the server.', usage: '-ban {@user}', aliases: 'خلخو', icon: 'fa-hammer', color: '#ef4444', enabled: true },
-    { id: 'clear', name: 'clear', dev: 'Mohammed Alhajri', desc: 'Clears messages from a channel.', usage: '-clear {amount}', aliases: 'None', icon: 'fa-broom', color: '#3b82f6', enabled: true },
+    { id: 'ban', name: 'Ban', dev: 'Mohammed Alhajri', desc: 'Bans a user from the server.', usage: '-ban {@user}', aliases: 'خلخو', icon: 'fa-gavel', color: '#ef4444', enabled: true },
+    { id: 'clear', name: 'clear', dev: 'Mohammed Alhajri', desc: 'Clears messages from a channel.', usage: '-clear {amount}', aliases: 'None', icon: 'fa-trash-alt', color: '#06b6d4', enabled: true },
     { id: 'coin', name: 'coin', dev: 'Mohammed Alhajri', desc: 'Simple coin flip command', usage: '-coin', aliases: 'None', icon: 'fa-coins', color: '#eab308', enabled: true },
-    { id: 'kick', name: 'kick', dev: 'Mohammed Alhajri', desc: 'Kicks a user from the server.', usage: '-kick {@user}', aliases: 'None', icon: 'fa-user-slash', color: '#f97316', enabled: true },
-    { id: 'ping', name: 'ping', dev: 'Mohammed Alhajri', desc: 'Ping / Pong!', usage: '-ping', aliases: 'None', icon: 'fa-wifi', color: '#10b981', enabled: true }
+    { id: 'kick', name: 'kick', dev: 'Mohammed Alhajri', desc: 'Kicks a user from the server.', usage: '-kick {@user}', aliases: 'None', icon: 'fa-user-minus', color: '#f97316', enabled: true },
+    { id: 'ping', name: 'ping', dev: 'Mohammed Alhajri', desc: 'Ping / Pong!', usage: '-ping', aliases: 'None', icon: 'fa-tachometer-alt', color: '#10b981', enabled: true }
 ];
 
 function getUptime() {
@@ -35,7 +31,7 @@ function getUptime() {
     return `${days}d ${hours}h ${minutes}m ${seconds}s`;
 }
 
-function getGuildAge() {
+function getGuildAgeParts() {
     const diff = Math.floor((Date.now() - guildCreatedAt) / 1000);
     const years = Math.floor(diff / (365 * 24 * 3600));
     const months = Math.floor((diff % (365 * 24 * 3600)) / (30 * 24 * 3600));
@@ -44,7 +40,7 @@ function getGuildAge() {
     const minutes = Math.floor((diff % 3600) / 60);
     const seconds = diff % 60;
 
-    return `${years} Years, ${months} Months, ${days} Days, ${hours} Hours, ${minutes} Mins, ${seconds} Secs`;
+    return { years, months, days, hours, minutes, seconds };
 }
 
 function renderLayout(title, content) {
@@ -65,7 +61,7 @@ function renderLayout(title, content) {
             .navbar { background: #111827; padding: 15px 20px; border-bottom: 1px solid #1f2937; display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 100; }
             .sidebar-toggle { color: #fff; font-size: 20px; cursor: pointer; padding: 8px 12px; background: #1f2937; border-radius: 6px; }
             .user-profile { display: flex; align-items: center; gap: 10px; color: #fff; }
-            .user-img { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 2px solid #3b82f6; }
+            .user-avatar-placeholder { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #2563eb, #3b82f6); color: #fff; font-weight: bold; display: flex; align-items: center; justify-content: center; font-size: 16px; border: 2px solid #38bdf8; }
             
             .layout { display: flex; flex: 1; position: relative; }
             
@@ -98,6 +94,9 @@ function renderLayout(title, content) {
             input:checked + .slider { background-color: #2563eb; }
             input:checked + .slider:before { transform: translateX(22px); }
             
+            .link-blue { color: #38bdf8; text-decoration: none; font-weight: bold; }
+            .link-blue:hover { text-decoration: underline; }
+
             .footer { text-align: center; padding: 20px; background: #111827; border-top: 1px solid #1f2937; font-size: 13px; color: #6b7280; }
         </style>
     </head>
@@ -109,7 +108,7 @@ function renderLayout(title, content) {
         <div class="navbar">
             <div class="sidebar-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></div>
             <div class="user-profile">
-                <img src="${userAvatarUrl}" class="user-img" onerror="this.src='https://ui-avatars.com/api/?name=nfyp_&background=2563eb&color=fff'">
+                <div class="user-avatar-placeholder">N</div>
                 <span>nfyp_ <small style="color:#6b7280">Admin</small></span>
             </div>
         </div>
@@ -118,7 +117,7 @@ function renderLayout(title, content) {
             <div class="overlay-backdrop" id="backdrop" onclick="toggleSidebar()"></div>
             <div class="sidebar" id="sidebar">
                 <div class="sidebar-header">
-                    <img src="${userAvatarUrl}" class="user-img" style="width:45px; height:45px;" onerror="this.src='https://ui-avatars.com/api/?name=nfyp_&background=2563eb&color=fff'">
+                    <div class="user-avatar-placeholder" style="width:45px; height:45px; font-size:20px;">N</div>
                     <div>
                         <h4 style="color:#fff;">nfyp_</h4>
                         <span style="font-size:12px; color:#38bdf8;">Administrator</span>
@@ -183,20 +182,23 @@ app.get('/dashboard', (req, res) => {
 
 app.get('/plugins', (req, res) => {
     let pluginsHTML = pluginsList.map(p => `
-        <div class="card">
+        <div class="card" style="position:relative; overflow:hidden;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h3 style="color:#fff; display:flex; align-items:center; gap:10px;">
-                    <i class="fas ${p.icon}" style="color:${p.color}; font-size:20px;"></i> ${p.name}
+                <h3 style="color:#fff; display:flex; align-items:center; gap:12px;">
+                    <div style="width:42px; height:42px; border-radius:10px; background:${p.color}22; border:1px solid ${p.color}; display:flex; align-items:center; justify-content:center;">
+                        <i class="fas ${p.icon}" style="color:${p.color}; font-size:20px;"></i>
+                    </div>
+                    ${p.name}
                 </h3>
                 <label class="switch">
                     <input type="checkbox" ${p.enabled ? 'checked' : ''} onchange="fetch('/api/plugins/toggle/${p.id}', {method:'POST'})">
                     <span class="slider"></span>
                 </label>
             </div>
-            <p style="margin: 8px 0; font-size: 14px;"><b>Developer:</b> ${p.dev}</p>
-            <p style="margin: 8px 0; font-size: 14px;"><b>Description:</b> ${p.desc}</p>
-            <p style="margin: 8px 0; font-size: 14px;"><b>Aliases:</b> <span style="color:#38bdf8">${p.aliases}</span></p>
-            <div style="margin-top:10px;">
+            <p style="margin: 12px 0 6px 0; font-size: 14px;"><b>Developer:</b> ${p.dev}</p>
+            <p style="margin: 6px 0; font-size: 14px;"><b>Description:</b> ${p.desc}</p>
+            <p style="margin: 6px 0; font-size: 14px;"><b>Aliases:</b> <span style="color:#38bdf8">${p.aliases}</span></p>
+            <div style="margin-top:12px;">
                 <button onclick="editAlias('${p.id}', '${p.aliases}')" class="btn"><i class="fas fa-edit"></i> Edit</button>
             </div>
         </div>
@@ -222,13 +224,14 @@ app.get('/plugins', (req, res) => {
 });
 
 app.get('/guilds', (req, res) => {
+    const age = getGuildAgeParts();
     const content = `
         <h2 style="color:#fff; margin-bottom: 10px;">Guilds</h2>
         <p style="margin-bottom: 20px;">See all the Guilds (Servers) that your BOT is in.</p>
         
         <div class="card">
             <div style="display:flex; align-items:center; gap:15px; margin-bottom:20px; padding-bottom:15px; border-bottom:1px solid #1f2937;">
-                <img src="${guildIconUrl}" style="width:65px; height:65px; border-radius:50%; border:2px solid #38bdf8; object-fit:cover;" onerror="this.src='https://ui-avatars.com/api/?name=Oscorp&background=2563eb&color=fff'">
+                <div style="width:65px; height:65px; border-radius:50%; background:linear-gradient(135deg, #2563eb, #0284c7); display:flex; align-items:center; justify-content:center; font-size:26px; font-weight:bold; color:#fff; border:2px solid #38bdf8; box-shadow:0 0 15px rgba(56,189,248,0.3);">O</div>
                 <div>
                     <h2 style="color:#fff;">Oscorp (OSCORP RP)</h2>
                     <p style="font-size:13px; color:#94a3b8;"><b>Guild ID:</b> 119830128491028391</p>
@@ -243,13 +246,38 @@ app.get('/guilds', (req, res) => {
                 <div class="stat-box"><div>Voice Channels</div><div class="stat-value">🔊 4</div></div>
             </div>
 
-            <div style="background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%); padding: 20px; border-radius: 12px; border: 1px solid #312e81; box-shadow: 0 4px 15px rgba(0,0,0,0.3); text-align: center; margin-top:15px;">
-                <h4 style="color: #facc15; font-size: 15px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">
-                    <i class="fas fa-history" style="margin-right: 6px;"></i> Server Created Duration
+            <!-- Server Created Duration 100x Ultra Fancy -->
+            <div style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%); padding: 25px; border-radius: 16px; border: 1px solid #312e81; box-shadow: 0 10px 30px rgba(0,0,0,0.6); text-align: center; margin-top:20px; position:relative; overflow:hidden;">
+                <div style="position:absolute; top:-20px; right:-20px; width:100px; height:100px; background:rgba(56,189,248,0.1); border-radius:50%; filter:blur(20px);"></div>
+                <h4 style="color: #facc15; font-size: 16px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; font-weight:800;">
+                    <i class="fas fa-crown" style="margin-right: 8px; color:#facc15;"></i> Server Created Duration
                 </h4>
-                <p style="color: #38bdf8; font-size: 18px; font-weight: bold; font-family: monospace; letter-spacing: 0.5px;">
-                    ${getGuildAge()}
-                </p>
+                <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+                    <div style="background:#111827; border:1px solid #374151; padding:10px 14px; border-radius:10px; min-width:80px;">
+                        <span style="font-size:22px; font-weight:bold; color:#38bdf8;">${age.years}</span>
+                        <div style="font-size:10px; color:#94a3b8; text-transform:uppercase;">Years</div>
+                    </div>
+                    <div style="background:#111827; border:1px solid #374151; padding:10px 14px; border-radius:10px; min-width:80px;">
+                        <span style="font-size:22px; font-weight:bold; color:#38bdf8;">${age.months}</span>
+                        <div style="font-size:10px; color:#94a3b8; text-transform:uppercase;">Months</div>
+                    </div>
+                    <div style="background:#111827; border:1px solid #374151; padding:10px 14px; border-radius:10px; min-width:80px;">
+                        <span style="font-size:22px; font-weight:bold; color:#38bdf8;">${age.days}</span>
+                        <div style="font-size:10px; color:#94a3b8; text-transform:uppercase;">Days</div>
+                    </div>
+                    <div style="background:#111827; border:1px solid #374151; padding:10px 14px; border-radius:10px; min-width:80px;">
+                        <span style="font-size:22px; font-weight:bold; color:#38bdf8;">${age.hours}</span>
+                        <div style="font-size:10px; color:#94a3b8; text-transform:uppercase;">Hours</div>
+                    </div>
+                    <div style="background:#111827; border:1px solid #374151; padding:10px 14px; border-radius:10px; min-width:80px;">
+                        <span style="font-size:22px; font-weight:bold; color:#38bdf8;">${age.minutes}</span>
+                        <div style="font-size:10px; color:#94a3b8; text-transform:uppercase;">Mins</div>
+                    </div>
+                    <div style="background:#111827; border:1px solid #374151; padding:10px 14px; border-radius:10px; min-width:80px;">
+                        <span style="font-size:22px; font-weight:bold; color:#38bdf8;">${age.seconds}</span>
+                        <div style="font-size:10px; color:#94a3b8; text-transform:uppercase;">Secs</div>
+                    </div>
+                </div>
             </div>
         </div>
     `;
@@ -262,10 +290,10 @@ app.get('/support', (req, res) => {
         <p style="margin-bottom: 20px;">Contact us using any of the following methods!</p>
         <div class="card">
             <div class="card-header"><i class="fas fa-envelope" style="color:#38bdf8"></i> Contact Details</div>
-            <p style="margin-bottom:12px;"><b>Email:</b> mail@MohammedAlhajri-dev.com</p>
-            <p style="margin-bottom:12px;"><b>Twitter:</b> @i661y</p>
-            <p style="margin-bottom:12px;"><b>Instagram:</b> @i661y</p>
-            <p style="margin-bottom:12px;"><b>Discord Developer:</b> Mohammed Alhajri</p>
+            <p style="margin-bottom:12px;"><b>Email:</b> <a href="mailto:mail@MohammedAlhajri-dev.com" class="link-blue">mail@MohammedAlhajri-dev.com</a></p>
+            <p style="margin-bottom:12px;"><b>Twitter:</b> <a href="https://x.com/i661y" target="_blank" class="link-blue">@i661y</a></p>
+            <p style="margin-bottom:12px;"><b>Instagram:</b> <a href="https://instagram.com/i661y" target="_blank" class="link-blue">@i661y</a></p>
+            <p style="margin-bottom:12px;"><b>Discord Developer:</b> <span style="color:#fff;">Mohammed Alhajri</span></p>
             <div style="margin-top:20px;">
                 <a href="https://discord.gg" target="_blank" class="btn" style="background:#5865F2;"><i class="fab fa-discord"></i> Join Discord Server</a>
             </div>
@@ -284,7 +312,7 @@ app.get('/settings', (req, res) => {
             
             <div style="margin-bottom: 15px;">
                 <label style="display:block; color:#d1d5db; margin-bottom:5px;">Bot Prefix:</label>
-                <input type="text" id="prefixInput" name="prefix" class="form-control" value="${botConfig.prefix}" maxlength="1" oninput="checkPrefix(this)">
+                <input type="text" id="prefixInput" name="prefix" class="form-control" value="${botConfig.prefix}" oninput="checkPrefix(this)">
                 <span id="prefixError" style="color:#ef4444; font-size:12px; display:none; margin-top:5px;">maxed letter of prefix "1"</span>
             </div>
 
@@ -294,7 +322,7 @@ app.get('/settings', (req, res) => {
         <script>
             function checkPrefix(input) {
                 const err = document.getElementById('prefixError');
-                if (input.value.length >= 1) {
+                if (input.value.length > 1) {
                     err.style.display = 'block';
                 } else {
                     err.style.display = 'none';
@@ -306,7 +334,9 @@ app.get('/settings', (req, res) => {
 });
 
 app.post('/settings/save', (req, res) => {
-    if (req.body.prefix) botConfig.prefix = req.body.prefix[0];
+    if (req.body.prefix && req.body.prefix.length <= 1) {
+        botConfig.prefix = req.body.prefix;
+    }
     res.redirect('/settings');
 });
 
