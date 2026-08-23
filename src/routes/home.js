@@ -26,7 +26,7 @@ router.get('/', (req, res) => {
     `);
 });
 
-// إضافة مسار login المباشر
+// مسار تسجيل الدخول
 router.get('/login', (req, res) => {
     const CLIENT_ID = process.env.CLIENT_ID || '';
     const REDIRECT_URI = encodeURIComponent(process.env.REDIRECT_URI || '');
@@ -36,6 +36,30 @@ router.get('/login', (req, res) => {
     } else {
         res.send('رجاء قم بإضافة CLIENT_ID و REDIRECT_URI في متغيّرات البيئة داخل Render');
     }
+});
+
+// مسار استقبال الـ Callback بعد الموافقة في ديسكورد
+router.get('/auth/discord/callback', (req, res) => {
+    res.send(`
+        <!DOCTYPE html>
+        <html lang="ar" dir="rtl">
+        <head>
+            <meta charset="UTF-8">
+            <title>تم تسجيل الدخول</title>
+            <style>
+                body { font-family: Arial, sans-serif; background: #0f172a; color: white; text-align: center; padding: 50px; }
+                .card { background: #1e293b; padding: 30px; border-radius: 12px; display: inline-block; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+                h1 { color: #22c55e; }
+            </style>
+        </head>
+        <body>
+            <div class="card">
+                <h1>تم تسجيل الدخول بنجاح! 🎉</h1>
+                <p>أهلاً بك في لوحة تحكم OSCORP</p>
+            </div>
+        </body>
+        </html>
+    `);
 });
 
 module.exports = router;
