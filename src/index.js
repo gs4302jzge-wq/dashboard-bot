@@ -89,19 +89,20 @@ const createErrorEmbed = (description) => {
     .setFooter({ text: 'OS | System Security', iconURL: client.user?.displayAvatarURL() });
 };
 
-// Global Command ID Resolver (Supports Base Name & Aliases)
+// Global Command ID Resolver (Supports Base Name & Dynamic Aliases with Arabic & Any Characters)
 function resolveCommandId(input) {
   if (!input) return null;
-  const cleanInput = input.toLowerCase().trim().replace(/[\s-]+/g, '_');
+  const cleanInput = input.trim().toLowerCase();
 
   for (const cmd of commandsConfig) {
-    if (cmd.id === cleanInput || cmd.name.replace(/[\s-]+/g, '_') === cleanInput) {
+    if (cmd.id.toLowerCase() === cleanInput || cmd.name.toLowerCase() === cleanInput) {
       return cmd.id;
     }
     const aliases = pluginsStore[cmd.id] || [];
-    const sanitizedAliases = aliases.map(a => a.toLowerCase().trim().replace(/[\s-]+/g, '_'));
-    if (sanitizedAliases.includes(cleanInput)) {
-      return cmd.id;
+    for (const alias of aliases) {
+      if (alias.trim().toLowerCase() === cleanInput) {
+        return cmd.id;
+      }
     }
   }
   return null;
@@ -114,34 +115,31 @@ async function registerSlashCommands() {
   const registeredNames = new Set();
 
   for (const cmd of commandsConfig) {
-    const namesToRegister = [cmd.name, ...(pluginsStore[cmd.id] || [])];
+    const rawName = cmd.name;
+    const validName = rawName.toLowerCase().trim().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+    if (!validName || registeredNames.has(validName)) continue;
 
-    for (const rawName of namesToRegister) {
-      const validName = rawName.toLowerCase().trim().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
-      if (!validName || registeredNames.has(validName)) continue;
+    registeredNames.add(validName);
 
-      registeredNames.add(validName);
+    const builder = new SlashCommandBuilder()
+      .setName(validName)
+      .setDescription(cmd.desc);
 
-      const builder = new SlashCommandBuilder()
-        .setName(validName)
-        .setDescription(cmd.desc);
+    cmd.options.forEach(opt => {
+      if (opt.type === 'user') builder.addUserOption(o => o.setName(opt.name).setDescription(opt.desc).setRequired(opt.req));
+      else if (opt.type === 'string') builder.addStringOption(o => o.setName(opt.name).setDescription(opt.desc).setRequired(opt.req));
+      else if (opt.type === 'int') builder.addIntegerOption(o => o.setName(opt.name).setDescription(opt.desc).setRequired(opt.req));
+      else if (opt.type === 'channel') builder.addChannelOption(o => o.setName(opt.name).setDescription(opt.desc).setRequired(opt.req));
+      else if (opt.type === 'role') builder.addRoleOption(o => o.setName(opt.name).setDescription(opt.desc).setRequired(opt.req));
+    });
 
-      cmd.options.forEach(opt => {
-        if (opt.type === 'user') builder.addUserOption(o => o.setName(opt.name).setDescription(opt.desc).setRequired(opt.req));
-        else if (opt.type === 'string') builder.addStringOption(o => o.setName(opt.name).setDescription(opt.desc).setRequired(opt.req));
-        else if (opt.type === 'int') builder.addIntegerOption(o => o.setName(opt.name).setDescription(opt.desc).setRequired(opt.req));
-        else if (opt.type === 'channel') builder.addChannelOption(o => o.setName(opt.name).setDescription(opt.desc).setRequired(opt.req));
-        else if (opt.type === 'role') builder.addRoleOption(o => o.setName(opt.name).setDescription(opt.desc).setRequired(opt.req));
-      });
-
-      slashList.push(builder.toJSON());
-    }
+    slashList.push(builder.toJSON());
   }
 
   const rest = new REST({ version: '10' }).setToken(BOT_TOKEN);
   try {
     await rest.put(Routes.applicationCommands(client.user.id), { body: slashList });
-    console.log(`💎 Registered ${slashList.length} Commands & Aliases to Discord API!`);
+    console.log(`💎 Registered ${slashList.length} Base Slash Commands to Discord API!`);
   } catch (err) {
     console.error('Failed to register Slash Commands:', err.message);
   }
@@ -245,15 +243,27 @@ client.on('interactionCreate', async (interaction) => {
   }
 });
 
-// Text Prefix Event Listener
+// Text Prefix & Direct Aliases Event Listener (Supports With & Without Prefix)
 client.on('messageCreate', async (message) => {
-  if (message.author.bot || !message.content.startsWith(PREFIX)) return;
+  if (message.author.bot) return;
 
-  const args = message.content.slice(PREFIX.length).trim().split(/ +/);
-  const rawCmd = args.shift();
+  let content = message.content.trim();
+  let rawCmd = '';
+
+  if (content.startsWith(PREFIX)) {
+    const args = content.slice(PREFIX.length).trim().split(/ +/);
+    rawCmd = args.shift();
+    content = args.join(' ');
+  } else {
+    const parts = content.split(/ +/);
+    rawCmd = parts.shift();
+    content = parts.join(' ');
+  }
+
   const commandId = resolveCommandId(rawCmd);
 
   if (commandId) {
+    const args = content ? content.split(/ +/) : [];
     const options = {
       user: message.mentions.users.first() || client.users.cache.get(args[0]),
       nick: args[1],
@@ -386,15 +396,14 @@ function layout(title, content, currentPath) {
 // REST API for Live Uptime
 app.get('/api/uptime', (req, res) => res.json(getFormattedUptime()));
 
-// Dynamic Aliases POST Handler with Instant Discord Sync
-app.post('/api/aliases', async (req, res) => {
+// Instant Aliases POST Handler (supports Arabic and instant saving)
+app.post('/api/aliases', (req, res) => {
   const { pluginId, aliases } = req.body;
   if (pluginId && Array.isArray(aliases)) {
     pluginsStore[pluginId] = aliases
-      .map(a => a.trim().toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, ''))
+      .map(a => a.trim())
       .filter(a => a !== '');
       
-    await registerSlashCommands();
     return res.json({ success: true, updated: pluginsStore[pluginId] });
   }
   res.status(400).json({ success: false, error: 'Invalid Parameters' });
@@ -639,7 +648,7 @@ app.get('/plugins', (req, res) => {
           const div = document.createElement('div');
           div.style.cssText = 'display:flex; align-items:center; gap:8px;';
           div.innerHTML = \`
-            <input type="text" value="\${alias}" oninput="currentAliases[\${index}] = this.value" placeholder="e.g. n, nick, nickname" style="flex:1; background:#060a14; border:1px solid rgba(255,255,255,0.15); color:#fff; padding:8px 12px; border-radius:6px; font-size:13px; outline:none;">
+            <input type="text" value="\${alias}" oninput="currentAliases[\${index}] = this.value" placeholder="e.g. n or nick or نك" style="flex:1; background:#060a14; border:1px solid rgba(255,255,255,0.15); color:#fff; padding:8px 12px; border-radius:6px; font-size:13px; outline:none;">
             <button onclick="removeAliasField(\${index})" style="background:#ef4444; border:none; color:#fff; width:34px; height:34px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:13px;">
               <i class="fa-solid fa-trash"></i>
             </button>
@@ -691,7 +700,7 @@ app.get('/plugins', (req, res) => {
           if (response.ok) {
             location.reload();
           } else {
-            alert('Failed to save aliases. Make sure bot token is valid.');
+            alert('Failed to save aliases.');
             saveBtn.disabled = false;
             saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save';
           }
