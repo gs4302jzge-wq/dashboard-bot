@@ -42,7 +42,14 @@ function getGuildIcon(guild) {
   return 'https://cdn.discordapp.com/embed/avatars/1.png';
 }
 
-const currentUser = { id: '154057416353677415', avatar: null, discriminator: '0' };
+const currentUser = { 
+  id: '154057416353677415', 
+  username: 'nfyp_', 
+  global_name: 'nfyp_',
+  email: 'nfyp@discord.app',
+  avatar: null, 
+  discriminator: '0' 
+};
 const currentGuild = { id: '119830128491028391', icon: null };
 
 const userAvatarUrl = getUserAvatar(currentUser);
@@ -415,6 +422,21 @@ app.get('/settings', (req, res) => {
   const content = `
       <h2 style="color:#fff; margin-bottom: 10px;">Settings</h2>
       <p style="margin-bottom: 20px;">Customize your BOT and update settings within the dashboard!</p>
+      
+      <div class="card" style="margin-bottom: 25px;">
+          <div class="card-header"><i class="fab fa-discord" style="color:#5865F2"></i> Authorized Discord Account</div>
+          <div style="display:flex; align-items:center; gap:18px; margin-bottom:15px; background:#1f2937; padding:15px; border-radius:10px; border:1px solid #374151;">
+              <img src="${userAvatarUrl}" class="img-avatar-fixed" style="width:55px; height:55px;" />
+              <div>
+                  <h3 style="color:#fff; font-size:16px;">${currentUser.global_name} <span style="font-size:12px; color:#38bdf8; background:#0f172a; padding:2px 8px; border-radius:12px; margin-left:5px;">@${currentUser.username}</span></h3>
+                  <p style="font-size:13px; color:#94a3b8; margin-top:4px;"><b>User ID:</b> ${currentUser.id}</p>
+              </div>
+          </div>
+          <form method="POST" action="/logout">
+              <button type="submit" class="btn btn-danger"><i class="fas fa-sign-out-alt"></i> Log Out Account</button>
+          </form>
+      </div>
+
       <form method="POST" action="/settings/save" class="card">
           <div class="card-header"><i class="fas fa-sliders-h" style="color:#38bdf8"></i> BOT Config</div>
           <div style="margin-bottom: 15px;">
@@ -432,6 +454,15 @@ app.post('/settings/save', (req, res) => {
     botConfig.prefix = req.body.prefix.trim();
   }
   res.redirect('/settings');
+});
+
+app.post('/logout', (req, res) => {
+  res.send(`
+    <script>
+      alert('Logged out successfully!');
+      window.location.href = '/settings';
+    </script>
+  `);
 });
 
 app.post('/api/plugins/toggle/:id', (req, res) => {
