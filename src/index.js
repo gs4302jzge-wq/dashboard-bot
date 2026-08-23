@@ -1,5 +1,5 @@
 const express = require('express');
-const { Client, GatewayIntentBits } = require('discord.js');
+const { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder } = require('discord.js');
 
 const app = express();
 const PORT = process.env.PORT || 10000;
@@ -9,7 +9,6 @@ app.use(express.urlencoded({ extended: true }));
 
 const PREFIX = '-';
 
-// Memory Store for Aliases
 const pluginsStore = {
   ban: [],
   clear: [],
@@ -27,69 +26,130 @@ const client = new Client({
 
 const BOT_TOKEN = process.env.DISCORD_TOKEN;
 
-// Command Handler Execution
+async function registerSlashCommands(clientId) {
+  const commands = [
+    new SlashCommandBuilder().setName('ban').setDescription('Ban a user').addUserOption(opt => opt.setName('user').setDescription('User to ban').setRequired(true)),
+    new SlashCommandBuilder().setName('clear').setDescription('Clear messages').addIntegerOption(opt => opt.setName('amount').setDescription('Number of messages').setRequired(true)),
+    new SlashCommandBuilder().setName('coin').setDescription('Flip a coin'),
+    new SlashCommandBuilder().setName('kick').setDescription('Kick a user').addUserOption(opt => opt.setName('user').setDescription('User to kick').setRequired(true))
+  ].map(cmd => cmd.toJSON());
+
+  const rest = new REST({ version: '10' }).setToken(BOT_TOKEN);
+  try {
+    console.log('Registering Slash Commands...');
+    await rest.put(Routes.applicationCommands(clientId), { body: commands });
+    console.log('Slash Commands Registered Successfully!');
+  } catch (err) {
+    console.error('Failed to register Slash Commands:', err);
+  }
+}
+
+client.on('interactionCreate', async (interaction) => {
+  if (!interaction.isChatInputCommand()) return;
+
+  const { commandName } = interaction;
+
+  if (commandName === 'ban') {
+    if (!interaction.member.permissions.has('BanMembers')) {
+      return interaction.reply({ content: '❌ لا تملك صلاحية حظر الأعضاء.', ephemeral: true });
+    }
+    const user = interaction.options.getUser('user');
+    const member = await interaction.guild.members.fetch(user.id).catch(() => null);
+    if (!member) return interaction.reply({ content: '⚠️ العضو غير موجود بالسيرفر.', ephemeral: true });
+    try {
+      await member.ban();
+      interaction.reply(`🔨 تم حظر **${user.tag}** بنجاح.`);
+    } catch {
+      interaction.reply({ content: '❌ تعذر حظر العضو.', ephemeral: true });
+    }
+  }
+
+  else if (commandName === 'clear') {
+    if (!interaction.member.permissions.has('ManageMessages')) {
+      return interaction.reply({ content: '❌ لا تملك صلاحية مسح الرسائل.', ephemeral: true });
+    }
+    const amount = interaction.options.getInteger('amount');
+    if (amount < 1 || amount > 100) {
+      return interaction.reply({ content: '⚠️ ادخل عدداً بين 1 و 100.', ephemeral: true });
+    }
+    try {
+      await interaction.channel.bulkDelete(amount, true);
+      interaction.reply({ content: `🧹 تم مسح **${amount}** رسالة.`, ephemeral: true });
+    } catch {
+      interaction.reply({ content: '❌ حدث خطأ أثناء مسح الرسائل.', ephemeral: true });
+    }
+  }
+
+  else if (commandName === 'coin') {
+    const result = Math.random() < 0.5 ? '🪙 ملك (Heads)' : '🪙 كتابة (Tails)';
+    interaction.reply(`النتيجة: **${result}**`);
+  }
+
+  else if (commandName === 'kick') {
+    if (!interaction.member.permissions.has('KickMembers')) {
+      return interaction.reply({ content: '❌ لا تملك صلاحية طرد الأعضاء.', ephemeral: true });
+    }
+    const user = interaction.options.getUser('user');
+    const member = await interaction.guild.members.fetch(user.id).catch(() => null);
+    if (!member) return interaction.reply({ content: '⚠️ العضو غير موجود بالسيرفر.', ephemeral: true });
+    try {
+      await member.kick();
+      interaction.reply(`👞 تم طرد **${user.tag}** بنجاح.`);
+    } catch {
+      interaction.reply({ content: '❌ تعذر طرد العضو.', ephemeral: true });
+    }
+  }
+});
+
 client.on('messageCreate', async (message) => {
   if (message.author.bot || !message.content.startsWith(PREFIX)) return;
 
   const args = message.content.slice(PREFIX.length).trim().split(/ +/);
   const commandName = args.shift().toLowerCase();
 
-  // Helper to check if command matches main name OR aliases
   const isCommand = (name) => {
-    return commandName === name || pluginsStore[name].includes(commandName);
+    return commandName === name || (pluginsStore[name] && pluginsStore[name].includes(commandName));
   };
 
-  // 1. BAN Command
   if (isCommand('ban')) {
-    if (!message.member.permissions.has('BanMembers')) {
-      return message.reply('❌ You do not have permission to ban members.');
-    }
+    if (!message.member.permissions.has('BanMembers')) return message.reply('❌ لا تملك صلاحية.');
     const member = message.mentions.members.first();
-    if (!member) return message.reply('⚠️ Usage: `-ban {@user}`');
+    if (!member) return message.reply('⚠️ الاستخدام: `-ban {@user}`');
     try {
       await member.ban();
-      message.channel.send(`🔨 **${member.user.tag}** has been banned.`);
-    } catch (err) {
-      message.reply('❌ Could not ban user. Check my role permissions.');
+      message.channel.send(`🔨 تم حظر **${member.user.tag}**.`);
+    } catch {
+      message.reply('❌ تعذر حظر العضو.');
     }
   }
 
-  // 2. CLEAR Command
   else if (isCommand('clear')) {
-    if (!message.member.permissions.has('ManageMessages')) {
-      return message.reply('❌ You do not have permission to clear messages.');
-    }
+    if (!message.member.permissions.has('ManageMessages')) return message.reply('❌ لا تملك صلاحية.');
     const amount = parseInt(args[0]);
-    if (isNaN(amount) || amount < 1 || amount > 100) {
-      return message.reply('⚠️ Usage: `-clear {amount}` (1 to 100)');
-    }
+    if (isNaN(amount) || amount < 1 || amount > 100) return message.reply('⚠️ الاستخدام: `-clear {العدد}`');
     try {
       await message.channel.bulkDelete(amount, true);
-      const msg = await message.channel.send(`🧹 Deleted **${amount}** messages.`);
+      const msg = await message.channel.send(`🧹 تم مسح **${amount}** رسالة.`);
       setTimeout(() => msg.delete().catch(() => {}), 3000);
-    } catch (err) {
-      message.reply('❌ Error clearing messages.');
+    } catch {
+      message.reply('❌ حدث خطأ أثناء مسح الرسائل.');
     }
   }
 
-  // 3. COIN Command
   else if (isCommand('coin')) {
-    const result = Math.random() < 0.5 ? '🪙 Heads (ملك)' : '🪙 Tails (كتابة)';
-    message.reply(`Result: **${result}**`);
+    const result = Math.random() < 0.5 ? '🪙 ملك' : '🪙 كتابة';
+    message.reply(`النتيجة: **${result}**`);
   }
 
-  // 4. KICK Command
   else if (isCommand('kick')) {
-    if (!message.member.permissions.has('KickMembers')) {
-      return message.reply('❌ You do not have permission to kick members.');
-    }
+    if (!message.member.permissions.has('KickMembers')) return message.reply('❌ لا تملك صلاحية.');
     const member = message.mentions.members.first();
-    if (!member) return message.reply('⚠️ Usage: `-kick {@user}`');
+    if (!member) return message.reply('⚠️ الاستخدام: `-kick {@user}`');
     try {
       await member.kick();
-      message.channel.send(`👞 **${member.user.tag}** has been kicked.`);
-    } catch (err) {
-      message.reply('❌ Could not kick user. Check my role permissions.');
+      message.channel.send(`👞 تم طرد **${member.user.tag}**.`);
+    } catch {
+      message.reply('❌ تعذر طرد العضو.');
     }
   }
 });
@@ -97,6 +157,7 @@ client.on('messageCreate', async (message) => {
 if (BOT_TOKEN) {
   client.once('ready', () => {
     console.log(`🤖 Logged in as: ${client.user.tag}`);
+    registerSlashCommands(client.user.id);
   });
   client.login(BOT_TOKEN).catch(err => {
     console.error('❌ Login Error:', err.message);
@@ -303,7 +364,6 @@ function layout(title, content, currentPath) {
   `;
 }
 
-// API Endpoint to save aliases
 app.post('/api/aliases', (req, res) => {
   const { pluginId, aliases } = req.body;
   if (pluginId && Array.isArray(aliases)) {
@@ -313,7 +373,6 @@ app.post('/api/aliases', (req, res) => {
   res.status(400).json({ success: false });
 });
 
-// 1. Dashboard Page
 app.get('/', (req, res) => {
   const guildCount = client.guilds?.cache?.size || 1;
   const userCount = client.users?.cache?.size || 9;
@@ -331,101 +390,42 @@ app.get('/', (req, res) => {
       </div>
 
       <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:1px; background:rgba(255,255,255,0.08); border-radius:8px; overflow:hidden; border:1px solid rgba(255,255,255,0.08);">
-        
         <div style="background:#0d1527; padding:16px 12px; text-align:left;">
           <div style="font-size:11px; color:#94a3b8; font-weight:600;">Server Count (Guilds)</div>
           <div style="font-size:22px; font-weight:bold; color:#fff; margin-top:8px; display:flex; align-items:center; gap:8px;">
             <i class="fa-solid fa-bars-staggered" style="font-size:16px; color:#94a3b8;"></i> ${guildCount}
           </div>
         </div>
-
         <div style="background:#0d1527; padding:16px 12px; text-align:left;">
           <div style="font-size:11px; color:#94a3b8; font-weight:600;">User Count (All Guilds)</div>
           <div style="font-size:22px; font-weight:bold; color:#fff; margin-top:8px; display:flex; align-items:center; gap:8px;">
             <i class="fa-solid fa-users" style="font-size:16px; color:#94a3b8;"></i> ${userCount}
           </div>
         </div>
-
         <div style="background:#0d1527; padding:16px 12px; text-align:left;">
           <div style="font-size:11px; color:#94a3b8; font-weight:600;">API Latency</div>
           <div style="font-size:22px; font-weight:bold; color:#fff; margin-top:8px; display:flex; align-items:center; gap:8px;">
             <i class="fa-solid fa-tower-broadcast" style="font-size:16px; color:#94a3b8;"></i> ${ping}ms
           </div>
         </div>
-
         <div style="background:#0d1527; padding:16px 12px; text-align:left;">
           <div style="font-size:11px; color:#94a3b8; font-weight:600;">Prefix</div>
           <div style="font-size:22px; font-weight:bold; color:#fff; margin-top:8px; display:flex; align-items:center; gap:8px;">
             <i class="fa-solid fa-bullhorn" style="font-size:16px; color:#94a3b8;"></i> -
           </div>
         </div>
-
-      </div>
-
-      <div style="margin-top:16px; background:#0b1224; border:1px solid rgba(255,255,255,0.06); border-radius:8px; padding:14px;">
-        <span style="background:rgba(52, 211, 153, 0.2); color:#34d399; font-size:11px; padding:3px 8px; border-radius:4px; font-weight:600;"><i class="fa-solid fa-circle" style="font-size:7px;"></i> Uptime</span>
-        <div style="margin-top:10px; color:#cbd5e1; font-size:14px;"><i class="fa-solid fa-rotate" style="font-size:12px; color:#64748b;"></i> Active</div>
       </div>
     </div>
   `;
   res.send(layout('Dashboard - OS | System', content, '/'));
 });
 
-// 2. Plugins Page
 app.get('/plugins', (req, res) => {
   const pluginsData = [
-    {
-      id: "ban",
-      name: "Ban",
-      icon: "fa-solid fa-hammer",
-      iconBg: "rgba(239, 68, 68, 0.2)",
-      iconColor: "#ef4444",
-      iconBorder: "rgba(239, 68, 68, 0.4)",
-      developer: "Mohammed Alhajri",
-      description: "Bans a user from the server.",
-      usage: "-ban {@user}",
-      aliases: pluginsStore.ban,
-      enabled: true
-    },
-    {
-      id: "clear",
-      name: "clear",
-      icon: "fa-solid fa-trash-can",
-      iconBg: "rgba(20, 184, 166, 0.2)",
-      iconColor: "#14b8a6",
-      iconBorder: "rgba(20, 184, 166, 0.4)",
-      developer: "Mohammed Alhajri",
-      description: "Clears messages from a channel.",
-      usage: "-clear {amount}",
-      aliases: pluginsStore.clear,
-      enabled: true
-    },
-    {
-      id: "coin",
-      name: "coin",
-      icon: "fa-solid fa-coins",
-      iconBg: "rgba(245, 158, 11, 0.2)",
-      iconColor: "#f59e0b",
-      iconBorder: "rgba(245, 158, 11, 0.4)",
-      developer: "Mohammed Alhajri",
-      description: "Simple coin flip command",
-      usage: "-coin",
-      aliases: pluginsStore.coin,
-      enabled: true
-    },
-    {
-      id: "kick",
-      name: "kick",
-      icon: "fa-solid fa-user-minus",
-      iconBg: "rgba(249, 115, 22, 0.2)",
-      iconColor: "#f97316",
-      iconBorder: "rgba(249, 115, 22, 0.4)",
-      developer: "Mohammed Alhajri",
-      description: "Kicks a user from the server.",
-      usage: "-kick {@user}",
-      aliases: pluginsStore.kick,
-      enabled: true
-    }
+    { id: "ban", name: "Ban", icon: "fa-solid fa-hammer", iconBg: "rgba(239, 68, 68, 0.2)", iconColor: "#ef4444", iconBorder: "rgba(239, 68, 68, 0.4)", developer: "Mohammed Alhajri", description: "Bans a user from the server.", usage: "-ban {@user}", aliases: pluginsStore.ban, enabled: true },
+    { id: "clear", name: "clear", icon: "fa-solid fa-trash-can", iconBg: "rgba(20, 184, 166, 0.2)", iconColor: "#14b8a6", iconBorder: "rgba(20, 184, 166, 0.4)", developer: "Mohammed Alhajri", description: "Clears messages from a channel.", usage: "-clear {amount}", aliases: pluginsStore.clear, enabled: true },
+    { id: "coin", name: "coin", icon: "fa-solid fa-coins", iconBg: "rgba(245, 158, 11, 0.2)", iconColor: "#f59e0b", iconBorder: "rgba(245, 158, 11, 0.4)", developer: "Mohammed Alhajri", description: "Simple coin flip command", usage: "-coin", aliases: pluginsStore.coin, enabled: true },
+    { id: "kick", name: "kick", icon: "fa-solid fa-user-minus", iconBg: "rgba(249, 115, 22, 0.2)", iconColor: "#f97316", iconBorder: "rgba(249, 115, 22, 0.4)", developer: "Mohammed Alhajri", description: "Kicks a user from the server.", usage: "-kick {@user}", aliases: pluginsStore.kick, enabled: true }
   ];
 
   const pluginCards = pluginsData.map(p => {
@@ -443,7 +443,6 @@ app.get('/plugins', (req, res) => {
           </div>
           <h3 style="margin:0; font-size:20px; font-weight:700; color:#fff;">${p.name}</h3>
         </div>
-        
         <label class="toggle-switch">
           <input type="checkbox" ${p.enabled ? 'checked' : ''}>
           <span class="slider"></span>
@@ -468,31 +467,23 @@ app.get('/plugins', (req, res) => {
     <h2 style="margin-bottom: 18px; font-size:26px; font-weight:700;">Plugins</h2>
     <div>${pluginCards}</div>
 
-    <!-- Edit Aliases Modal -->
     <div id="editAliasModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; align-items:center; justify-content:center; padding:15px; box-sizing:border-box;">
       <div class="card" style="width:100%; max-width:400px; margin:0; background:#0b1220; border:1px solid rgba(255,255,255,0.12); box-shadow:0 10px 30px rgba(0,0,0,0.8); border-radius:12px; padding:20px;">
-        
         <h3 style="margin-top:0; color:#fff; font-size:17px; font-weight:700; display:flex; align-items:center; gap:8px;">
           <i class="fa-solid fa-pen-to-square" style="color:#38bdf8; font-size:16px;"></i> Edit Aliases
         </h3>
-        
         <div style="color:#cbd5e1; font-size:13px; font-weight:600; margin-bottom:12px;">Aliases (up to 5)</div>
-
         <div id="aliasesContainer" style="display:flex; flex-direction:column; gap:10px; margin-bottom:12px;"></div>
-
         <div id="limitWarning" style="color:#ef4444; font-size:11px; font-weight:700; margin-bottom:12px; display:none; text-transform:uppercase;">
           YOU HAVE REACHED 5 LIMIT ONLY
         </div>
-
         <button id="addAliasBtn" onclick="addAliasField()" class="btn" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#cbd5e1; width:100%; justify-content:center; margin-bottom:16px; font-size:13px; padding:8px;">
           <i class="fa-solid fa-plus"></i> Add Alias
         </button>
-
         <div style="display:flex; justify-content:flex-end; gap:10px;">
           <button onclick="closeEditModal()" class="btn" style="background:rgba(255,255,255,0.08); color:#cbd5e1; font-size:12px; padding:6px 16px;">Cancel</button>
           <button id="saveBtn" onclick="saveAliases()" class="btn" style="background:#22c55e; color:#fff; font-size:12px; padding:6px 16px;"><i class="fa-solid fa-floppy-disk"></i> Save</button>
         </div>
-
       </div>
     </div>
 
@@ -514,7 +505,6 @@ app.get('/plugins', (req, res) => {
       function renderAliasInputs() {
         const container = document.getElementById('aliasesContainer');
         container.innerHTML = '';
-
         currentAliases.forEach((alias, index) => {
           const div = document.createElement('div');
           div.style.cssText = 'display:flex; align-items:center; gap:8px;';
@@ -575,7 +565,7 @@ app.get('/plugins', (req, res) => {
             saveBtn.disabled = false;
             saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save';
           }
-        } catch (err) {
+        } catch {
           alert('Error connecting to server');
           saveBtn.disabled = false;
           saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save';
@@ -587,13 +577,11 @@ app.get('/plugins', (req, res) => {
   res.send(layout('Plugins - OS | System', content, '/plugins'));
 });
 
-// 3. Guilds Route
 app.get('/guilds', (req, res) => {
   const content = `
     <h2 style="margin-bottom: 20px; font-size:24px;">Guilds Overview</h2>
-    
     <div class="card">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid rgba(255,255,255,0.08);">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
         <div style="display:flex; align-items:center; gap:16px;">
           <div style="width:52px; height:52px; border-radius:14px; background:#2563eb; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:24px; color:#fff;">
             O
@@ -612,12 +600,10 @@ app.get('/guilds', (req, res) => {
   res.send(layout('Guilds - OS | System', content, '/guilds'));
 });
 
-// 4. Support Route
 app.get('/support', (req, res) => {
   const content = `
     <h2 style="margin-bottom: 4px;">Support</h2>
     <p style="color: #94a3b8; margin-top: 0; margin-bottom: 20px;">Contact us using any of the following methods!</p>
-
     <div class="card">
       <div style="color:#cbd5e1; font-size:14px; line-height:2.2; margin-bottom:20px;">
         <div><strong>Email:</strong> mail@MohammedAlhajri-dev.com</div>
@@ -629,12 +615,10 @@ app.get('/support', (req, res) => {
   res.send(layout('Support - OS | System', content, '/support'));
 });
 
-// 5. Settings Route
 app.get('/settings', (req, res) => {
   const content = `
     <h2 style="margin-bottom: 6px; font-size:24px;">Global Settings</h2>
     <p style="color: #94a3b8; margin-top: 0; margin-bottom: 20px; font-size:14px;">Configure general system configurations for OS | System.</p>
-
     <div class="card">
       <h3 style="margin-top:0; font-size:16px; color:#fff;"><i class="fa-solid fa-sliders" style="color:#38bdf8;"></i> System Configuration</h3>
       <p style="color:#94a3b8; font-size:13px;">Manage global dashboard parameters.</p>
