@@ -78,12 +78,12 @@ function getSidebarHtml(activePath) {
     
     <!-- Profile Header in Sidebar -->
     <div style="display:flex; align-items:center; gap:12px; margin-bottom:30px; padding-bottom:20px; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
-      <div style="width:44px; height:44px; border-radius:50%; background:#2563eb; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:20px; color:#fff; box-shadow:0 0 12px rgba(37,99,235,0.4);">
-        N
+      <div style="width:44px; height:44px; border-radius:50%; background:#5865F2; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:20px; color:#fff; box-shadow:0 0 12px rgba(88,101,242,0.4);">
+        <i class="fa-brands fa-discord"></i>
       </div>
       <div>
         <div style="font-weight:700; font-size:16px; color:#fff;">nfyp_</div>
-        <div style="font-size:12px; color:#38bdf8; font-weight:500; margin-top:2px;">Administrator</div>
+        <div style="font-size:12px; color:#64748b; font-weight:500; margin-top:2px;">Admin</div>
       </div>
     </div>
 
@@ -103,7 +103,7 @@ function layout(title, content, currentPath) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${title}</title>
-    <!-- FontAwesome 6 Icons x100 -->
+    <!-- FontAwesome 6 Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
       body {
@@ -116,11 +116,11 @@ function layout(title, content, currentPath) {
       }
       .top-banner {
         text-align: center;
-        padding: 8px;
-        background: rgba(15, 23, 42, 0.9);
+        padding: 10px;
+        background: #090e1c;
         color: #fcd34d;
-        font-size: 13px;
-        font-weight: 500;
+        font-size: 14px;
+        font-weight: 600;
         border-bottom: 1px solid rgba(255,255,255,0.05);
       }
       .navbar {
@@ -153,12 +153,12 @@ function layout(title, content, currentPath) {
         width: 32px;
         height: 32px;
         border-radius: 50%;
-        background-color: #2563eb;
+        background-color: #5865F2;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-weight: bold;
-        font-size: 14px;
+        font-size: 16px;
+        color: white;
       }
       .container {
         padding: 20px;
@@ -186,7 +186,7 @@ function layout(title, content, currentPath) {
         text-align: center;
       }
       .btn {
-        background-color: #2563eb;
+        background-color: #5865F2;
         color: white;
         border: none;
         padding: 10px 18px;
@@ -194,18 +194,81 @@ function layout(title, content, currentPath) {
         font-weight: 600;
         cursor: pointer;
         text-decoration: none;
-        display: inline-block;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
       }
-      .input-field {
-        width: 100%;
-        padding: 10px 14px;
-        background-color: #060913;
-        border: 1px solid rgba(255,255,255,0.1);
-        border-radius: 8px;
+      .btn-edit {
+        background-color: #2563eb;
         color: white;
-        margin-top: 6px;
-        margin-bottom: 16px;
-        box-sizing: border-box;
+        border: none;
+        padding: 7px 14px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .btn-remove {
+        background-color: #ef4444;
+        color: white;
+        border: none;
+        padding: 7px 14px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .code-badge {
+        background: rgba(56, 189, 248, 0.15);
+        color: #38bdf8;
+        padding: 2px 8px;
+        border-radius: 6px;
+        font-family: monospace;
+        font-size: 13px;
+      }
+      /* Custom Toggle Switch */
+      .switch {
+        position: relative;
+        display: inline-block;
+        width: 44px;
+        height: 24px;
+      }
+      .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background-color: #334155;
+        transition: .3s;
+        border-radius: 24px;
+      }
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: .3s;
+        border-radius: 50%;
+      }
+      input:checked + .slider {
+        background-color: #3b82f6;
+      }
+      input:checked + .slider:before {
+        transform: translateX(20px);
       }
     </style>
   </head>
@@ -215,7 +278,7 @@ function layout(title, content, currentPath) {
     <div class="navbar">
       <button class="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
       <div class="user-profile">
-        <div class="user-avatar-mini">N</div>
+        <div class="user-avatar-mini"><i class="fa-brands fa-discord"></i></div>
         <span style="font-size:14px;"><b>nfyp_</b> <span style="color:#64748b; font-size:12px;">Admin</span></span>
       </div>
     </div>
@@ -259,129 +322,142 @@ app.get('/', (req, res) => {
         <div style="font-size: 18px; font-weight: bold;"><i class="fa-solid fa-stopwatch" style="color:#c084fc; margin-right:6px;"></i> 0d 0h 1m 21s</div>
       </div>
     </div>
-
-    <div class="card">
-      <h3 style="margin-top: 0; color: #38bdf8; font-size: 16px;">
-        <i class="fa-solid fa-bullhorn" style="margin-right: 8px;"></i> Dashboard Notice
-      </h3>
-      <p style="color: #94a3b8; font-size: 14px; line-height: 1.5;">
-        Welcome to Discord BOT Dashboard V2, this is an early version of the final product! Please report any issues you find!
-      </p>
-      <div style="font-weight: bold; font-size: 13px;">Version: 3.5</div>
-    </div>
-
-    <div class="card">
-      <h3 style="margin-top: 0; color: #38bdf8; font-size: 16px;">
-        <i class="fa-solid fa-circle-info" style="margin-right: 8px;"></i> OS | System - Details
-      </h3>
-      <p style="margin: 8px 0; font-size: 14px;">• <b>Username:</b> OS | System#3523</p>
-      <p style="margin: 8px 0; font-size: 14px;">• <b>Client ID:</b> 154057416353677415</p>
-      <p style="margin: 8px 0; font-size: 14px;">• <b>Joined:</b> Saturday, August 22nd, 2026</p>
-    </div>
   `;
   res.send(layout('Dashboard', content, '/'));
 });
 
-// 2. Guilds Route (Matching the exact second image details)
+// 2. Plugins Route (Matching image 2)
+app.get('/plugins', (req, res) => {
+  const pluginsData = [
+    {
+      name: 'Ban',
+      icon: 'fa-solid fa-hammer',
+      iconBg: '#ef444420',
+      iconColor: '#ef4444',
+      developer: 'Mohammed Alhajri',
+      description: 'Bans a user from the server.',
+      usage: '-ban {@user}',
+      aliases: 'خلخو',
+      enabled: true
+    },
+    {
+      name: 'clear',
+      icon: 'fa-solid fa-trash-can',
+      iconBg: '#0284c720',
+      iconColor: '#38bdf8',
+      developer: 'Mohammed Alhajri',
+      description: 'Clears messages from a channel.',
+      usage: '-clear {amount}',
+      aliases: 'None',
+      enabled: true
+    },
+    {
+      name: 'coin',
+      icon: 'fa-solid fa-coins',
+      iconBg: '#eab30820',
+      iconColor: '#eab308',
+      developer: 'Mohammed Alhajri',
+      description: 'Simple coin flip command',
+      usage: '-coin',
+      aliases: 'None',
+      enabled: true
+    },
+    {
+      name: 'kick',
+      icon: 'fa-solid fa-user-minus',
+      iconBg: '#f9731620',
+      iconColor: '#f97316',
+      developer: 'Mohammed Alhajri',
+      description: 'Kicks a user from the server.',
+      usage: '-kick {@user}',
+      aliases: 'None',
+      enabled: true
+    }
+  ];
+
+  const pluginsHtml = pluginsData.map(p => `
+    <div class="card" style="position:relative;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div style="width:40px; height:40px; border-radius:10px; background:${p.iconBg}; color:${p.iconColor}; display:flex; align-items:center; justify-content:center; font-size:18px;">
+            <i class="${p.icon}"></i>
+          </div>
+          <h3 style="margin:0; font-size:18px; color:#fff;">${p.name}</h3>
+        </div>
+        <label class="switch">
+          <input type="checkbox" ${p.enabled ? 'checked' : ''}>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div style="color:#94a3b8; font-size:13px; line-height:1.8;">
+        <div><strong>Developer:</strong> <span style="color:#cbd5e1;">${p.developer}</span></div>
+        <div><strong>Description:</strong> <span style="color:#cbd5e1;">${p.description}</span></div>
+        <div><strong>Usage:</strong> <span class="code-badge">${p.usage}</span></div>
+        <div><strong>Aliases:</strong> <span style="color:#38bdf8;">${p.aliases}</span></div>
+      </div>
+
+      <div style="display:flex; gap:8px; margin-top:16px;">
+        <button class="btn-edit"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+        <button class="btn-remove"><i class="fa-solid fa-trash"></i> Remove</button>
+      </div>
+    </div>
+  `).join('');
+
+  const content = `
+    <h2 style="margin-bottom: 20px;">Plugins</h2>
+    ${pluginsHtml}
+  `;
+  res.send(layout('Plugins - OS | System', content, '/plugins'));
+});
+
+// 3. Support Route (Matching image 1)
+app.get('/support', (req, res) => {
+  const content = `
+    <h2 style="margin-bottom: 4px;">Support</h2>
+    <p style="color: #94a3b8; margin-top: 0; margin-bottom: 20px;">Contact us using any of the following methods!</p>
+
+    <div class="card">
+      <h3 style="margin-top:0; font-size:16px; color:#fff; display:flex; align-items:center; gap:8px; margin-bottom:16px;">
+        <i class="fa-solid fa-envelope" style="color:#38bdf8;"></i> Contact Details
+      </h3>
+
+      <div style="color:#cbd5e1; font-size:14px; line-height:2.0; margin-bottom:20px;">
+        <div><strong>Email:</strong> <span style="color:#94a3b8;">mail@MohammedAlhajri-dev.com</span></div>
+        <div><strong>Twitter:</strong> <span style="color:#94a3b8;">@i661y</span></div>
+        <div><strong>Instagram:</strong> <span style="color:#94a3b8;">@i661y</span></div>
+        <div><strong>Discord Developer:</strong> <span style="color:#94a3b8;">Mohammed Alhajri</span></div>
+      </div>
+
+      <a href="https://discord.gg" target="_blank" class="btn" style="background:#5865F2;">
+        <i class="fa-brands fa-discord"></i> Join Discord Server
+      </a>
+    </div>
+  `;
+  res.send(layout('Support - OS | System', content, '/support'));
+});
+
+// 4. Guilds Route
 app.get('/guilds', (req, res) => {
   const content = `
     <h2 style="margin-bottom: 20px;">Guilds - OS | System</h2>
-    
     <div class="card">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-        <div>
-          <h3 style="margin:0; font-size:20px; color:#fff;">OSCORP RP</h3>
-          <div style="color:#64748b; font-size:13px; margin-top:2px;">ID: 1540577416353677415</div>
-        </div>
-        <span style="background:rgba(5, 150, 105, 0.2); color:#34d399; padding:4px 10px; border-radius:6px; font-size:12px; font-weight:600;">Connected</span>
-      </div>
-
-      <div class="grid-2">
-        <div class="stat-box">
-          <div style="font-size:13px; color:#94a3b8; margin-bottom:6px;">Total Roles</div>
-          <div style="font-size:18px; font-weight:bold;"><i class="fa-solid fa-shield-halved" style="color:#64748b; margin-right:6px;"></i> 8</div>
-        </div>
-        <div class="stat-box">
-          <div style="font-size:13px; color:#94a3b8; margin-bottom:6px;">Voice Channels</div>
-          <div style="font-size:18px; font-weight:bold;"><i class="fa-solid fa-bullhorn" style="color:#64748b; margin-right:6px;"></i> 4</div>
-        </div>
-      </div>
-
-      <!-- Created Duration Card -->
-      <div style="background:#091024; border:1px solid rgba(255,255,255,0.05); border-radius:12px; padding:16px; margin-top:10px;">
-        <div style="color:#fcd34d; font-size:12px; font-weight:700; letter-spacing:1px; margin-bottom:12px; text-transform:uppercase;">Created Duration</div>
-        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; text-align:center;">
-          <div style="background:#0d1730; padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.05);">
-            <div style="font-size:18px; font-weight:bold;">15</div>
-            <div style="font-size:10px; color:#64748b; margin-top:2px;">DAYS</div>
-          </div>
-          <div style="background:#0d1730; padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.05);">
-            <div style="font-size:18px; font-weight:bold;">2</div>
-            <div style="font-size:10px; color:#64748b; margin-top:2px;">HOURS</div>
-          </div>
-          <div style="background:#0d1730; padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.05);">
-            <div style="font-size:18px; font-weight:bold;">1</div>
-            <div style="font-size:10px; color:#64748b; margin-top:2px;">SECS</div>
-          </div>
-        </div>
-      </div>
+      <h3 style="margin:0; font-size:20px; color:#fff;">OSCORP RP</h3>
+      <div style="color:#64748b; font-size:13px; margin-top:2px;">ID: 1540577416353677415</div>
     </div>
   `;
-  res.send(layout('Guilds - Dashboard', content, '/guilds'));
-});
-
-// 3. Plugins Route
-app.get('/plugins', (req, res) => {
-  const content = `
-    <h2>Plugins Matrix</h2>
-    <div class="card">
-      <h3 style="margin-top:0;">🧩 Enabled Commands</h3>
-      <div style="display:flex; flex-direction:column; gap:10px; margin-top:15px;">
-        <div style="background:#060913; padding:12px; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
-          <div><i class="fa-solid fa-gavel" style="margin-right:8px; color:#38bdf8;"></i> <strong>Ban</strong></div>
-          <span style="color:#34d399; font-size:12px;"><i class="fa-solid fa-circle-check"></i> Active</span>
-        </div>
-        <div style="background:#060913; padding:12px; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
-          <div><i class="fa-solid fa-trash" style="margin-right:8px; color:#38bdf8;"></i> <strong>Clear</strong></div>
-          <span style="color:#34d399; font-size:12px;"><i class="fa-solid fa-circle-check"></i> Active</span>
-        </div>
-        <div style="background:#060913; padding:12px; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
-          <div><i class="fa-solid fa-coins" style="margin-right:8px; color:#38bdf8;"></i> <strong>Coin</strong></div>
-          <span style="color:#34d399; font-size:12px;"><i class="fa-solid fa-circle-check"></i> Active</span>
-        </div>
-      </div>
-    </div>
-  `;
-  res.send(layout('Plugins - Dashboard', content, '/plugins'));
-});
-
-// 4. Support Route
-app.get('/support', (req, res) => {
-  const content = `
-    <h2>Support Hub</h2>
-    <div class="card">
-      <h3><i class="fa-solid fa-headset"></i> Need Assistance?</h3>
-      <p style="color:#94a3b8; line-height:1.6;">Reach out for custom configurations or system updates.</p>
-      <a href="https://discord.gg" target="_blank" class="btn"><i class="fa-brands fa-discord" style="margin-right:6px;"></i> Join Discord Server</a>
-    </div>
-  `;
-  res.send(layout('Support - Dashboard', content, '/support'));
+  res.send(layout('Guilds - OS | System', content, '/guilds'));
 });
 
 // 5. Settings Route
 app.get('/settings', (req, res) => {
   const content = `
-    <h2>Bot Settings</h2>
+    <h2>Settings</h2>
     <div class="card">
-      <h3><i class="fa-solid fa-sliders"></i> Configuration</h3>
-      <form>
-        <label style="font-size:14px; color:#94a3b8;">Bot Prefix</label>
-        <input type="text" class="input-field" value="-">
-        <button type="button" class="btn">Save Changes</button>
-      </form>
+      <h3>System Configurations</h3>
     </div>
   `;
-  res.send(layout('Settings - Dashboard', content, '/settings'));
+  res.send(layout('Settings - OS | System', content, '/settings'));
 });
 
 app.listen(PORT, () => {
