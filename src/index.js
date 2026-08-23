@@ -6,8 +6,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const startTime = Date.now();
-// تاريخ افتراضي لإنشاء السيرفر (سنة و3 أشهر)
 const guildCreatedAt = new Date('2025-05-15T00:00:00Z').getTime();
+
+// رابط صورة البروفايل وصورة السيرفر (يمكن تعديل الرابط بوضع رابط مستضيفك)
+const userAvatarUrl = "https://cdn.discordapp.com/embed/avatars/0.png";
+const guildIconUrl = "https://cdn.discordapp.com/icons/119830128491028391/a_guild_icon.png";
 
 let botConfig = {
     clientId: '154057416353677415',
@@ -16,11 +19,11 @@ let botConfig = {
 };
 
 let pluginsList = [
-    { id: 'ban', name: 'Ban', dev: 'Mohammed Alhajri', desc: 'Bans a user from the server.', usage: '-ban {@user}', aliases: 'خلخو', enabled: true },
-    { id: 'clear', name: 'clear', dev: 'Mohammed Alhajri', desc: 'Clears messages from a channel.', usage: '-clear {amount}', aliases: 'None', enabled: true },
-    { id: 'coin', name: 'coin', dev: 'Mohammed Alhajri', desc: 'Simple coin flip command', usage: '-coin', aliases: 'None', enabled: true },
-    { id: 'kick', name: 'kick', dev: 'Mohammed Alhajri', desc: 'Kicks a user from the server.', usage: '-kick {@user}', aliases: 'None', enabled: true },
-    { id: 'ping', name: 'ping', dev: 'Mohammed Alhajri', desc: 'Ping / Pong!', usage: '-ping', aliases: 'None', enabled: true }
+    { id: 'ban', name: 'Ban', dev: 'Mohammed Alhajri', desc: 'Bans a user from the server.', usage: '-ban {@user}', aliases: 'خلخو', icon: 'fa-hammer', color: '#ef4444', enabled: true },
+    { id: 'clear', name: 'clear', dev: 'Mohammed Alhajri', desc: 'Clears messages from a channel.', usage: '-clear {amount}', aliases: 'None', icon: 'fa-broom', color: '#3b82f6', enabled: true },
+    { id: 'coin', name: 'coin', dev: 'Mohammed Alhajri', desc: 'Simple coin flip command', usage: '-coin', aliases: 'None', icon: 'fa-coins', color: '#eab308', enabled: true },
+    { id: 'kick', name: 'kick', dev: 'Mohammed Alhajri', desc: 'Kicks a user from the server.', usage: '-kick {@user}', aliases: 'None', icon: 'fa-user-slash', color: '#f97316', enabled: true },
+    { id: 'ping', name: 'ping', dev: 'Mohammed Alhajri', desc: 'Ping / Pong!', usage: '-ping', aliases: 'None', icon: 'fa-wifi', color: '#10b981', enabled: true }
 ];
 
 function getUptime() {
@@ -52,22 +55,20 @@ function renderLayout(title, content) {
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>${title} - OS | System</title>
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
         <style>
             * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
             body { background-color: #0b0f19; color: #94a3b8; display: flex; flex-direction: column; min-height: 100vh; }
             
-            /* Banner Zikr */
             .dhikr-banner { background: linear-gradient(90deg, #0f172a, #1e1b4b, #0f172a); color: #facc15; text-align: center; padding: 12px; font-weight: bold; font-size: 16px; border-bottom: 1px solid #312e81; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
             
             .navbar { background: #111827; padding: 15px 20px; border-bottom: 1px solid #1f2937; display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 100; }
             .sidebar-toggle { color: #fff; font-size: 20px; cursor: pointer; padding: 8px 12px; background: #1f2937; border-radius: 6px; }
             .user-profile { display: flex; align-items: center; gap: 10px; color: #fff; }
-            .user-avatar { width: 35px; height: 35px; border-radius: 50%; background: #2563eb; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+            .user-img { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 2px solid #3b82f6; }
             
             .layout { display: flex; flex: 1; position: relative; }
             
-            /* Overlay Sidebar Style */
             .sidebar { 
                 position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background: #111827; border-right: 1px solid #1f2937; 
                 padding: 20px 0; z-index: 999; transition: all 0.3s ease; box-shadow: 5px 0 25px rgba(0,0,0,0.5);
@@ -87,7 +88,6 @@ function renderLayout(title, content) {
             .stat-value { font-size: 20px; font-weight: bold; color: #38bdf8; margin-top: 5px; }
             
             .btn { background: #2563eb; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; text-decoration: none; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; }
-            .btn-danger { background: #dc2626; }
             .btn-success { background: #16a34a; }
             .form-control { width: 100%; padding: 10px; background: #1f2937; border: 1px solid #374151; border-radius: 6px; color: #fff; outline: none; margin-top: 5px; }
 
@@ -109,7 +109,7 @@ function renderLayout(title, content) {
         <div class="navbar">
             <div class="sidebar-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></div>
             <div class="user-profile">
-                <div class="user-avatar">N</div>
+                <img src="${userAvatarUrl}" class="user-img" onerror="this.src='https://ui-avatars.com/api/?name=nfyp_&background=2563eb&color=fff'">
                 <span>nfyp_ <small style="color:#6b7280">Admin</small></span>
             </div>
         </div>
@@ -118,7 +118,7 @@ function renderLayout(title, content) {
             <div class="overlay-backdrop" id="backdrop" onclick="toggleSidebar()"></div>
             <div class="sidebar" id="sidebar">
                 <div class="sidebar-header">
-                    <div class="user-avatar" style="width:45px; height:45px; font-size:18px;">N</div>
+                    <img src="${userAvatarUrl}" class="user-img" style="width:45px; height:45px;" onerror="this.src='https://ui-avatars.com/api/?name=nfyp_&background=2563eb&color=fff'">
                     <div>
                         <h4 style="color:#fff;">nfyp_</h4>
                         <span style="font-size:12px; color:#38bdf8;">Administrator</span>
@@ -185,7 +185,9 @@ app.get('/plugins', (req, res) => {
     let pluginsHTML = pluginsList.map(p => `
         <div class="card">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h3>🛠️ ${p.name}</h3>
+                <h3 style="color:#fff; display:flex; align-items:center; gap:10px;">
+                    <i class="fas ${p.icon}" style="color:${p.color}; font-size:20px;"></i> ${p.name}
+                </h3>
                 <label class="switch">
                     <input type="checkbox" ${p.enabled ? 'checked' : ''} onchange="fetch('/api/plugins/toggle/${p.id}', {method:'POST'})">
                     <span class="slider"></span>
@@ -226,7 +228,7 @@ app.get('/guilds', (req, res) => {
         
         <div class="card">
             <div style="display:flex; align-items:center; gap:15px; margin-bottom:20px; padding-bottom:15px; border-bottom:1px solid #1f2937;">
-                <div style="width:65px; height:65px; border-radius:50%; background:#2563eb; display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:bold; color:#fff; border:2px solid #38bdf8;">O</div>
+                <img src="${guildIconUrl}" style="width:65px; height:65px; border-radius:50%; border:2px solid #38bdf8; object-fit:cover;" onerror="this.src='https://ui-avatars.com/api/?name=Oscorp&background=2563eb&color=fff'">
                 <div>
                     <h2 style="color:#fff;">Oscorp (OSCORP RP)</h2>
                     <p style="font-size:13px; color:#94a3b8;"><b>Guild ID:</b> 119830128491028391</p>
@@ -241,9 +243,13 @@ app.get('/guilds', (req, res) => {
                 <div class="stat-box"><div>Voice Channels</div><div class="stat-value">🔊 4</div></div>
             </div>
 
-            <div style="background:#1f2937; padding:15px; border-radius:8px; margin-top:15px;">
-                <h4 style="color:#38bdf8; margin-bottom:5px;"><i class="fas fa-clock"></i> Server Created Duration:</h4>
-                <p style="color:#fff; font-size:15px; font-weight:bold;">${getGuildAge()}</p>
+            <div style="background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%); padding: 20px; border-radius: 12px; border: 1px solid #312e81; box-shadow: 0 4px 15px rgba(0,0,0,0.3); text-align: center; margin-top:15px;">
+                <h4 style="color: #facc15; font-size: 15px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">
+                    <i class="fas fa-history" style="margin-right: 6px;"></i> Server Created Duration
+                </h4>
+                <p style="color: #38bdf8; font-size: 18px; font-weight: bold; font-family: monospace; letter-spacing: 0.5px;">
+                    ${getGuildAge()}
+                </p>
             </div>
         </div>
     `;
