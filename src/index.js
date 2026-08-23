@@ -9,6 +9,17 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use('/', require('./routes/home'));
 
+// ربط مسارات المصادقة وتسجيل الدخول
+try {
+    app.use('/', require('./auth/auth'));
+} catch (e) {
+    try {
+        app.use('/', require('./routes/auth'));
+    } catch (err) {
+        console.log('Auth route file not found yet');
+    }
+}
+
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on port ${PORT}`);
 });
