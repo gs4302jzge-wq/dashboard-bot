@@ -30,7 +30,7 @@ if (BOT_TOKEN) {
   console.log('⚠️ DISCORD_TOKEN لم يتم العثور عليه في بيئة العمل');
 }
 
-// Navigation Bar Script
+// Sidebar JavaScript toggle
 const sidebarScript = `
 <script>
 function toggleSidebar() {
@@ -49,24 +49,53 @@ function toggleSidebar() {
 </script>
 `;
 
-const sidebarHtml = `
-<div id="overlay" onclick="toggleSidebar()" style="display:none; opacity:0; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index:998; transition: opacity 0.3s ease;"></div>
-<div id="sidebar" style="position:fixed; top:0; left:0; width:280px; height:100%; background:linear-gradient(180deg, #090d16 0%, #0f172a 100%); border-right:1px solid rgba(56, 189, 248, 0.1); z-index:999; transform:translateX(-100%); transition:transform 0.35s cubic-bezier(0.4, 0, 0.2, 1); padding:25px; box-sizing:border-box; color:#f8fafc; box-shadow: 10px 0 30px rgba(0,0,0,0.5);">
-  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:35px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px;">
-    <h3 style="margin:0; font-size:20px; color:#38bdf8; display:flex; align-items:center; gap:10px;">⚡ OS Control</h3>
-    <button onclick="toggleSidebar()" style="background:rgba(255,255,255,0.05); border:none; color:#94a3b8; width:32px; height:32px; border-radius:50%; font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:0.2s;">✕</button>
-  </div>
-  <nav style="display:flex; flex-direction:column; gap:10px;">
-    <a href="/" style="color:#e2e8f0; text-decoration:none; padding:12px 16px; border-radius:10px; font-weight:500; display:flex; align-items:center; gap:12px; background:linear-gradient(90deg, rgba(56,189,248,0.15), transparent); border-left: 3px solid #38bdf8; transition:0.2s;">📊 Dashboard</a>
-    <a href="/guilds" style="color:#94a3b8; text-decoration:none; padding:12px 16px; border-radius:10px; font-weight:500; display:flex; align-items:center; gap:12px; transition:0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.03)';this.style.color='#fff'" onmouseout="this.style.background='none';this.style.color='#94a3b8'">🖥️ Servers (Guilds)</a>
-    <a href="/plugins" style="color:#94a3b8; text-decoration:none; padding:12px 16px; border-radius:10px; font-weight:500; display:flex; align-items:center; gap:12px; transition:0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.03)';this.style.color='#fff'" onmouseout="this.style.background='none';this.style.color='#94a3b8'">🧩 Plugins Matrix</a>
-    <a href="/settings" style="color:#94a3b8; text-decoration:none; padding:12px 16px; border-radius:10px; font-weight:500; display:flex; align-items:center; gap:12px; transition:0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.03)';this.style.color='#fff'" onmouseout="this.style.background='none';this.style.color='#94a3b8'">⚙️ Bot Configuration</a>
-    <a href="/support" style="color:#94a3b8; text-decoration:none; padding:12px 16px; border-radius:10px; font-weight:500; display:flex; align-items:center; gap:12px; transition:0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.03)';this.style.color='#fff'" onmouseout="this.style.background='none';this.style.color='#94a3b8'">🎧 Support Hub</a>
-  </nav>
-</div>
-`;
+// Sidebar Component
+function getSidebarHtml(activePath) {
+  const navItems = [
+    { path: '/', label: 'Dashboard', icon: 'fa-solid fa-house' },
+    { path: '/plugins', label: 'Plugins', icon: 'fa-solid fa-rocket' },
+    { path: '/guilds', label: 'Guilds', icon: 'fa-solid fa-server' },
+    { path: '/support', label: 'Support', icon: 'fa-solid fa-circle-question' },
+    { path: '/settings', label: 'Settings', icon: 'fa-solid fa-gear' }
+  ];
 
-function layout(title, content) {
+  const navLinks = navItems.map(item => {
+    const isActive = activePath === item.path;
+    const activeStyle = isActive 
+      ? 'background: rgba(56, 189, 248, 0.12); color: #38bdf8; font-weight: 600;' 
+      : 'color: #94a3b8;';
+    return `
+      <a href="${item.path}" style="text-decoration:none; padding:12px 16px; border-radius:10px; display:flex; align-items:center; gap:14px; font-size:15px; transition:0.2s; ${activeStyle}">
+        <i class="${item.icon}" style="font-size:18px; width:22px; text-align:center;"></i>
+        <span>${item.label}</span>
+      </a>
+    `;
+  }).join('');
+
+  return `
+  <div id="overlay" onclick="toggleSidebar()" style="display:none; opacity:0; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index:998; transition: opacity 0.3s ease;"></div>
+  <div id="sidebar" style="position:fixed; top:0; left:0; width:270px; height:100%; background:#0b1329; border-right:1px solid rgba(255, 255, 255, 0.05); z-index:999; transform:translateX(-100%); transition:transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); padding:24px 18px; box-sizing:border-box; color:#f8fafc; box-shadow: 10px 0 30px rgba(0,0,0,0.5);">
+    
+    <!-- Profile Header in Sidebar -->
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:30px; padding-bottom:20px; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+      <div style="width:44px; height:44px; border-radius:50%; background:#2563eb; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:20px; color:#fff; box-shadow:0 0 12px rgba(37,99,235,0.4);">
+        N
+      </div>
+      <div>
+        <div style="font-weight:700; font-size:16px; color:#fff;">nfyp_</div>
+        <div style="font-size:12px; color:#38bdf8; font-weight:500; margin-top:2px;">Administrator</div>
+      </div>
+    </div>
+
+    <!-- Navigation List -->
+    <nav style="display:flex; flex-direction:column; gap:6px;">
+      ${navLinks}
+    </nav>
+  </div>
+  `;
+}
+
+function layout(title, content, currentPath) {
   return `
   <!DOCTYPE html>
   <html lang="en">
@@ -74,176 +103,120 @@ function layout(title, content) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${title}</title>
+    <!-- FontAwesome 6 Icons x100 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
       body {
         margin: 0;
         padding: 0;
-        background-color: #070a13;
+        background-color: #060913;
         color: #f8fafc;
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        background-image: radial-gradient(circle at 50% 0%, #111827 0%, #070a13 70%);
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         min-height: 100vh;
       }
       .top-banner {
         text-align: center;
-        padding: 10px;
-        background: linear-gradient(90deg, rgba(15,23,42,0.8), rgba(30,27,75,0.8), rgba(15,23,42,0.8));
+        padding: 8px;
+        background: rgba(15, 23, 42, 0.9);
         color: #fcd34d;
         font-size: 13px;
-        font-weight: 600;
-        letter-spacing: 0.5px;
+        font-weight: 500;
         border-bottom: 1px solid rgba(255,255,255,0.05);
-        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
       }
       .navbar {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 16px 24px;
-        background-color: rgba(11, 15, 25, 0.75);
-        backdrop-filter: blur(12px);
+        padding: 14px 20px;
+        background-color: #0b1329;
         border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        position: sticky;
-        top: 0;
-        z-index: 100;
       }
       .menu-btn {
         background: rgba(255,255,255,0.05);
-        border: 1px solid rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.08);
         color: #f8fafc;
-        width: 40px;
-        height: 40px;
-        border-radius: 10px;
-        font-size: 20px;
+        width: 38px;
+        height: 38px;
+        border-radius: 8px;
+        font-size: 18px;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: 0.2s;
-      }
-      .menu-btn:hover {
-        background: rgba(56, 189, 248, 0.15);
-        border-color: rgba(56, 189, 248, 0.3);
       }
       .user-profile {
         display: flex;
         align-items: center;
-        gap: 12px;
-        background: rgba(255,255,255,0.03);
-        padding: 6px 14px 6px 6px;
-        border-radius: 30px;
-        border: 1px solid rgba(255,255,255,0.06);
+        gap: 10px;
       }
-      .user-avatar {
-        width: 36px;
-        height: 36px;
+      .user-avatar-mini {
+        width: 32px;
+        height: 32px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #3b82f6, #6366f1);
+        background-color: #2563eb;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 16px;
-        box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
-      }
-      .admin-tag {
-        background: rgba(56, 189, 248, 0.15);
-        color: #38bdf8;
-        padding: 2px 8px;
-        border-radius: 6px;
-        font-size: 11px;
-        font-weight: 600;
-        letter-spacing: 0.5px;
+        font-weight: bold;
+        font-size: 14px;
       }
       .container {
-        max-width: 900px;
+        padding: 20px;
+        max-width: 850px;
         margin: 0 auto;
-        padding: 25px 20px;
       }
       .card {
-        background: rgba(17, 24, 39, 0.65);
-        backdrop-filter: blur(16px);
-        border: 1px solid rgba(255, 255, 255, 0.07);
-        border-radius: 16px;
-        padding: 22px;
-        margin-bottom: 20px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        transition: transform 0.2s ease, border-color 0.2s ease;
-      }
-      .card:hover {
-        border-color: rgba(56, 189, 248, 0.2);
+        background-color: #0d1730;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 16px;
       }
       .grid-2 {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 16px;
-        margin-bottom: 20px;
+        gap: 12px;
+        margin-bottom: 16px;
       }
       .stat-box {
-        background: rgba(17, 24, 39, 0.65);
-        backdrop-filter: blur(16px);
-        border: 1px solid rgba(255, 255, 255, 0.07);
-        border-radius: 16px;
-        padding: 20px;
+        background-color: #0d1730;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 12px;
+        padding: 18px;
         text-align: center;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        position: relative;
-        overflow: hidden;
-      }
-      .stat-box::after {
-        content: '';
-        position: absolute;
-        top: 0; left: 0; width: 100%; height: 2px;
-        background: linear-gradient(90deg, transparent, #38bdf8, transparent);
-        opacity: 0.5;
       }
       .btn {
-        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        background-color: #2563eb;
         color: white;
         border: none;
-        padding: 12px 22px;
-        border-radius: 10px;
+        padding: 10px 18px;
+        border-radius: 8px;
         font-weight: 600;
         cursor: pointer;
         text-decoration: none;
         display: inline-block;
-        box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
-        transition: 0.2s;
-      }
-      .btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6);
       }
       .input-field {
         width: 100%;
-        padding: 12px 16px;
-        background: rgba(11, 15, 25, 0.8);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 10px;
+        padding: 10px 14px;
+        background-color: #060913;
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 8px;
         color: white;
-        margin-top: 8px;
-        margin-bottom: 20px;
+        margin-top: 6px;
+        margin-bottom: 16px;
         box-sizing: border-box;
-        font-size: 14px;
-        outline: none;
-        transition: 0.2s;
-      }
-      .input-field:focus {
-        border-color: #38bdf8;
-        box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
       }
     </style>
   </head>
   <body>
     <div class="top-banner">✨ سبحان الله وبحمده ، سبحان الله العظيم ✨</div>
-    ${sidebarHtml}
+    ${getSidebarHtml(currentPath)}
     <div class="navbar">
-      <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+      <button class="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
       <div class="user-profile">
-        <div class="user-avatar">👾</div>
-        <div style="display:flex; flex-direction:column; gap:2px;">
-          <span style="font-size:13px; font-weight:bold; line-height:1;">nfyp_</span>
-          <span class="admin-tag">Admin</span>
-        </div>
+        <div class="user-avatar-mini">N</div>
+        <span style="font-size:14px;"><b>nfyp_</b> <span style="color:#64748b; font-size:12px;">Admin</span></span>
       </div>
     </div>
     <div class="container">
@@ -255,162 +228,160 @@ function layout(title, content) {
   `;
 }
 
-// 1. Root / Dashboard Page (x1000 Upgraded)
+// 1. Dashboard Route
 app.get('/', (req, res) => {
   const guildCount = client.guilds?.cache?.size || 1;
   const userCount = client.users?.cache?.size || 9;
   const ping = client.ws?.ping || 94;
 
   const content = `
-    <div style="margin-bottom: 25px;">
-      <h2 style="margin: 0 0 6px 0; font-size: 26px; font-weight: 800; background: linear-gradient(90deg, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Welcome back, nfyp_ 👋</h2>
-      <p style="color: #94a3b8; margin: 0; font-size: 15px;">Here is the real-time telemetry and overview for <b>OS | System</b>.</p>
-    </div>
+    <h2 style="margin-bottom: 4px;">Welcome, nfyp_</h2>
+    <p style="color: #94a3b8; margin-top: 0; margin-bottom: 20px;">Here's what's happening with <b>OS | System</b> today.</p>
 
     <div class="grid-2">
       <div class="stat-box">
-        <div style="font-size: 13px; color: #94a3b8; margin-bottom: 8px; font-weight: 500;">Server Count</div>
-        <div style="font-size: 22px; font-weight: 800; color: #38bdf8;">📊 ${guildCount}</div>
+        <div style="font-size: 13px; color: #94a3b8; margin-bottom: 8px;">Server Count</div>
+        <div style="font-size: 20px; font-weight: bold;"><i class="fa-solid fa-chart-simple" style="color:#38bdf8; margin-right:6px;"></i> ${guildCount}</div>
       </div>
       <div class="stat-box">
-        <div style="font-size: 13px; color: #94a3b8; margin-bottom: 8px; font-weight: 500;">User Count</div>
-        <div style="font-size: 22px; font-weight: 800; color: #34d399;">👥 ${userCount}</div>
+        <div style="font-size: 13px; color: #94a3b8; margin-bottom: 8px;">User Count</div>
+        <div style="font-size: 20px; font-weight: bold;"><i class="fa-solid fa-users" style="color:#38bdf8; margin-right:6px;"></i> ${userCount}</div>
       </div>
     </div>
 
-    <div class="grid-2" style="margin-bottom: 25px;">
+    <div class="grid-2" style="margin-bottom: 20px;">
       <div class="stat-box">
-        <div style="font-size: 13px; color: #94a3b8; margin-bottom: 8px; font-weight: 500;">API Latency</div>
-        <div style="font-size: 22px; font-weight: 800; color: #fcd34d;">⚡ ${ping}ms</div>
+        <div style="font-size: 13px; color: #94a3b8; margin-bottom: 8px;">API Latency</div>
+        <div style="font-size: 20px; font-weight: bold;"><i class="fa-solid fa-bolt" style="color:#fcd34d; margin-right:6px;"></i> ${ping}ms</div>
       </div>
       <div class="stat-box">
-        <div style="font-size: 13px; color: #94a3b8; margin-bottom: 8px; font-weight: 500;">System Uptime</div>
-        <div style="font-size: 18px; font-weight: 800; color: #c084fc;">⏱️ 0d 0h 2m 14s</div>
+        <div style="font-size: 13px; color: #94a3b8; margin-bottom: 8px;">System Uptime</div>
+        <div style="font-size: 18px; font-weight: bold;"><i class="fa-solid fa-stopwatch" style="color:#c084fc; margin-right:6px;"></i> 0d 0h 1m 21s</div>
       </div>
     </div>
 
-    <div class="card" style="border-left: 4px solid #38bdf8;">
-      <h3 style="margin: 0 0 10px 0; color: #38bdf8; font-size: 17px; display: flex; align-items: center; gap: 8px;">
-        📣 Dashboard Notice
-      </h3>
-      <p style="color: #cbd5e1; font-size: 14px; line-height: 1.6; margin: 0 0 15px 0;">
-        Welcome to Discord BOT Dashboard V2 (x1000 Pro Edition). High-performance matrix operating smoothly. Report any anomalies instantly!
-      </p>
-      <div style="display:inline-block; background:rgba(56,189,248,0.1); color:#38bdf8; padding:4px 10px; border-radius:6px; font-weight: bold; font-size: 12px;">Version: 3.5 Pro</div>
-    </div>
-
-    <div class="card" style="border-left: 4px solid #6366f1;">
-      <h3 style="margin: 0 0 12px 0; color: #818cf8; font-size: 17px; display: flex; align-items: center; gap: 8px;">
-        ℹ️ OS | System - Secure Core Details
-      </h3>
-      <p style="margin: 6px 0; font-size: 14px; color:#cbd5e1;">• <b>Username:</b> OS | System#3523</p>
-      <p style="margin: 6px 0; font-size: 14px; color:#cbd5e1;">• <b>Client ID:</b> 154057416353677415</p>
-      <p style="margin: 6px 0; font-size: 14px; color:#cbd5e1;">• <b>Joined:</b> Saturday, August 22nd, 2026</p>
-    </div>
-  `;
-  res.send(layout('Dashboard Pro', content));
-});
-
-// 2. Plugins Page
-app.get('/plugins', (req, res) => {
-  const content = `
-    <h2 style="margin-top:0;">Bot Plugins Matrix</h2>
     <div class="card">
-      <h3 style="margin-top:0; color:#38bdf8;">🧩 Active Core Modules</h3>
-      
-      <div style="background:rgba(255,255,255,0.03); padding:14px; border-radius:12px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; border:1px solid rgba(255,255,255,0.05);">
-        <div>
-          <strong style="font-size:15px;">🔨 Ban Module</strong>
-          <div style="font-size:12px; color:#94a3b8; margin-top:2px;">Bans disruptive users from the server matrix.</div>
-        </div>
-        <span style="background-color:rgba(5,150,105,0.2); color:#34d399; border:1px solid rgba(5,150,105,0.4); padding:4px 10px; border-radius:6px; font-size:12px; font-weight:600;">Active</span>
-      </div>
+      <h3 style="margin-top: 0; color: #38bdf8; font-size: 16px;">
+        <i class="fa-solid fa-bullhorn" style="margin-right: 8px;"></i> Dashboard Notice
+      </h3>
+      <p style="color: #94a3b8; font-size: 14px; line-height: 1.5;">
+        Welcome to Discord BOT Dashboard V2, this is an early version of the final product! Please report any issues you find!
+      </p>
+      <div style="font-weight: bold; font-size: 13px;">Version: 3.5</div>
+    </div>
 
-      <div style="background:rgba(255,255,255,0.03); padding:14px; border-radius:12px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; border:1px solid rgba(255,255,255,0.05);">
-        <div>
-          <strong style="font-size:15px;">🗑️ Clear Purge</strong>
-          <div style="font-size:12px; color:#94a3b8; margin-top:2px;">Clears specific message volumes from channels.</div>
-        </div>
-        <span style="background-color:rgba(5,150,105,0.2); color:#34d399; border:1px solid rgba(5,150,105,0.4); padding:4px 10px; border-radius:6px; font-size:12px; font-weight:600;">Active</span>
-      </div>
-
-      <div style="background:rgba(255,255,255,0.03); padding:14px; border-radius:12px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; border:1px solid rgba(255,255,255,0.05);">
-        <div>
-          <strong style="font-size:15px;">🪙 Coin Flip</strong>
-          <div style="font-size:12px; color:#94a3b8; margin-top:2px;">Advanced probability randomizer command.</div>
-        </div>
-        <span style="background-color:rgba(5,150,105,0.2); color:#34d399; border:1px solid rgba(5,150,105,0.4); padding:4px 10px; border-radius:6px; font-size:12px; font-weight:600;">Active</span>
-      </div>
-
-      <div style="background:rgba(255,255,255,0.03); padding:14px; border-radius:12px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; border:1px solid rgba(255,255,255,0.05);">
-        <div>
-          <strong style="font-size:15px;">🚪 Kick Protocol</strong>
-          <div style="font-size:12px; color:#94a3b8; margin-top:2px;">Ejects selected users safely.</div>
-        </div>
-        <span style="background-color:rgba(5,150,105,0.2); color:#34d399; border:1px solid rgba(5,150,105,0.4); padding:4px 10px; border-radius:6px; font-size:12px; font-weight:600;">Active</span>
-      </div>
-
-      <div style="background:rgba(255,255,255,0.03); padding:14px; border-radius:12px; display:flex; justify-content:space-between; align-items:center; border:1px solid rgba(255,255,255,0.05);">
-        <div>
-          <strong style="font-size:15px;">⏲️ Ping Diagnostics</strong>
-          <div style="font-size:12px; color:#94a3b8; margin-top:2px;">Measures round-trip responsiveness.</div>
-        </div>
-        <span style="background-color:rgba(5,150,105,0.2); color:#34d399; border:1px solid rgba(5,150,105,0.4); padding:4px 10px; border-radius:6px; font-size:12px; font-weight:600;">Active</span>
-      </div>
+    <div class="card">
+      <h3 style="margin-top: 0; color: #38bdf8; font-size: 16px;">
+        <i class="fa-solid fa-circle-info" style="margin-right: 8px;"></i> OS | System - Details
+      </h3>
+      <p style="margin: 8px 0; font-size: 14px;">• <b>Username:</b> OS | System#3523</p>
+      <p style="margin: 8px 0; font-size: 14px;">• <b>Client ID:</b> 154057416353677415</p>
+      <p style="margin: 8px 0; font-size: 14px;">• <b>Joined:</b> Saturday, August 22nd, 2026</p>
     </div>
   `;
-  res.send(layout('Plugins Matrix', content));
+  res.send(layout('Dashboard', content, '/'));
 });
 
-// 3. Guilds Page
+// 2. Guilds Route (Matching the exact second image details)
 app.get('/guilds', (req, res) => {
   const content = `
-    <h2 style="margin-top:0;">Connected Servers</h2>
+    <h2 style="margin-bottom: 20px;">Guilds - OS | System</h2>
+    
     <div class="card">
-      <h3 style="margin-top:0; color:#38bdf8;">💳 Authorized Nodes</h3>
-      <div style="background:rgba(255,255,255,0.03); padding:16px; border-radius:12px; display:flex; justify-content:space-between; align-items:center; border:1px solid rgba(255,255,255,0.05);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
         <div>
-          <strong style="font-size:16px;">🛡️ OSCORP RP</strong>
-          <div style="font-size:12px; color:#94a3b8; margin-top:4px;">ID: 1540577416353677415 | Active Members: 9</div>
+          <h3 style="margin:0; font-size:20px; color:#fff;">OSCORP RP</h3>
+          <div style="color:#64748b; font-size:13px; margin-top:2px;">ID: 1540577416353677415</div>
         </div>
-        <span style="background-color:rgba(5,150,105,0.2); color:#34d399; border:1px solid rgba(5,150,105,0.4); padding:6px 12px; border-radius:8px; font-size:12px; font-weight:600;">Connected</span>
+        <span style="background:rgba(5, 150, 105, 0.2); color:#34d399; padding:4px 10px; border-radius:6px; font-size:12px; font-weight:600;">Connected</span>
+      </div>
+
+      <div class="grid-2">
+        <div class="stat-box">
+          <div style="font-size:13px; color:#94a3b8; margin-bottom:6px;">Total Roles</div>
+          <div style="font-size:18px; font-weight:bold;"><i class="fa-solid fa-shield-halved" style="color:#64748b; margin-right:6px;"></i> 8</div>
+        </div>
+        <div class="stat-box">
+          <div style="font-size:13px; color:#94a3b8; margin-bottom:6px;">Voice Channels</div>
+          <div style="font-size:18px; font-weight:bold;"><i class="fa-solid fa-bullhorn" style="color:#64748b; margin-right:6px;"></i> 4</div>
+        </div>
+      </div>
+
+      <!-- Created Duration Card -->
+      <div style="background:#091024; border:1px solid rgba(255,255,255,0.05); border-radius:12px; padding:16px; margin-top:10px;">
+        <div style="color:#fcd34d; font-size:12px; font-weight:700; letter-spacing:1px; margin-bottom:12px; text-transform:uppercase;">Created Duration</div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; text-align:center;">
+          <div style="background:#0d1730; padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.05);">
+            <div style="font-size:18px; font-weight:bold;">15</div>
+            <div style="font-size:10px; color:#64748b; margin-top:2px;">DAYS</div>
+          </div>
+          <div style="background:#0d1730; padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.05);">
+            <div style="font-size:18px; font-weight:bold;">2</div>
+            <div style="font-size:10px; color:#64748b; margin-top:2px;">HOURS</div>
+          </div>
+          <div style="background:#0d1730; padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.05);">
+            <div style="font-size:18px; font-weight:bold;">1</div>
+            <div style="font-size:10px; color:#64748b; margin-top:2px;">SECS</div>
+          </div>
+        </div>
       </div>
     </div>
   `;
-  res.send(layout('Servers Hub', content));
+  res.send(layout('Guilds - Dashboard', content, '/guilds'));
 });
 
-// 4. Settings Page
+// 3. Plugins Route
+app.get('/plugins', (req, res) => {
+  const content = `
+    <h2>Plugins Matrix</h2>
+    <div class="card">
+      <h3 style="margin-top:0;">🧩 Enabled Commands</h3>
+      <div style="display:flex; flex-direction:column; gap:10px; margin-top:15px;">
+        <div style="background:#060913; padding:12px; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+          <div><i class="fa-solid fa-gavel" style="margin-right:8px; color:#38bdf8;"></i> <strong>Ban</strong></div>
+          <span style="color:#34d399; font-size:12px;"><i class="fa-solid fa-circle-check"></i> Active</span>
+        </div>
+        <div style="background:#060913; padding:12px; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+          <div><i class="fa-solid fa-trash" style="margin-right:8px; color:#38bdf8;"></i> <strong>Clear</strong></div>
+          <span style="color:#34d399; font-size:12px;"><i class="fa-solid fa-circle-check"></i> Active</span>
+        </div>
+        <div style="background:#060913; padding:12px; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+          <div><i class="fa-solid fa-coins" style="margin-right:8px; color:#38bdf8;"></i> <strong>Coin</strong></div>
+          <span style="color:#34d399; font-size:12px;"><i class="fa-solid fa-circle-check"></i> Active</span>
+        </div>
+      </div>
+    </div>
+  `;
+  res.send(layout('Plugins - Dashboard', content, '/plugins'));
+});
+
+// 4. Support Route
+app.get('/support', (req, res) => {
+  const content = `
+    <h2>Support Hub</h2>
+    <div class="card">
+      <h3><i class="fa-solid fa-headset"></i> Need Assistance?</h3>
+      <p style="color:#94a3b8; line-height:1.6;">Reach out for custom configurations or system updates.</p>
+      <a href="https://discord.gg" target="_blank" class="btn"><i class="fa-brands fa-discord" style="margin-right:6px;"></i> Join Discord Server</a>
+    </div>
+  `;
+  res.send(layout('Support - Dashboard', content, '/support'));
+});
+
+// 5. Settings Route
 app.get('/settings', (req, res) => {
   const content = `
-    <h2 style="margin-top:0;">Bot Configuration</h2>
+    <h2>Bot Settings</h2>
     <div class="card">
-      <h3 style="margin-top:0; color:#38bdf8;">⚙️ System Parameters</h3>
+      <h3><i class="fa-solid fa-sliders"></i> Configuration</h3>
       <form>
-        <label style="font-size:14px; color:#94a3b8; font-weight:500;">Bot Command Prefix</label>
+        <label style="font-size:14px; color:#94a3b8;">Bot Prefix</label>
         <input type="text" class="input-field" value="-">
-        
-        <label style="font-size:14px; color:#94a3b8; font-weight:500;">Dashboard Port Bind</label>
-        <input type="text" class="input-field" value="10000" disabled style="opacity: 0.7;">
-
-        <button type="button" class="btn">💾 Save Configuration</button>
+        <button type="button" class="btn">Save Changes</button>
       </form>
     </div>
   `;
-  res.send(layout('Settings Center', content));
-});
-
-// 5. Support Page
-app.get('/support', (req, res) => {
-  const content = `
-    <h2 style="margin-top:0;">Support & Assistance</h2>
-    <div class="card">
-      <h3 style="margin-top:0; color:#38bdf8;">🎧 Developer Helpdesk</h3>
-      <p style="color:#94a3b8; line-height:1.6; margin-bottom:20px;">If you encounter any anomalies or require custom architectural upgrades, reach out to developer Mohammed Alhajri.</p>
-      <a href="https://discord.gg" target="_blank" class="btn" style="background: linear-gradient(135deg, #5865f2, #4752c4); box-shadow: 0 4px 15px rgba(88, 101, 242, 0.4);">👾 Join Support Discord</a>
-    </div>
-  `;
-  res.send(layout('Support Hub', content));
+  res.send(layout('Settings - Dashboard', content, '/settings'));
 });
 
 app.listen(PORT, () => {
