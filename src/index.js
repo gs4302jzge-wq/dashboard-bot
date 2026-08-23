@@ -80,11 +80,20 @@ function layout(title, content) {
         color: #f8fafc;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       }
+      .top-banner {
+        text-align: center;
+        padding: 8px;
+        background: linear-gradient(90deg, #0f172a, #1e1b4b, #0f172a);
+        color: #fcd34d;
+        font-size: 13px;
+        font-weight: 500;
+        border-bottom: 1px solid #1e293b;
+      }
       .navbar {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 16px 20px;
+        padding: 14px 20px;
         background-color: #0f172a;
         border-bottom: 1px solid #1e293b;
       }
@@ -95,6 +104,12 @@ function layout(title, content) {
         font-size: 22px;
         cursor: pointer;
       }
+      .user-profile {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+      }
       .user-avatar {
         width: 32px;
         height: 32px;
@@ -103,6 +118,11 @@ function layout(title, content) {
         display: flex;
         align-items: center;
         justify-content: center;
+        font-size: 16px;
+      }
+      .admin-tag {
+        color: #94a3b8;
+        font-size: 12px;
       }
       .container {
         padding: 20px;
@@ -111,8 +131,21 @@ function layout(title, content) {
         background-color: #111827;
         border: 1px solid #1f2937;
         border-radius: 12px;
-        padding: 20px;
-        margin-bottom: 20px;
+        padding: 16px;
+        margin-bottom: 16px;
+      }
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+      .stat-box {
+        background-color: #111827;
+        border: 1px solid #1f2937;
+        border-radius: 12px;
+        padding: 16px;
+        text-align: center;
       }
       .btn {
         background-color: #2563eb;
@@ -124,13 +157,6 @@ function layout(title, content) {
         cursor: pointer;
         text-decoration: none;
         display: inline-block;
-      }
-      .badge {
-        background-color: #059669;
-        color: white;
-        padding: 4px 8px;
-        border-radius: 6px;
-        font-size: 12px;
       }
       .input-field {
         width: 100%;
@@ -146,10 +172,14 @@ function layout(title, content) {
     </style>
   </head>
   <body>
+    <div class="top-banner">✨ سبحان الله وبحمده ، سبحان الله العظيم ✨</div>
     ${sidebarHtml}
     <div class="navbar">
       <button class="menu-btn" onclick="toggleSidebar()">☰</button>
-      <div class="user-avatar">🤖</div>
+      <div class="user-profile">
+        <div class="user-avatar">👾</div>
+        <span><b>nfyp_</b> <span class="admin-tag">Admin</span></span>
+      </div>
     </div>
     <div class="container">
       ${content}
@@ -163,51 +193,52 @@ function layout(title, content) {
 // 1. Root / Dashboard Page
 app.get('/', (req, res) => {
   const guildCount = client.guilds?.cache?.size || 1;
-  const userCount = client.users?.cache?.size || 2;
+  const userCount = client.users?.cache?.size || 9;
   const ping = client.ws?.ping || 94;
 
   const content = `
-    <h2>Welcome, nfyp_</h2>
-    <p style="color: #9ca3af; margin-top: -10px;">Here's what's happening with <b>OS | System</b> today.</p>
+    <h2 style="margin-bottom: 4px;">Welcome, nfyp_</h2>
+    <p style="color: #9ca3af; margin-top: 0; margin-bottom: 20px;">Here's what's happening with <b>OS | System</b> today.</p>
 
-    <div class="card">
-      <div style="display: flex; justify-content: space-around; text-align: center; margin-bottom: 15px;">
-        <div>
-          <div style="font-size: 12px; color: #9ca3af;">Server Count (Guilds)</div>
-          <div style="font-size: 18px; font-weight: bold; margin-top: 4px;">≡ ${guildCount}</div>
-        </div>
-        <div>
-          <div style="font-size: 12px; color: #9ca3af;">User Count (All Guilds)</div>
-          <div style="font-size: 18px; font-weight: bold; margin-top: 4px;">👥 ${userCount}</div>
-        </div>
+    <div class="grid-2">
+      <div class="stat-box">
+        <div style="font-size: 13px; color: #9ca3af; margin-bottom: 6px;">Server Count</div>
+        <div style="font-size: 18px; font-weight: bold;">📊 ${guildCount}</div>
       </div>
-      <div style="display: flex; justify-content: space-around; text-align: center;">
-        <div>
-          <div style="font-size: 12px; color: #9ca3af;">API Latency</div>
-          <div style="font-size: 18px; font-weight: bold; margin-top: 4px;">📶 ${ping}ms</div>
-        </div>
-        <div>
-          <div style="font-size: 12px; color: #9ca3af;">Prefix</div>
-          <div style="font-size: 18px; font-weight: bold; margin-top: 4px;">📢 -</div>
-        </div>
+      <div class="stat-box">
+        <div style="font-size: 13px; color: #9ca3af; margin-bottom: 6px;">User Count</div>
+        <div style="font-size: 18px; font-weight: bold;">👥 ${userCount}</div>
       </div>
     </div>
 
-    <div class="card" style="padding: 12px 20px;">
-      <span class="badge" style="background-color: #065f46; color: #34d399;">● Uptime</span>
-      <p style="margin: 8px 0 0 0; font-weight: bold;">🔄 0d 0h 0m 17s</p>
+    <div class="grid-2" style="margin-bottom: 20px;">
+      <div class="stat-box">
+        <div style="font-size: 13px; color: #9ca3af; margin-bottom: 6px;">API Latency</div>
+        <div style="font-size: 18px; font-weight: bold;">⚡ ${ping}ms</div>
+      </div>
+      <div class="stat-box">
+        <div style="font-size: 13px; color: #9ca3af; margin-bottom: 6px;">System Uptime</div>
+        <div style="font-size: 16px; font-weight: bold;">⏱️ 0d 0h 1m 21s</div>
+      </div>
     </div>
 
     <div class="card">
-      <h3>🎉 Welcome</h3>
-      <p style="color: #9ca3af;">Welcome to Discord BOT Dashboard V2!</p>
-      <p style="font-weight: bold;">Version: 3.0</p>
+      <h3 style="margin-top: 0; color: #38bdf8; font-size: 16px; display: flex; align-items: center; gap: 8px;">
+        📣 Dashboard Notice
+      </h3>
+      <p style="color: #9ca3af; font-size: 14px; line-height: 1.5; margin-bottom: 12px;">
+        Welcome to Discord BOT Dashboard V2, this is an early version of the final product! Please report any issues you find!
+      </p>
+      <div style="font-weight: bold; font-size: 13px;">Version: 3.5</div>
     </div>
 
     <div class="card">
-      <h3>🔎 OS | System - Details</h3>
-      <p>• <b>Username:</b> OS | System#3523</p>
-      <p>• <b>Client ID:</b> 1540577416353677415</p>
+      <h3 style="margin-top: 0; color: #38bdf8; font-size: 16px; display: flex; align-items: center; gap: 8px;">
+        ℹ️ OS | System - Details
+      </h3>
+      <p style="margin: 6px 0; font-size: 14px;">• <b>Username:</b> OS | System#3523</p>
+      <p style="margin: 6px 0; font-size: 14px;">• <b>Client ID:</b> 154057416353677415</p>
+      <p style="margin: 6px 0; font-size: 14px;">• <b>Joined:</b> Saturday, August 22nd, 2026</p>
     </div>
   `;
   res.send(layout('Dashboard', content));
@@ -225,7 +256,7 @@ app.get('/plugins', (req, res) => {
           <strong>🔨 Ban</strong>
           <div style="font-size:12px; color:#9ca3af;">Bans a user from the server.</div>
         </div>
-        <span class="badge">Enabled</span>
+        <span style="background-color:#059669; color:white; padding:4px 8px; border-radius:6px; font-size:12px;">Enabled</span>
       </div>
 
       <div style="background:#1f2937; padding:12px; border-radius:8px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
@@ -233,7 +264,7 @@ app.get('/plugins', (req, res) => {
           <strong>🗑️ Clear</strong>
           <div style="font-size:12px; color:#9ca3af;">Clears messages from a channel.</div>
         </div>
-        <span class="badge">Enabled</span>
+        <span style="background-color:#059669; color:white; padding:4px 8px; border-radius:6px; font-size:12px;">Enabled</span>
       </div>
 
       <div style="background:#1f2937; padding:12px; border-radius:8px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
@@ -241,7 +272,7 @@ app.get('/plugins', (req, res) => {
           <strong>🪙 Coin</strong>
           <div style="font-size:12px; color:#9ca3af;">Simple coin flip command</div>
         </div>
-        <span class="badge">Enabled</span>
+        <span style="background-color:#059669; color:white; padding:4px 8px; border-radius:6px; font-size:12px;">Enabled</span>
       </div>
 
       <div style="background:#1f2937; padding:12px; border-radius:8px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
@@ -249,7 +280,7 @@ app.get('/plugins', (req, res) => {
           <strong>🚪 Kick</strong>
           <div style="font-size:12px; color:#9ca3af;">Kicks a user from the server.</div>
         </div>
-        <span class="badge">Enabled</span>
+        <span style="background-color:#059669; color:white; padding:4px 8px; border-radius:6px; font-size:12px;">Enabled</span>
       </div>
 
       <div style="background:#1f2937; padding:12px; border-radius:8px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
@@ -257,7 +288,7 @@ app.get('/plugins', (req, res) => {
           <strong>⏲️ Ping</strong>
           <div style="font-size:12px; color:#9ca3af;">Ping / Pong!</div>
         </div>
-        <span class="badge">Enabled</span>
+        <span style="background-color:#059669; color:white; padding:4px 8px; border-radius:6px; font-size:12px;">Enabled</span>
       </div>
     </div>
   `;
@@ -275,7 +306,7 @@ app.get('/guilds', (req, res) => {
           <strong>🛡️ OSCORP RP</strong>
           <div style="font-size:12px; color:#9ca3af;">ID: 1540577416353677415 | Members: 9</div>
         </div>
-        <span class="badge">Connected</span>
+        <span style="background-color:#059669; color:white; padding:4px 8px; border-radius:6px; font-size:12px;">Connected</span>
       </div>
     </div>
   `;
