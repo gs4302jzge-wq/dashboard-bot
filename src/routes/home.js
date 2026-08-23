@@ -26,4 +26,16 @@ router.get('/', (req, res) => {
     `);
 });
 
+// إضافة مسار login المباشر
+router.get('/login', (req, res) => {
+    const CLIENT_ID = process.env.CLIENT_ID || '';
+    const REDIRECT_URI = encodeURIComponent(process.env.REDIRECT_URI || '');
+    
+    if (CLIENT_ID) {
+        res.redirect(`https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=identify%20guilds`);
+    } else {
+        res.send('رجاء قم بإضافة CLIENT_ID و REDIRECT_URI في متغيّرات البيئة داخل Render');
+    }
+});
+
 module.exports = router;
