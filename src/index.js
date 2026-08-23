@@ -8,10 +8,9 @@ app.use(express.urlencoded({ extended: true }));
 const startTime = Date.now();
 const guildCreatedAt = new Date('2025-05-15T00:00:00Z').getTime();
 
-// ضع رابط صورتك الشخصية ورابط صورة السيرفر المباشر هنا
-// يمكنك تغيير هذه الروابط بأي رابط صورة مباشر ينتهي بـ .png أو .jpg
-const userAvatarUrl = "https://cdn.discordapp.com/avatars/154057416353677415/a_avatar.png"; 
-const guildIconUrl = "https://cdn.discordapp.com/icons/119830128491028391/a_icon.png";
+// استخدام روابط سريعة ومضمونة للصورة الشخصية وصورة السيرفر
+const userAvatarUrl = "https://unavatar.io/discord/154057416353677415"; 
+const guildIconUrl = "https://api.dicebear.com/7.x/identicon/svg?seed=OscorpRP_119830128491028391";
 
 let botConfig = {
     clientId: '154057416353677415',
@@ -66,7 +65,6 @@ function renderLayout(title, content) {
             .navbar { background: #111827; padding: 15px 20px; border-bottom: 1px solid #1f2937; display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 100; }
             .sidebar-toggle { color: #fff; font-size: 20px; cursor: pointer; padding: 8px 12px; background: #1f2937; border-radius: 6px; }
             .user-profile { display: flex; align-items: center; gap: 10px; color: #fff; }
-            .user-avatar { width: 38px; height: 38px; border-radius: 50%; border: 2px solid #38bdf8; object-fit: cover; }
             
             .layout { display: flex; flex: 1; position: relative; }
             
@@ -102,21 +100,23 @@ function renderLayout(title, content) {
             .link-blue { color: #38bdf8; text-decoration: none; font-weight: bold; }
             .link-blue:hover { text-decoration: underline; }
 
-            .img-avatar-real {
+            .img-avatar-fixed {
                 width: 38px;
                 height: 38px;
                 border-radius: 50%;
                 border: 2px solid #38bdf8;
                 object-fit: cover;
+                background-color: #1e293b;
             }
 
-            .img-guild-real {
+            .img-guild-fixed {
                 width: 65px;
                 height: 65px;
                 border-radius: 50%;
                 border: 2px solid #38bdf8;
                 box-shadow: 0 0 15px rgba(56,189,248,0.3);
                 object-fit: cover;
+                background-color: #1e293b;
             }
 
             .footer { text-align: center; padding: 20px; background: #111827; border-top: 1px solid #1f2937; font-size: 13px; color: #6b7280; }
@@ -130,7 +130,7 @@ function renderLayout(title, content) {
         <div class="navbar">
             <div class="sidebar-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></div>
             <div class="user-profile">
-                <img src="${userAvatarUrl}" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'" class="img-avatar-real" />
+                <img src="${userAvatarUrl}" class="img-avatar-fixed" />
                 <span>nfyp_ <small style="color:#6b7280">Admin</small></span>
             </div>
         </div>
@@ -139,7 +139,7 @@ function renderLayout(title, content) {
             <div class="overlay-backdrop" id="backdrop" onclick="toggleSidebar()"></div>
             <div class="sidebar" id="sidebar">
                 <div class="sidebar-header">
-                    <img src="${userAvatarUrl}" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'" class="img-avatar-real" style="width:45px; height:45px;" />
+                    <img src="${userAvatarUrl}" class="img-avatar-fixed" style="width:45px; height:45px;" />
                     <div>
                         <h4 style="color:#fff;">nfyp_</h4>
                         <span style="font-size:12px; color:#38bdf8;">Administrator</span>
@@ -253,7 +253,7 @@ app.get('/guilds', (req, res) => {
         
         <div class="card">
             <div style="display:flex; align-items:center; gap:15px; margin-bottom:20px; padding-bottom:15px; border-bottom:1px solid #1f2937;">
-                <img src="${guildIconUrl}" onerror="this.src='https://cdn.discordapp.com/embed/avatars/1.png'" class="img-guild-real" />
+                <img src="${guildIconUrl}" class="img-guild-fixed" />
                 <div>
                     <h2 style="color:#fff;">Oscorp (OSCORP RP)</h2>
                     <p style="font-size:13px; color:#94a3b8;"><b>Guild ID:</b> 119830128491028391</p>
