@@ -9,7 +9,7 @@ app.use(express.urlencoded({ extended: true }));
 
 const PREFIX = '-';
 
-// تخزين الأوامر والاختصارات فارغة للتعديل من الداشبورد
+// تخزين الاختصارات لكل أمر (تترك فارغة ليتم تعديلها من الداشبورد)
 const pluginsStore = {
   setnick: [],
   ban: [],
@@ -35,6 +35,33 @@ const pluginsStore = {
   slowmode: [],
   reset: []
 };
+
+// تعريف جميع الأوامر الأساسية وخياراتها
+const commandsConfig = [
+  { id: 'setnick', name: 'setnick', desc: '✏️ تغيير اللقب لعضو', options: [ { name: 'user', desc: 'العضو', type: 'user', req: true }, { name: 'nick', desc: 'اللقب الجديد', type: 'string', req: true } ] },
+  { id: 'ban', name: 'ban', desc: '🔨 حظر عضو من السيرفر', options: [ { name: 'user', desc: 'العضو', type: 'user', req: true } ] },
+  { id: 'unban', name: 'unban', desc: '🔓 إلغاء حظر عضو', options: [ { name: 'userid', desc: 'ID العضو', type: 'string', req: true } ] },
+  { id: 'kick', name: 'kick', desc: '👢 طرد عضو من السيرفر', options: [ { name: 'user', desc: 'العضو', type: 'user', req: true } ] },
+  { id: 'vkick', name: 'vkick', desc: '🔇 طرد عضو من الروم الصوتي', options: [ { name: 'user', desc: 'العضو', type: 'user', req: true } ] },
+  { id: 'mute_text', name: 'mute_text', desc: '🔕 كتم كتابي لعضو', options: [ { name: 'user', desc: 'العضو', type: 'user', req: true } ] },
+  { id: 'unmute_text', name: 'unmute_text', desc: '🔔 إلغاء الكتم الكتابي', options: [ { name: 'user', desc: 'العضو', type: 'user', req: true } ] },
+  { id: 'mute_voice', name: 'mute_voice', desc: '🎙️ كتم صوتي لعضو', options: [ { name: 'user', desc: 'العضو', type: 'user', req: true } ] },
+  { id: 'unmute_voice', name: 'unmute_voice', desc: '🔊 إلغاء الكتم الصوتي', options: [ { name: 'user', desc: 'العضو', type: 'user', req: true } ] },
+  { id: 'timeout', name: 'timeout', desc: '⏱️ عزل مؤقت لعضو', options: [ { name: 'user', desc: 'العضو', type: 'user', req: true }, { name: 'minutes', desc: 'المدة بالدقائق', type: 'int', req: true } ] },
+  { id: 'untimeout', name: 'untimeout', desc: '⏰ إلغاء العزل المؤقت', options: [ { name: 'user', desc: 'العضو', type: 'user', req: true } ] },
+  { id: 'clear', name: 'clear', desc: '🧹 مسح الرسائل من القناة', options: [ { name: 'amount', desc: 'عدد الرسائل (1-100)', type: 'int', req: true } ] },
+  { id: 'move', name: 'move', desc: '🚀 نقل عضو لروم صوتي', options: [ { name: 'user', desc: 'العضو', type: 'user', req: true }, { name: 'channel', desc: 'الروم الصوتي', type: 'channel', req: true } ] },
+  { id: 'role', name: 'role', desc: '🏷️ إعطاء أو سحب رتبة', options: [ { name: 'user', desc: 'العضو', type: 'user', req: true }, { name: 'role', desc: 'الرتبة', type: 'role', req: true } ] },
+  { id: 'points', name: 'points', desc: '⭐ عرض أو إضافة نقاط', options: [ { name: 'user', desc: 'العضو', type: 'user', req: true } ] },
+  { id: 'warn', name: 'warn', desc: '⚠️ توجيه تحذير لعضو', options: [ { name: 'user', desc: 'العضو', type: 'user', req: true }, { name: 'reason', desc: 'السبب', type: 'string', req: false } ] },
+  { id: 'warn_remove', name: 'warn_remove', desc: '🗑️ إزالة تحذير عن عضو', options: [ { name: 'user', desc: 'العضو', type: 'user', req: true } ] },
+  { id: 'warnings', name: 'warnings', desc: '📋 عرض تحذيرات عضو', options: [ { name: 'user', desc: 'العضو', type: 'user', req: true } ] },
+  { id: 'lock', name: 'lock', desc: '🔒 قفل القناة الحالية', options: [] },
+  { id: 'unlock', name: 'unlock', desc: '🔓 فتح القناة الحالية', options: [] },
+  { id: 'setcolor', name: 'setcolor', desc: '🎨 تغيير لون رتبة', options: [ { name: 'role', desc: 'الرتبة', type: 'role', req: true }, { name: 'color', desc: 'رمز اللون Hex', type: 'string', req: true } ] },
+  { id: 'slowmode', name: 'slowmode', desc: '⏳ تحديد وضع البطء', options: [ { name: 'seconds', desc: 'المدة بالثواني', type: 'int', req: true } ] },
+  { id: 'reset', name: 'reset', desc: '🔄 إعادة ضبط نقاط الخبرة (XP)', options: [] }
+];
 
 const client = new Client({
   intents: [
@@ -65,122 +92,181 @@ const createErrorEmbed = (description) => {
     .setFooter({ text: 'OS | System Security', iconURL: client.user?.displayAvatarURL() });
 };
 
-async function registerSlashCommands(clientId) {
-  const commands = [
-    new SlashCommandBuilder().setName('setnick').setDescription('✏️ تغيير اللقب لعضو').addUserOption(opt => opt.setName('user').setDescription('العضو').setRequired(true)).addStringOption(opt => opt.setName('nick').setDescription('اللقب الجديد').setRequired(true)),
-    new SlashCommandBuilder().setName('ban').setDescription('🔨 حظر عضو من السيرفر').addUserOption(opt => opt.setName('user').setDescription('العضو').setRequired(true)),
-    new SlashCommandBuilder().setName('unban').setDescription('🔓 إلغاء حظر عضو').addStringOption(opt => opt.setName('userid').setDescription('ID العضو').setRequired(true)),
-    new SlashCommandBuilder().setName('kick').setDescription('👢 طرد عضو من السيرفر').addUserOption(opt => opt.setName('user').setDescription('العضو').setRequired(true)),
-    new SlashCommandBuilder().setName('vkick').setDescription('🔇 طرد عضو من الروم الصوتي').addUserOption(opt => opt.setName('user').setDescription('العضو').setRequired(true)),
-    new SlashCommandBuilder().setName('mute_text').setDescription('🔕 كتم كتابي لعضو').addUserOption(opt => opt.setName('user').setDescription('العضو').setRequired(true)),
-    new SlashCommandBuilder().setName('unmute_text').setDescription('🔔 إلغاء الكتم الكتابي').addUserOption(opt => opt.setName('user').setDescription('العضو').setRequired(true)),
-    new SlashCommandBuilder().setName('mute_voice').setDescription('🎙️ كتم صوتي لعضو').addUserOption(opt => opt.setName('user').setDescription('العضو').setRequired(true)),
-    new SlashCommandBuilder().setName('unmute_voice').setDescription('🔊 إلغاء الكتم الصوتي').addUserOption(opt => opt.setName('user').setDescription('العضو').setRequired(true)),
-    new SlashCommandBuilder().setName('timeout').setDescription('⏱️ عزل مؤقت لعضو').addUserOption(opt => opt.setName('user').setDescription('العضو').setRequired(true)).addIntegerOption(opt => opt.setName('minutes').setDescription('المدة بالدقائق').setRequired(true)),
-    new SlashCommandBuilder().setName('untimeout').setDescription('⏰ إلغاء العزل المؤقت').addUserOption(opt => opt.setName('user').setDescription('العضو').setRequired(true)),
-    new SlashCommandBuilder().setName('clear').setDescription('🧹 مسح الرسائل من القناة').addIntegerOption(opt => opt.setName('amount').setDescription('عدد الرسائل (1-100)').setRequired(true)),
-    new SlashCommandBuilder().setName('move').setDescription('🚀 نقل عضو لروم صوتي آخر').addUserOption(opt => opt.setName('user').setDescription('العضو').setRequired(true)).addChannelOption(opt => opt.setName('channel').setDescription('الروم الصوتي Target').setRequired(true)),
-    new SlashCommandBuilder().setName('role').setDescription('🏷️ إعطاء أو سحب رتبة من عضو').addUserOption(opt => opt.setName('user').setDescription('العضو').setRequired(true)).addRoleOption(opt => opt.setName('role').setDescription('الرتبة').setRequired(true)),
-    new SlashCommandBuilder().setName('points').setDescription('⭐ عرض أو إضافة نقاط للمشرفين').addUserOption(opt => opt.setName('user').setDescription('العضو').setRequired(true)),
-    new SlashCommandBuilder().setName('warn').setDescription('⚠️ توجيه تحذير لعضو').addUserOption(opt => opt.setName('user').setDescription('العضو').setRequired(true)).addStringOption(opt => opt.setName('reason').setDescription('السبب').setRequired(false)),
-    new SlashCommandBuilder().setName('warn_remove').setDescription('🗑️ إزالة تحذير عن عضو').addUserOption(opt => opt.setName('user').setDescription('العضو').setRequired(true)),
-    new SlashCommandBuilder().setName('warnings').setDescription('📋 عرض تحذيرات عضو').addUserOption(opt => opt.setName('user').setDescription('العضو').setRequired(true)),
-    new SlashCommandBuilder().setName('lock').setDescription('🔒 قفل القناة الحالية'),
-    new SlashCommandBuilder().setName('unlock').setDescription('🔓 فتح القناة الحالية'),
-    new SlashCommandBuilder().setName('setcolor').setDescription('🎨 تغيير لون رتبة باستخدام HEX').addRoleOption(opt => opt.setName('role').setDescription('الرتبة').setRequired(true)).addStringOption(opt => opt.setName('color').setDescription('رمز اللون مثل #FF0000').setRequired(true)),
-    new SlashCommandBuilder().setName('slowmode').setDescription('⏳ تحديد وضع البطء').addIntegerOption(opt => opt.setName('seconds').setDescription('المدة بالثواني').setRequired(true)),
-    new SlashCommandBuilder().setName('reset').setDescription('🔄 إعادة ضبط نقاط الخبرة (XP)')
-  ].map(cmd => cmd.toJSON());
+// دالة لبناء وتسجيل Slash Commands الأساسية بالإضافة للـ Aliases ديناميكياً
+async function registerSlashCommands() {
+  if (!client.user) return;
+  const slashList = [];
+
+  for (const cmd of commandsConfig) {
+    // تجميع الاسم الأساسي للأمر + أي Aliases تم إضافتها من الداشبورد
+    const namesToRegister = [cmd.name, ...(pluginsStore[cmd.id] || [])];
+
+    for (const name of namesToRegister) {
+      // التأكد من أن اسم الـ Slash يتوافق مع شروط ديسكورد (حروف صغيرة وبدون مسافات)
+      const validName = name.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-z_]/g, '');
+      if (!validName) continue;
+
+      const builder = new SlashCommandBuilder()
+        .setName(validName)
+        .setDescription(cmd.desc);
+
+      // إضافة الخيارات لكل أمر
+      cmd.options.forEach(opt => {
+        if (opt.type === 'user') builder.addUserOption(o => o.setName(opt.name).setDescription(opt.desc).setRequired(opt.req));
+        else if (opt.type === 'string') builder.addStringOption(o => o.setName(opt.name).setDescription(opt.desc).setRequired(opt.req));
+        else if (opt.type === 'int') builder.addIntegerOption(o => o.setName(opt.name).setDescription(opt.desc).setRequired(opt.req));
+        else if (opt.type === 'channel') builder.addChannelOption(o => o.setName(opt.name).setDescription(opt.desc).setRequired(opt.req));
+        else if (opt.type === 'role') builder.addRoleOption(o => o.setName(opt.name).setDescription(opt.desc).setRequired(opt.req));
+      });
+
+      slashList.push(builder.toJSON());
+    }
+  }
 
   const rest = new REST({ version: '10' }).setToken(BOT_TOKEN);
   try {
-    await rest.put(Routes.applicationCommands(clientId), { body: commands });
-    console.log('💎 23 Slash Commands Registered Successfully!');
+    await rest.put(Routes.applicationCommands(client.user.id), { body: slashList });
+    console.log(`💎 Registered ${slashList.length} Slash Commands (Including Aliases)!`);
   } catch (err) {
     console.error('Failed to register Slash Commands:', err);
   }
 }
 
-// معالجة جميع أوامر السلاش
-client.on('interactionCreate', async (interaction) => {
-  if (!interaction.isChatInputCommand()) return;
-  const { commandName } = interaction;
+// ربط كل أسم أو اختصار بالأمر الرئيسي لتنفيذه
+function getCommandIdByName(name) {
+  const cleanName = name.toLowerCase().replace(/_/g, ' ').trim();
+  for (const cmd of commandsConfig) {
+    if (cmd.name === name || cmd.id === name || cmd.name.replace(/_/g, ' ') === cleanName) return cmd.id;
+    const aliases = pluginsStore[cmd.id] || [];
+    if (aliases.includes(name) || aliases.includes(cleanName)) return cmd.id;
+  }
+  return null;
+}
 
-  if (commandName === 'setnick') {
-    const user = interaction.options.getUser('user');
-    const nick = interaction.options.getString('nick');
-    const member = await interaction.guild.members.fetch(user.id).catch(() => null);
+// تنفيذ منطق الأمر الموحد (سواء تم استدعاؤه بـ Slash Command أو Text Prefix)
+async function handleExecution(commandId, interactionOrMessage, options) {
+  const guild = interactionOrMessage.guild;
+  const channel = interactionOrMessage.channel;
+
+  if (commandId === 'setnick') {
+    const user = options.user;
+    const nick = options.nick;
+    const member = await guild.members.fetch(user.id).catch(() => null);
     if (member) {
       await member.setNickname(nick).catch(() => null);
-      return interaction.reply({ embeds: [createSuccessEmbed('✏️ تغيير اللقب', `تم تغيير لقب **${user.tag}** إلى **${nick}**`)] });
+      return interactionOrMessage.reply({ embeds: [createSuccessEmbed('✏️ تغيير اللقب', `تم تغيير لقب **${user.tag}** إلى **${nick}**`)] });
     }
   }
 
-  else if (commandName === 'ban') {
-    const user = interaction.options.getUser('user');
-    const member = await interaction.guild.members.fetch(user.id).catch(() => null);
+  else if (commandId === 'ban') {
+    const user = options.user;
+    const member = await guild.members.fetch(user.id).catch(() => null);
     if (member) {
       await member.ban().catch(() => null);
-      return interaction.reply({ embeds: [createSuccessEmbed('🔨 تم حظر العضو', `تم حظر **${user.tag}** بنجاح.`)] });
+      return interactionOrMessage.reply({ embeds: [createSuccessEmbed('🔨 تم حظر العضو', `تم حظر **${user.tag}** بنجاح.`)] });
     }
   }
 
-  else if (commandName === 'unban') {
-    const userId = interaction.options.getString('userid');
-    await interaction.guild.members.unban(userId).catch(() => null);
-    return interaction.reply({ embeds: [createSuccessEmbed('🔓 إلغاء الحظر', `تم إلغاء حظر الـ ID: **${userId}**`)] });
+  else if (commandId === 'unban') {
+    const userId = options.userid;
+    await guild.members.unban(userId).catch(() => null);
+    return interactionOrMessage.reply({ embeds: [createSuccessEmbed('🔓 إلغاء الحظر', `تم إلغاء حظر الـ ID: **${userId}**`)] });
   }
 
-  else if (commandName === 'kick') {
-    const user = interaction.options.getUser('user');
-    const member = await interaction.guild.members.fetch(user.id).catch(() => null);
+  else if (commandId === 'kick') {
+    const user = options.user;
+    const member = await guild.members.fetch(user.id).catch(() => null);
     if (member) {
       await member.kick().catch(() => null);
-      return interaction.reply({ embeds: [createSuccessEmbed('👢 طرد عضو', `تم طرد **${user.tag}** بنجاح.`)] });
+      return interactionOrMessage.reply({ embeds: [createSuccessEmbed('👢 طرد عضو', `تم طرد **${user.tag}** بنجاح.`)] });
     }
   }
 
-  else if (commandName === 'vkick') {
-    const user = interaction.options.getUser('user');
-    const member = await interaction.guild.members.fetch(user.id).catch(() => null);
+  else if (commandId === 'vkick') {
+    const user = options.user;
+    const member = await guild.members.fetch(user.id).catch(() => null);
     if (member && member.voice.channel) {
       await member.voice.disconnect().catch(() => null);
-      return interaction.reply({ embeds: [createSuccessEmbed('🔇 طرد صفي', `تم فصل **${user.tag}** من الروم الصوتي.`)] });
+      return interactionOrMessage.reply({ embeds: [createSuccessEmbed('🔇 طرد صفي', `تم فصل **${user.tag}** من الروم الصوتي.`)] });
     }
-    return interaction.reply({ embeds: [createErrorEmbed('العضو غير متواجد في روم صوتي.')], ephemeral: true });
+    return interactionOrMessage.reply({ embeds: [createErrorEmbed('العضو غير متواجد في روم صوتي.')] });
   }
 
-  else if (commandName === 'lock') {
-    await interaction.channel.permissionOverwrites.edit(interaction.guild.roles.everyone, { SendMessages: false });
-    return interaction.reply({ embeds: [createSuccessEmbed('🔒 قفل القناة', 'تم إغلاق الكتابة في هذه القناة.')] });
+  else if (commandId === 'lock') {
+    await channel.permissionOverwrites.edit(guild.roles.everyone, { SendMessages: false });
+    return interactionOrMessage.reply({ embeds: [createSuccessEmbed('🔒 قفل القناة', 'تم إغلاق الكتابة في هذه القناة.')] });
   }
 
-  else if (commandName === 'unlock') {
-    await interaction.channel.permissionOverwrites.edit(interaction.guild.roles.everyone, { SendMessages: true });
-    return interaction.reply({ embeds: [createSuccessEmbed('🔓 فتح القناة', 'تم فتح الكتابة في هذه القناة.')] });
+  else if (commandId === 'unlock') {
+    await channel.permissionOverwrites.edit(guild.roles.everyone, { SendMessages: true });
+    return interactionOrMessage.reply({ embeds: [createSuccessEmbed('🔓 فتح القناة', 'تم فتح الكتابة في هذه القناة.')] });
   }
 
-  else if (commandName === 'clear') {
-    const amount = interaction.options.getInteger('amount');
-    await interaction.channel.bulkDelete(amount, true).catch(() => null);
-    return interaction.reply({ embeds: [createSuccessEmbed('🧹 تطهير الشات', `تم مسح **${amount}** رسالة.`)], ephemeral: true });
+  else if (commandId === 'clear') {
+    const amount = options.amount || 10;
+    await channel.bulkDelete(amount, true).catch(() => null);
+    return interactionOrMessage.reply({ embeds: [createSuccessEmbed('🧹 تطهير الشات', `تم مسح **${amount}** رسالة.`)].map(e => e.toJSON()), ephemeral: true });
   }
 
-  else if (commandName === 'slowmode') {
-    const seconds = interaction.options.getInteger('seconds');
-    await interaction.channel.setRateLimitPerUser(seconds);
-    return interaction.reply({ embeds: [createSuccessEmbed('⏳ وضع البطء', `تم ضبط وضع البطء إلى **${seconds}** ثانية.`)] });
+  else if (commandId === 'slowmode') {
+    const seconds = options.seconds || 0;
+    await channel.setRateLimitPerUser(seconds);
+    return interactionOrMessage.reply({ embeds: [createSuccessEmbed('⏳ وضع البطء', `تم ضبط وضع البطء إلى **${seconds}** ثانية.`)] });
   }
 
   else {
-    return interaction.reply({ embeds: [createSuccessEmbed(`✅ ${commandName}`, `تم تنفيذ أمر **${commandName}** بنجاح.`)] });
+    return interactionOrMessage.reply({ embeds: [createSuccessEmbed(`✅ ${commandId}`, `تم تنفيذ الأمر **${commandId}** بنجاح.`)] });
+  }
+}
+
+// استقبال الـ Slash Commands
+client.on('interactionCreate', async (interaction) => {
+  if (!interaction.isChatInputCommand()) return;
+  const commandId = getCommandIdByName(interaction.commandName);
+  
+  if (commandId) {
+    const options = {
+      user: interaction.options.getUser('user'),
+      nick: interaction.options.getString('nick'),
+      userid: interaction.options.getString('userid'),
+      amount: interaction.options.getInteger('amount'),
+      seconds: interaction.options.getInteger('seconds'),
+      minutes: interaction.options.getInteger('minutes'),
+      channel: interaction.options.getChannel('channel'),
+      role: interaction.options.getRole('role'),
+      color: interaction.options.getString('color'),
+      reason: interaction.options.getString('reason')
+    };
+    await handleExecution(commandId, interaction, options);
+  }
+});
+
+// استقبال الأوامر العادية بالطريقة العادية Prefix
+client.on('messageCreate', async (message) => {
+  if (message.author.bot || !message.content.startsWith(PREFIX)) return;
+
+  const args = message.content.slice(PREFIX.length).trim().split(/ +/);
+  const cmdName = args.shift().toLowerCase();
+
+  const commandId = getCommandIdByName(cmdName);
+  if (commandId) {
+    const options = {
+      user: message.mentions.users.first() || client.users.cache.get(args[0]),
+      nick: args[1],
+      userid: args[0],
+      amount: parseInt(args[0]) || 10,
+      seconds: parseInt(args[0]) || 0,
+      minutes: parseInt(args[1]) || 5,
+      reason: args.slice(1).join(' ')
+    };
+    await handleExecution(commandId, message, options);
   }
 });
 
 if (BOT_TOKEN) {
   client.once('ready', () => {
     console.log(`🤖 Logged in as: ${client.user.tag}`);
-    registerSlashCommands(client.user.id);
+    registerSlashCommands();
   });
   client.login(BOT_TOKEN).catch(err => {
     console.error('❌ Login Error:', err.message);
@@ -230,7 +316,6 @@ function getSidebarHtml(activePath) {
   return `
   <div id="overlay" onclick="toggleSidebar()" style="display:none; opacity:0; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); backdrop-filter: blur(6px); z-index:998; transition: opacity 0.3s ease;"></div>
   <div id="sidebar" style="position:fixed; top:0; left:0; width:270px; height:100%; background:#090e1a; border-right:1px solid rgba(255, 255, 255, 0.08); z-index:999; transform:translateX(-100%); transition:transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); padding:24px 18px; box-sizing:border-box; color:#f8fafc; box-shadow: 10px 0 30px rgba(0,0,0,0.8);">
-    
     <div style="display:flex; align-items:center; gap:12px; margin-bottom:30px; padding-bottom:20px; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
       <div style="width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg, #5865F2, #3b82f6); display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:20px; color:#fff; box-shadow:0 0 15px rgba(88,101,242,0.5);">
         <i class="fa-brands fa-discord"></i>
@@ -240,10 +325,7 @@ function getSidebarHtml(activePath) {
         <div style="font-size:12px; color:#38bdf8; font-weight:600; margin-top:2px; display:flex; align-items:center; gap:4px;"><span style="width:6px; height:6px; background:#38bdf8; border-radius:50%;"></span> Admin</div>
       </div>
     </div>
-
-    <nav style="display:flex; flex-direction:column; gap:6px;">
-      ${navLinks}
-    </nav>
+    <nav style="display:flex; flex-direction:column; gap:6px;">${navLinks}</nav>
   </div>
   `;
 }
@@ -258,22 +340,10 @@ function layout(title, content, currentPath) {
     <title>${title}</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-      body {
-        margin: 0; padding: 0; background-color: #080d1a; color: #f8fafc;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; min-height: 100vh;
-      }
-      .top-banner {
-        text-align: center; padding: 10px; background: linear-gradient(90deg, #090e1c, #0f172a, #090e1c);
-        color: #fcd34d; font-size: 14px; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.06);
-      }
-      .navbar {
-        display: flex; justify-content: space-between; align-items: center; padding: 14px 22px;
-        background-color: #0b1224; border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-      }
-      .menu-btn {
-        background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #f8fafc;
-        width: 40px; height: 40px; border-radius: 10px; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;
-      }
+      body { margin: 0; padding: 0; background-color: #080d1a; color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; min-height: 100vh; }
+      .top-banner { text-align: center; padding: 10px; background: linear-gradient(90deg, #090e1c, #0f172a, #090e1c); color: #fcd34d; font-size: 14px; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.06); }
+      .navbar { display: flex; justify-content: space-between; align-items: center; padding: 14px 22px; background-color: #0b1224; border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
+      .menu-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #f8fafc; width: 40px; height: 40px; border-radius: 10px; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
       .container { padding: 20px; max-width: 900px; margin: 0 auto; }
       .card { background: #0d1527; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 20px; margin-bottom: 16px; }
       .btn { background: #2563eb; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; }
@@ -299,19 +369,19 @@ function layout(title, content, currentPath) {
         <span style="font-size:14px; font-weight:600;">nfyp_ <span style="color:#64748b; font-size:12px;">Admin</span></span>
       </div>
     </div>
-    <div class="container">
-      ${content}
-    </div>
+    <div class="container">${content}</div>
     ${sidebarScript}
   </body>
   </html>
   `;
 }
 
-app.post('/api/aliases', (req, res) => {
+// عند تحديث الـ Aliases من الداشبورد يعيد تسجيل الـ Slash Commands فوراً لتعمل مباشرة بـ /
+app.post('/api/aliases', async (req, res) => {
   const { pluginId, aliases } = req.body;
   if (pluginId && Array.isArray(aliases)) {
     pluginsStore[pluginId] = aliases.map(a => a.trim().toLowerCase()).filter(a => a !== '');
+    await registerSlashCommands(); // تحديث السلاش كاماندز تلقائياً
     return res.json({ success: true });
   }
   res.status(400).json({ success: false });
@@ -327,12 +397,10 @@ app.get('/', (req, res) => {
       <h2 style="margin:0; font-size: 24px; font-weight:700;">Welcome, nfyp_</h2>
       <p style="color: #94a3b8; margin: 4px 0 0 0; font-size: 14px;">Here's what's happening with <strong style="color:#fff;">OS | System</strong> today.</p>
     </div>
-
     <div class="card" style="padding:16px; margin-bottom:16px;">
       <div style="margin-bottom:12px;">
         <button class="btn btn-sky" style="padding:6px 14px; font-size:13px;" onclick="location.reload();"><i class="fa-solid fa-rotate"></i> Refresh Data</button>
       </div>
-
       <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:1px; background:rgba(255,255,255,0.08); border-radius:8px; overflow:hidden; border:1px solid rgba(255,255,255,0.08);">
         <div style="background:#0d1527; padding:16px 12px; text-align:left;">
           <div style="font-size:11px; color:#94a3b8; font-weight:600;">Server Count</div>
@@ -356,7 +424,6 @@ app.get('/', (req, res) => {
   res.send(layout('Dashboard - OS | System', content, '/'));
 });
 
-// صفحة الـ Plugins تضمن الأوامر الـ 23 بالكامل مع ألوانها وأيقوناتها، والـ Aliases فارغة للتعديل
 app.get('/plugins', (req, res) => {
   const rawPlugins = [
     { id: "setnick", name: "setnick", icon: "fa-solid fa-pen", iconBg: "rgba(59, 130, 246, 0.2)", iconColor: "#3b82f6", desc: "Changes the nickname of a member.", usage: "/setnick {@user} {nick}" },
