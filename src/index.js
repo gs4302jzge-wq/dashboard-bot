@@ -309,7 +309,7 @@ app.get('/', (req, res) => {
   res.send(layout('Dashboard - OS | System', content, '/'));
 });
 
-// 2. Plugins Page (With Edit Aliases Modal)
+// 2. Plugins Page (Fixed Edit Aliases Button & Removed خلخو)
 app.get('/plugins', (req, res) => {
   const pluginsData = [
     {
@@ -322,8 +322,8 @@ app.get('/plugins', (req, res) => {
       developer: "Mohammed Alhajri",
       description: "Bans a user from the server.",
       usage: "-ban {@user}",
-      aliases: ["خلخو"],
-      aliasesColor: "#38bdf8",
+      aliases: [],
+      aliasesColor: "#94a3b8",
       enabled: true
     },
     {
@@ -370,7 +370,9 @@ app.get('/plugins', (req, res) => {
     }
   ];
 
-  const pluginCards = pluginsData.map(p => `
+  const pluginCards = pluginsData.map(p => {
+    const jsonAliases = JSON.stringify(p.aliases).replace(/"/g, '&quot;');
+    return `
     <div class="card" style="padding:20px; margin-bottom:18px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
         <div style="display:flex; align-items:center; gap:14px;">
@@ -394,11 +396,11 @@ app.get('/plugins', (req, res) => {
       </div>
 
       <div style="display:flex; gap:10px;">
-        <button class="btn" onclick="openEditModal('${p.id}', '${p.name}', ${JSON.stringify(p.aliases)})" style="background:#2563eb; font-size:12px; padding:6px 14px;"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+        <button class="btn" onclick="openEditModal('${p.id}', '${p.name}', ${jsonAliases})" style="background:#2563eb; font-size:12px; padding:6px 14px;"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
         <button class="btn btn-danger" style="font-size:12px; padding:6px 14px;"><i class="fa-solid fa-trash"></i> Remove</button>
       </div>
     </div>
-  `).join('');
+  `}).join('');
 
   const content = `
     <h2 style="margin-bottom: 18px; font-size:26px; font-weight:700;">Plugins</h2>
@@ -438,7 +440,7 @@ app.get('/plugins', (req, res) => {
 
       function openEditModal(id, name, aliases) {
         currentPluginId = id;
-        currentAliases = [...aliases];
+        currentAliases = Array.isArray(aliases) ? [...aliases] : [];
         renderAliasInputs();
         document.getElementById('editAliasModal').style.display = 'flex';
       }
