@@ -18,7 +18,6 @@ const client = new Client({
   ]
 });
 
-// يقرأ التوكن بأمان من متغيرات البيئة
 const BOT_TOKEN = process.env.DISCORD_TOKEN;
 
 if (BOT_TOKEN) {
@@ -34,10 +33,18 @@ if (BOT_TOKEN) {
 }
 
 // ================= =================
-// 2. إعدادات الـ Dashboard (Express Web Server)
+// 2. إعدادات البيانات والصفحات
 // ================= =================
 const startTime = Date.now();
-const guildCreatedAt = new Date('2025-05-15T00:00:00Z').getTime();
+
+const currentUser = { 
+  id: '154057416353677415', 
+  username: 'nfyp_', 
+  global_name: 'nfyp_',
+  email: 'nfyp@discord.app',
+  avatar: null, 
+  discriminator: '0' 
+};
 
 function getUserAvatar(user) {
   try {
@@ -50,26 +57,6 @@ function getUserAvatar(user) {
   return 'https://cdn.discordapp.com/embed/avatars/0.png';
 }
 
-function getGuildIcon(guild) {
-  try {
-    if (guild && guild.icon) {
-      const isAnimated = typeof guild.icon === 'string' && guild.icon.startsWith('a_');
-      const format = isAnimated ? 'gif' : 'png';
-      return `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.${format}?size=512`;
-    }
-  } catch (e) {}
-  return 'https://cdn.discordapp.com/embed/avatars/1.png';
-}
-
-const currentUser = { 
-  id: '154057416353677415', 
-  username: 'nfyp_', 
-  global_name: 'nfyp_',
-  email: 'nfyp@discord.app',
-  avatar: null, 
-  discriminator: '0' 
-};
-
 const userAvatarUrl = getUserAvatar(currentUser);
 
 let botConfig = {
@@ -80,13 +67,13 @@ let botConfig = {
 
 let pluginsList = [
   { id: 'ban', name: 'Ban', dev: 'Mohammed Alhajri', desc: 'Bans a user from the server.', usageTemplate: 'ban {@user}', aliases: ['خلخو'], icon: 'fa-gavel', color: '#ef4444', enabled: true },
-  { id: 'clear', name: 'clear', dev: 'Mohammed Alhajri', desc: 'Clears messages from a channel.', usageTemplate: 'clear {amount}', aliases: [], icon: 'fa-trash-alt', color: '#06b6d4', enabled: true },
-  { id: 'coin', name: 'coin', dev: 'Mohammed Alhajri', desc: 'Simple coin flip command', usageTemplate: 'coin', aliases: [], icon: 'fa-coins', color: '#eab308', enabled: true },
-  { id: 'kick', name: 'kick', dev: 'Mohammed Alhajri', desc: 'Kicks a user from the server.', usageTemplate: 'kick {@user}', aliases: [], icon: 'fa-user-minus', color: '#f97316', enabled: true },
-  { id: 'ping', name: 'ping', dev: 'Mohammed Alhajri', desc: 'Ping / Pong!', usageTemplate: 'ping', aliases: [], icon: 'fa-tachometer-alt', color: '#10b981', enabled: true }
+  { id: 'clear', name: 'Clear', dev: 'Mohammed Alhajri', desc: 'Clears messages from a channel.', usageTemplate: 'clear {amount}', aliases: [], icon: 'fa-trash-alt', color: '#06b6d4', enabled: true },
+  { id: 'coin', name: 'Coin', dev: 'Mohammed Alhajri', desc: 'Simple coin flip command', usageTemplate: 'coin', aliases: [], icon: 'fa-coins', color: '#eab308', enabled: true },
+  { id: 'kick', name: 'Kick', dev: 'Mohammed Alhajri', desc: 'Kicks a user from the server.', usageTemplate: 'kick {@user}', aliases: [], icon: 'fa-user-minus', color: '#f97316', enabled: true },
+  { id: 'ping', name: 'Ping', dev: 'Mohammed Alhajri', desc: 'Ping / Pong!', usageTemplate: 'ping', aliases: [], icon: 'fa-tachometer-alt', color: '#10b981', enabled: true }
 ];
 
-function renderLayout(title, content) {
+function renderLayout(title, activePath, content) {
   return `
   <!DOCTYPE html>
   <html lang="en">
@@ -130,15 +117,17 @@ function renderLayout(title, content) {
           .uptime-dot { width: 6px; height: 6px; background: #34d399; border-radius: 50%; }
 
           .btn { background: #2563eb; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; text-decoration: none; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; }
-          .btn-danger { background: #ef4444; }
-          .btn-success { background: #16a34a; }
-          .form-control { width: 100%; padding: 10px; background: #1a202c; border: 1px solid #2d3748; border-radius: 6px; color: #fff; outline: none; margin-top: 5px; }
+          .form-control { width: 100%; padding: 10px; background: #1a202c; border: 1px solid #2d3748; border-radius: 6px; color: #fff; outline: none; margin-top: 5px; margin-bottom: 12px; }
           .img-avatar-fixed { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; background-color: #1e293b; }
           .footer { text-align: center; padding: 15px; background: #0f131d; border-top: 1px solid #1a202c; font-size: 12px; color: #6b7280; }
 
           .details-list { list-style: none; padding-left: 5px; margin-top: 10px; }
           .details-list li { color: #cbd5e1; font-size: 14px; margin-bottom: 8px; font-weight: 500; }
           .details-list li b { color: #ffffff; }
+
+          .plugin-item { display: flex; align-items: center; justify-content: space-between; padding: 12px; background: #131825; border: 1px solid #1a202c; border-radius: 6px; margin-bottom: 8px; }
+          .plugin-info { display: flex; align-items: center; gap: 12px; }
+          .plugin-icon { width: 36px; height: 36px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 16px; }
 
           @media (max-width: 600px) {
               .stats-grid-4 { grid-template-columns: repeat(2, 1fr); }
@@ -166,11 +155,11 @@ function renderLayout(title, content) {
                       <span style="font-size:12px; color:#38bdf8;">Administrator</span>
                   </div>
               </div>
-              <a href="/dashboard" class="active"><i class="fas fa-home"></i> Dashboard</a>
-              <a href="/plugins"><i class="fas fa-rocket"></i> Plugins</a>
-              <a href="/guilds"><i class="fas fa-server"></i> Guilds</a>
-              <a href="/support"><i class="fas fa-question-circle"></i> Support</a>
-              <a href="/settings"><i class="fas fa-cog"></i> Settings</a>
+              <a href="/dashboard" class="${activePath === '/dashboard' ? 'active' : ''}"><i class="fas fa-home"></i> Dashboard</a>
+              <a href="/plugins" class="${activePath === '/plugins' ? 'active' : ''}"><i class="fas fa-rocket"></i> Plugins</a>
+              <a href="/guilds" class="${activePath === '/guilds' ? 'active' : ''}"><i class="fas fa-server"></i> Guilds</a>
+              <a href="/support" class="${activePath === '/support' ? 'active' : ''}"><i class="fas fa-question-circle"></i> Support</a>
+              <a href="/settings" class="${activePath === '/settings' ? 'active' : ''}"><i class="fas fa-cog"></i> Settings</a>
           </div>
           <div class="main-content">${content}</div>
       </div>
@@ -186,6 +175,7 @@ function renderLayout(title, content) {
   `;
 }
 
+// 1. الرئيسية
 app.get('/', (req, res) => res.redirect('/dashboard'));
 
 app.get('/dashboard', (req, res) => {
@@ -233,14 +223,9 @@ app.get('/dashboard', (req, res) => {
           </div>
       </div>
 
-      <div style="margin-top:22px; margin-bottom:14px;">
-          <h2 style="color:#ffffff; font-size:20px; font-weight:700;">Dashboard</h2>
-          <p style="font-size:13px; color:#94a3b8; margin-top:2px;">Find the latest news with Discord BOT Dashboard and information about "OS | System"</p>
-      </div>
-
       <div class="card">
           <div class="card-header">🎉 Welcome</div>
-          <p style="font-size:13px; color:#cbd5e1; line-height:1.5;">Welcome to Discord BOT Dashboard V2, this is an early version of the final product! Please report any issues you find!</p>
+          <p style="font-size:13px; color:#cbd5e1; line-height:1.5;">Welcome to Discord BOT Dashboard V2!</p>
           <p style="font-size:13px; color:#ffffff; font-weight:600; margin-top:12px;">Version: 3.0</p>
       </div>
 
@@ -249,13 +234,7 @@ app.get('/dashboard', (req, res) => {
           <ul class="details-list">
               <li>• <b>Username:</b> ${client.user ? client.user.tag : 'OS | System#3523'}</li>
               <li>• <b>Client ID:</b> ${client.user ? client.user.id : '154057416353677415'}</li>
-              <li>• <b>Joined:</b> Saturday, August 22nd, 2026, 4:24 AM</li>
           </ul>
-      </div>
-
-      <div class="card">
-          <div class="card-header">📣 News</div>
-          <p style="font-size:13px; color:#cbd5e1; line-height:1.5;">The Discord BOT Dashboard Marketplace is here, you can find plugins and modules created by developers worldwide!</p>
       </div>
 
       <script>
@@ -272,7 +251,88 @@ app.get('/dashboard', (req, res) => {
           setInterval(updateLiveUptime, 1000);
       </script>
   `;
-  res.send(renderLayout('Dashboard', content));
+  res.send(renderLayout('Dashboard', '/dashboard', content));
+});
+
+// 2. صفحة الـ Plugins
+app.get('/plugins', (req, res) => {
+  let pluginsHTML = pluginsList.map(p => `
+      <div class="plugin-item">
+          <div class="plugin-info">
+              <div class="plugin-icon" style="background:${p.color};"><i class="fas ${p.icon}"></i></div>
+              <div>
+                  <h4 style="color:#fff; font-size:15px;">${p.name}</h4>
+                  <p style="font-size:12px; color:#94a3b8;">${p.desc}</p>
+              </div>
+          </div>
+          <span style="background:${p.enabled ? '#064e3b' : '#7f1d1d'}; color:${p.enabled ? '#34d399' : '#f87171'}; padding:4px 8px; border-radius:4px; font-size:12px;">
+              ${p.enabled ? 'Enabled' : 'Disabled'}
+          </span>
+      </div>
+  `).join('');
+
+  const content = `
+      <h3 style="color:#fff; font-size:18px; font-weight:600; margin-bottom:12px;">Bot Plugins & Commands</h3>
+      <div class="card">
+          <div class="card-header"><i class="fas fa-puzzle-piece" style="color:#38bdf8;"></i> Active Plugins</div>
+          ${pluginsHTML}
+      </div>
+  `;
+  res.send(renderLayout('Plugins', '/plugins', content));
+});
+
+// 3. صفحة الـ Guilds
+app.get('/guilds', (req, res) => {
+  const content = `
+      <h3 style="color:#fff; font-size:18px; font-weight:600; margin-bottom:12px;">Connected Servers</h3>
+      <div class="card">
+          <div class="card-header"><i class="fas fa-server" style="color:#38bdf8;"></i> Server List</div>
+          <div class="plugin-item">
+              <div class="plugin-info">
+                  <div class="plugin-icon" style="background:#3b82f6;"><i class="fas fa-shield-alt"></i></div>
+                  <div>
+                      <h4 style="color:#fff; font-size:15px;">OSCORP RP</h4>
+                      <p style="font-size:12px; color:#94a3b8;">ID: 154057416353677415 | Members: 9</p>
+                  </div>
+              </div>
+              <span style="background:#064e3b; color:#34d399; padding:4px 8px; border-radius:4px; font-size:12px;">Connected</span>
+          </div>
+      </div>
+  `;
+  res.send(renderLayout('Guilds', '/guilds', content));
+});
+
+// 4. صفحة الدعم Support
+app.get('/support', (req, res) => {
+  const content = `
+      <h3 style="color:#fff; font-size:18px; font-weight:600; margin-bottom:12px;">Support & Help</h3>
+      <div class="card">
+          <div class="card-header"><i class="fas fa-headset" style="color:#38bdf8;"></i> Need Help?</div>
+          <p style="font-size:14px; color:#cbd5e1; margin-bottom:12px;">If you encounter any issues or need custom configurations, feel free to contact developer Mohammed Alhajri.</p>
+          <a href="https://discord.gg" target="_blank" class="btn"><i class="fab fa-discord"></i> Join Support Discord</a>
+      </div>
+  `;
+  res.send(renderLayout('Support', '/support', content));
+});
+
+// 5. صفحة الإعدادات Settings
+app.get('/settings', (req, res) => {
+  const content = `
+      <h3 style="color:#fff; font-size:18px; font-weight:600; margin-bottom:12px;">Bot Settings</h3>
+      <div class="card">
+          <div class="card-header"><i class="fas fa-sliders-h" style="color:#38bdf8;"></i> Configuration</div>
+          <form action="/settings/save" method="POST">
+              <label style="font-size:13px; color:#94a3b8;">Bot Prefix</label>
+              <input type="text" name="prefix" class="form-control" value="${botConfig.prefix}" />
+              
+              <label style="font-size:13px; color:#94a3b8;">Dashboard Port</label>
+              <input type="text" name="port" class="form-control" value="${botConfig.port}" readonly />
+
+              <button type="button" class="btn" onclick="alert('Settings Saved Successfully!')"><i class="fas fa-save"></i> Save Settings</button>
+          </form>
+      </div>
+  `;
+  res.send(renderLayout('Settings', '/settings', content));
 });
 
 app.listen(PORT, '0.0.0.0', () => {
