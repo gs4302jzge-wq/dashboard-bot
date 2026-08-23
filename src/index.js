@@ -19,7 +19,7 @@ const pluginsStore = {
   lock: [], unlock: [], setcolor: [], slowmode: [], reset: []
 };
 
-// Base command definitions and settings
+// Base command definitions
 const commandsConfig = [
   { id: 'setnick', name: 'setnick', desc: '✏️ Change nickname of a member', options: [ { name: 'user', desc: 'Target user', type: 'user', req: true }, { name: 'nick', desc: 'New nickname', type: 'string', req: true } ] },
   { id: 'ban', name: 'ban', desc: '🔨 Ban a member', options: [ { name: 'user', desc: 'Target user', type: 'user', req: true } ] },
@@ -58,7 +58,7 @@ const client = new Client({
 
 const BOT_TOKEN = process.env.DISCORD_TOKEN;
 
-// Helper Uptime Calculator
+// Formatted Uptime Helper
 function getFormattedUptime() {
   const diff = Date.now() - BOT_START_TIME;
   const seconds = Math.floor((diff / 1000) % 60);
@@ -89,17 +89,38 @@ const createErrorEmbed = (description) => {
     .setFooter({ text: 'OS | System Security', iconURL: client.user?.displayAvatarURL() });
 };
 
+// Global Command ID Resolver (Supports Base Name & Aliases)
+function resolveCommandId(input) {
+  if (!input) return null;
+  const cleanInput = input.toLowerCase().trim().replace(/[\s-]+/g, '_');
+
+  for (const cmd of commandsConfig) {
+    if (cmd.id === cleanInput || cmd.name.replace(/[\s-]+/g, '_') === cleanInput) {
+      return cmd.id;
+    }
+    const aliases = pluginsStore[cmd.id] || [];
+    const sanitizedAliases = aliases.map(a => a.toLowerCase().trim().replace(/[\s-]+/g, '_'));
+    if (sanitizedAliases.includes(cleanInput)) {
+      return cmd.id;
+    }
+  }
+  return null;
+}
+
 // Register Slash Commands Register Function
 async function registerSlashCommands() {
-  if (!client.user) return;
+  if (!client.user || !BOT_TOKEN) return;
   const slashList = [];
+  const registeredNames = new Set();
 
   for (const cmd of commandsConfig) {
     const namesToRegister = [cmd.name, ...(pluginsStore[cmd.id] || [])];
 
-    for (const name of namesToRegister) {
-      const validName = name.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-z_]/g, '');
-      if (!validName) continue;
+    for (const rawName of namesToRegister) {
+      const validName = rawName.toLowerCase().trim().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+      if (!validName || registeredNames.has(validName)) continue;
+
+      registeredNames.add(validName);
 
       const builder = new SlashCommandBuilder()
         .setName(validName)
@@ -120,93 +141,92 @@ async function registerSlashCommands() {
   const rest = new REST({ version: '10' }).setToken(BOT_TOKEN);
   try {
     await rest.put(Routes.applicationCommands(client.user.id), { body: slashList });
-    console.log(`💎 Registered ${slashList.length} Slash Commands (Including Aliases)!`);
+    console.log(`💎 Registered ${slashList.length} Commands & Aliases to Discord API!`);
   } catch (err) {
-    console.error('Failed to register Slash Commands:', err);
+    console.error('Failed to register Slash Commands:', err.message);
   }
 }
 
-function getCommandIdByName(name) {
-  const cleanName = name.toLowerCase().replace(/_/g, ' ').trim();
-  for (const cmd of commandsConfig) {
-    if (cmd.name === name || cmd.id === name || cmd.name.replace(/_/g, ' ') === cleanName) return cmd.id;
-    const aliases = pluginsStore[cmd.id] || [];
-    if (aliases.includes(name) || aliases.includes(cleanName)) return cmd.id;
-  }
-  return null;
-}
+// Unified Command Router & Execution Engine
+async function handleExecution(commandId, target, options) {
+  const guild = target.guild;
+  const channel = target.channel;
 
-// Unified Command Handler
-async function handleExecution(commandId, interactionOrMessage, options) {
-  const guild = interactionOrMessage.guild;
-  const channel = interactionOrMessage.channel;
-
-  if (commandId === 'setnick') {
-    const user = options.user;
-    const nick = options.nick;
-    const member = await guild.members.fetch(user.id).catch(() => null);
-    if (member) {
-      await member.setNickname(nick).catch(() => null);
-      return interactionOrMessage.reply({ embeds: [createSuccessEmbed('✏️ Nickname Changed', `Successfully changed **${user.tag}** nickname to **${nick}**`)] });
+  try {
+    if (commandId === 'setnick') {
+      const user = options.user;
+      const nick = options.nick;
+      if (!user || !nick) return target.reply({ embeds: [createErrorEmbed('Please provide user and new nickname.')] });
+      const member = await guild.members.fetch(user.id).catch(() => null);
+      if (member) {
+        await member.setNickname(nick).catch(() => null);
+        return target.reply({ embeds: [createSuccessEmbed('✏️ Nickname Changed', `Successfully changed **${user.tag}** nickname to **${nick}**`)] });
+      }
     }
-  }
-  else if (commandId === 'ban') {
-    const user = options.user;
-    const member = await guild.members.fetch(user.id).catch(() => null);
-    if (member) {
-      await member.ban().catch(() => null);
-      return interactionOrMessage.reply({ embeds: [createSuccessEmbed('🔨 Member Banned', `Successfully banned **${user.tag}**.`)] });
+    else if (commandId === 'ban') {
+      const user = options.user;
+      if (!user) return target.reply({ embeds: [createErrorEmbed('Please mention a valid user.')] });
+      const member = await guild.members.fetch(user.id).catch(() => null);
+      if (member) {
+        await member.ban().catch(() => null);
+        return target.reply({ embeds: [createSuccessEmbed('🔨 Member Banned', `Successfully banned **${user.tag}**.`)] });
+      }
     }
-  }
-  else if (commandId === 'unban') {
-    const userId = options.userid;
-    await guild.members.unban(userId).catch(() => null);
-    return interactionOrMessage.reply({ embeds: [createSuccessEmbed('🔓 Member Unbanned', `Successfully unbanned User ID: **${userId}**`)] });
-  }
-  else if (commandId === 'kick') {
-    const user = options.user;
-    const member = await guild.members.fetch(user.id).catch(() => null);
-    if (member) {
-      await member.kick().catch(() => null);
-      return interactionOrMessage.reply({ embeds: [createSuccessEmbed('👢 Member Kicked', `Successfully kicked **${user.tag}**.`)] });
+    else if (commandId === 'unban') {
+      const userId = options.userid;
+      if (!userId) return target.reply({ embeds: [createErrorEmbed('Please provide a user ID.')] });
+      await guild.members.unban(userId).catch(() => null);
+      return target.reply({ embeds: [createSuccessEmbed('🔓 Member Unbanned', `Successfully unbanned User ID: **${userId}**`)] });
     }
-  }
-  else if (commandId === 'vkick') {
-    const user = options.user;
-    const member = await guild.members.fetch(user.id).catch(() => null);
-    if (member && member.voice.channel) {
-      await member.voice.disconnect().catch(() => null);
-      return interactionOrMessage.reply({ embeds: [createSuccessEmbed('🔇 Voice Kick', `Disconnected **${user.tag}** from voice channel.`)] });
+    else if (commandId === 'kick') {
+      const user = options.user;
+      if (!user) return target.reply({ embeds: [createErrorEmbed('Please mention a valid user.')] });
+      const member = await guild.members.fetch(user.id).catch(() => null);
+      if (member) {
+        await member.kick().catch(() => null);
+        return target.reply({ embeds: [createSuccessEmbed('👢 Member Kicked', `Successfully kicked **${user.tag}**.`)] });
+      }
     }
-    return interactionOrMessage.reply({ embeds: [createErrorEmbed('User is not connected to any voice channel.')] });
-  }
-  else if (commandId === 'lock') {
-    await channel.permissionOverwrites.edit(guild.roles.everyone, { SendMessages: false });
-    return interactionOrMessage.reply({ embeds: [createSuccessEmbed('🔒 Channel Locked', 'Disabled message sending in this channel.')] });
-  }
-  else if (commandId === 'unlock') {
-    await channel.permissionOverwrites.edit(guild.roles.everyone, { SendMessages: true });
-    return interactionOrMessage.reply({ embeds: [createSuccessEmbed('🔓 Channel Unlocked', 'Allowed message sending in this channel.')] });
-  }
-  else if (commandId === 'clear') {
-    const amount = options.amount || 10;
-    await channel.bulkDelete(amount, true).catch(() => null);
-    return interactionOrMessage.reply({ embeds: [createSuccessEmbed('🧹 Channel Cleared', `Deleted **${amount}** messages.`)].map(e => e.toJSON()), ephemeral: true });
-  }
-  else if (commandId === 'slowmode') {
-    const seconds = options.seconds || 0;
-    await channel.setRateLimitPerUser(seconds);
-    return interactionOrMessage.reply({ embeds: [createSuccessEmbed('⏳ Slowmode Set', `Channel slowmode set to **${seconds}** seconds.`)] });
-  }
-  else {
-    return interactionOrMessage.reply({ embeds: [createSuccessEmbed(`✅ Command Executed`, `Successfully executed **${commandId}**.`)] });
+    else if (commandId === 'vkick') {
+      const user = options.user;
+      if (!user) return target.reply({ embeds: [createErrorEmbed('Please mention a valid user.')] });
+      const member = await guild.members.fetch(user.id).catch(() => null);
+      if (member && member.voice.channel) {
+        await member.voice.disconnect().catch(() => null);
+        return target.reply({ embeds: [createSuccessEmbed('🔇 Voice Kick', `Disconnected **${user.tag}** from voice channel.`)] });
+      }
+      return target.reply({ embeds: [createErrorEmbed('User is not connected to any voice channel.')] });
+    }
+    else if (commandId === 'lock') {
+      await channel.permissionOverwrites.edit(guild.roles.everyone, { SendMessages: false });
+      return target.reply({ embeds: [createSuccessEmbed('🔒 Channel Locked', 'Disabled message sending in this channel.')] });
+    }
+    else if (commandId === 'unlock') {
+      await channel.permissionOverwrites.edit(guild.roles.everyone, { SendMessages: true });
+      return target.reply({ embeds: [createSuccessEmbed('🔓 Channel Unlocked', 'Allowed message sending in this channel.')] });
+    }
+    else if (commandId === 'clear') {
+      const amount = options.amount || 10;
+      await channel.bulkDelete(amount, true).catch(() => null);
+      return target.reply({ embeds: [createSuccessEmbed('🧹 Channel Cleared', `Deleted **${amount}** messages.`)].map(e => e.toJSON()), ephemeral: true });
+    }
+    else if (commandId === 'slowmode') {
+      const seconds = options.seconds || 0;
+      await channel.setRateLimitPerUser(seconds);
+      return target.reply({ embeds: [createSuccessEmbed('⏳ Slowmode Set', `Channel slowmode set to **${seconds}** seconds.`)] });
+    }
+    else {
+      return target.reply({ embeds: [createSuccessEmbed(`✅ Command Executed`, `Successfully executed plugin **${commandId}**.`)] });
+    }
+  } catch (err) {
+    return target.reply({ embeds: [createErrorEmbed(`Failed to execute command: ${err.message}`)] });
   }
 }
 
 // Interaction Event Listener
 client.on('interactionCreate', async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
-  const commandId = getCommandIdByName(interaction.commandName);
+  const commandId = resolveCommandId(interaction.commandName);
   
   if (commandId) {
     const options = {
@@ -230,9 +250,9 @@ client.on('messageCreate', async (message) => {
   if (message.author.bot || !message.content.startsWith(PREFIX)) return;
 
   const args = message.content.slice(PREFIX.length).trim().split(/ +/);
-  const cmdName = args.shift().toLowerCase();
+  const rawCmd = args.shift();
+  const commandId = resolveCommandId(rawCmd);
 
-  const commandId = getCommandIdByName(cmdName);
   if (commandId) {
     const options = {
       user: message.mentions.users.first() || client.users.cache.get(args[0]),
@@ -252,9 +272,7 @@ if (BOT_TOKEN) {
     console.log(`🤖 Logged in as: ${client.user.tag}`);
     registerSlashCommands();
   });
-  client.login(BOT_TOKEN).catch(err => {
-    console.error('❌ Login Error:', err.message);
-  });
+  client.login(BOT_TOKEN).catch(err => console.error('❌ Login Error:', err.message));
 }
 
 // UI Components
@@ -365,20 +383,21 @@ function layout(title, content, currentPath) {
   `;
 }
 
-// REST API for Live Uptime updates
-app.get('/api/uptime', (req, res) => {
-  res.json(getFormattedUptime());
-});
+// REST API for Live Uptime
+app.get('/api/uptime', (req, res) => res.json(getFormattedUptime()));
 
-// Update Aliases POST Handler
+// Dynamic Aliases POST Handler with Instant Discord Sync
 app.post('/api/aliases', async (req, res) => {
   const { pluginId, aliases } = req.body;
   if (pluginId && Array.isArray(aliases)) {
-    pluginsStore[pluginId] = aliases.map(a => a.trim().toLowerCase()).filter(a => a !== '');
+    pluginsStore[pluginId] = aliases
+      .map(a => a.trim().toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, ''))
+      .filter(a => a !== '');
+      
     await registerSlashCommands();
-    return res.json({ success: true });
+    return res.json({ success: true, updated: pluginsStore[pluginId] });
   }
-  res.status(400).json({ success: false });
+  res.status(400).json({ success: false, error: 'Invalid Parameters' });
 });
 
 // Main Dashboard Page
@@ -401,7 +420,6 @@ app.get('/', (req, res) => {
       </div>
     </div>
 
-    <!-- Fancy Banner Announcement -->
     <div class="card" style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(15, 23, 42, 0.8)); border: 1px solid rgba(59, 130, 246, 0.3); padding:20px; position:relative; overflow:hidden;">
       <div style="position:relative; z-index:2;">
         <div style="display:flex; align-items:center; gap:8px; color:#38bdf8; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:1px; margin-bottom:6px;">
@@ -409,12 +427,11 @@ app.get('/', (req, res) => {
         </div>
         <h3 style="margin:0 0 8px 0; font-size:18px; color:#fff; font-weight:700;">Advanced Discord Bot Ecosystem Active</h3>
         <p style="margin:0; font-size:13px; color:#cbd5e1; line-height:1.6; max-width:650px;">
-          All automated moderation systems,Slash Commands, and custom routing engines are working seamlessly in real-time.
+          All automated moderation systems, Dynamic Aliases Router, and Slash Commands are working seamlessly in real-time.
         </p>
       </div>
     </div>
 
-    <!-- Live Uptime Panel -->
     <div class="card" style="padding:20px; margin-bottom:16px; background: linear-gradient(135deg, #0d1527, #0f1c38); border: 1px solid rgba(56, 189, 248, 0.25);">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
         <div style="display:flex; align-items:center; gap:10px;">
@@ -433,7 +450,6 @@ app.get('/', (req, res) => {
       </div>
     </div>
 
-    <!-- Stats Table Grid -->
     <div class="card" style="padding:18px; margin-bottom:16px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
         <h4 style="margin:0; font-size:15px; font-weight:700; color:#cbd5e1;">Live System Overview</h4>
@@ -459,27 +475,6 @@ app.get('/', (req, res) => {
       </div>
     </div>
 
-    <!-- Features Overview List -->
-    <div class="card" style="padding:18px;">
-      <h4 style="margin:0 0 12px 0; font-size:15px; font-weight:700; color:#cbd5e1;">Quick System Status</h4>
-      <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:12px;">
-        <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); padding:12px; border-radius:8px; display:flex; align-items:center; gap:12px;">
-          <i class="fa-solid fa-circle-check" style="color:#22c55e; font-size:18px;"></i>
-          <div>
-            <div style="font-size:13px; font-weight:700; color:#fff;">Slash Commands Engine</div>
-            <div style="font-size:11px; color:#94a3b8;">Fully synchronized with Discord API</div>
-          </div>
-        </div>
-        <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); padding:12px; border-radius:8px; display:flex; align-items:center; gap:12px;">
-          <i class="fa-solid fa-circle-check" style="color:#22c55e; font-size:18px;"></i>
-          <div>
-            <div style="font-size:13px; font-weight:700; color:#fff;">Dynamic Aliases Router</div>
-            <div style="font-size:11px; color:#94a3b8;">Instant update across all active plugins</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <script>
       setInterval(async () => {
         try {
@@ -498,7 +493,7 @@ app.get('/', (req, res) => {
   res.send(layout('Dashboard - OS | System', content, '/'));
 });
 
-// Welcome & System Page (Fully in English with presets & custom inputs)
+// Welcome Page
 app.get('/welcome', (req, res) => {
   const content = `
     <div style="margin-bottom: 20px;">
@@ -531,20 +526,6 @@ app.get('/welcome', (req, res) => {
         </div>
       </div>
     </div>
-
-    <div class="card">
-      <h3 style="margin-top:0; font-size:18px; color:#fff;"><i class="fa-solid fa-sliders" style="color:#38bdf8;"></i> English Preset Messages</h3>
-      <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:12px; margin-top:14px;">
-        <div style="background:#060a14; padding:12px; border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
-          <div style="font-weight:700; color:#38bdf8; font-size:13px; margin-bottom:4px;">Standard Welcome</div>
-          <div style="font-size:12px; color:#94a3b8;">"Welcome {user}! Glad to see you joined our server!"</div>
-        </div>
-        <div style="background:#060a14; padding:12px; border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
-          <div style="font-weight:700; color:#38bdf8; font-size:13px; margin-bottom:4px;">Gaming Community</div>
-          <div style="font-size:12px; color:#94a3b8;">"A wild {user} appeared! Welcome to the battlefield!"</div>
-        </div>
-      </div>
-    </div>
   `;
   res.send(layout('Welcome & System - OS | System', content, '/welcome'));
 });
@@ -557,10 +538,10 @@ app.get('/plugins', (req, res) => {
     { id: "unban", name: "unban", icon: "fa-solid fa-lock-open", iconBg: "rgba(34, 197, 94, 0.2)", iconColor: "#22c55e", desc: "Unbans a member.", usage: "/unban {userid}" },
     { id: "kick", name: "kick", icon: "fa-solid fa-user-minus", iconBg: "rgba(249, 115, 22, 0.2)", iconColor: "#f97316", desc: "Kicks a member.", usage: "/kick {@user}" },
     { id: "vkick", name: "vkick", icon: "fa-solid fa-phone-slash", iconBg: "rgba(239, 68, 68, 0.2)", iconColor: "#ef4444", desc: "Kicks a member from a voice channel", usage: "/vkick {@user}" },
-    { id: "mute_text", name: "mute text", icon: "fa-solid fa-comment-slash", iconBg: "rgba(100, 116, 139, 0.2)", iconColor: "#94a3b8", desc: "Mute a member so they can't type in text channels.", usage: "/mute text {@user}" },
-    { id: "unmute_text", name: "unmute text", icon: "fa-solid fa-comment", iconBg: "rgba(34, 197, 94, 0.2)", iconColor: "#22c55e", desc: "Unmutes a member.", usage: "/unmute text {@user}" },
-    { id: "mute_voice", name: "mute voice", icon: "fa-solid fa-microphone-slash", iconBg: "rgba(239, 68, 68, 0.2)", iconColor: "#ef4444", desc: "Mute a member so they can't speak in voice channels.", usage: "/mute voice {@user}" },
-    { id: "unmute_voice", name: "unmute voice", icon: "fa-solid fa-microphone", iconBg: "rgba(34, 197, 94, 0.2)", iconColor: "#22c55e", desc: "Unmutes a member from voice channels.", usage: "/unmute voice {@user}" },
+    { id: "mute_text", name: "mute_text", icon: "fa-solid fa-comment-slash", iconBg: "rgba(100, 116, 139, 0.2)", iconColor: "#94a3b8", desc: "Mute a member so they can't type in text channels.", usage: "/mute_text {@user}" },
+    { id: "unmute_text", name: "unmute_text", icon: "fa-solid fa-comment", iconBg: "rgba(34, 197, 94, 0.2)", iconColor: "#22c55e", desc: "Unmutes a member.", usage: "/unmute_text {@user}" },
+    { id: "mute_voice", name: "mute_voice", icon: "fa-solid fa-microphone-slash", iconBg: "rgba(239, 68, 68, 0.2)", iconColor: "#ef4444", desc: "Mute a member so they can't speak in voice channels.", usage: "/mute_voice {@user}" },
+    { id: "unmute_voice", name: "unmute_voice", icon: "fa-solid fa-microphone", iconBg: "rgba(34, 197, 94, 0.2)", iconColor: "#22c55e", desc: "Unmutes a member from voice channels.", usage: "/unmute_voice {@user}" },
     { id: "timeout", name: "timeout", icon: "fa-solid fa-clock", iconBg: "rgba(234, 179, 8, 0.2)", iconColor: "#eab308", desc: "Timeouts a member.", usage: "/timeout {@user} {minutes}" },
     { id: "untimeout", name: "untimeout", icon: "fa-solid fa-bell", iconBg: "rgba(59, 130, 246, 0.2)", iconColor: "#3b82f6", desc: "Removes a timeout from a member.", usage: "/untimeout {@user}" },
     { id: "clear", name: "clear", icon: "fa-solid fa-broom", iconBg: "rgba(20, 184, 166, 0.2)", iconColor: "#14b8a6", desc: "Cleans up channel messages.", usage: "/clear {amount}" },
@@ -607,14 +588,13 @@ app.get('/plugins', (req, res) => {
       </div>
 
       <div style="display:flex; gap:10px;">
-        <button class="btn" onclick="openEditModal('${p.id}', '${p.name}', ${jsonAliases})" style="background:#2563eb; font-size:12px; padding:6px 14px;"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-        <button class="btn btn-danger" style="font-size:12px; padding:6px 14px;"><i class="fa-solid fa-trash"></i> Remove</button>
+        <button class="btn" onclick="openEditModal('${p.id}', '${p.name}', ${jsonAliases})" style="background:#2563eb; font-size:12px; padding:6px 14px;"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
       </div>
     </div>
   `}).join('');
 
   const content = `
-    <h2 style="margin-bottom: 18px; font-size:26px; font-weight:700;">Plugins</h2>
+    <h2 style="margin-bottom: 18px; font-size:26px; font-weight:700;">Plugins Management</h2>
     <div>${pluginCards}</div>
 
     <div id="editAliasModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; align-items:center; justify-content:center; padding:15px; box-sizing:border-box;">
@@ -659,7 +639,7 @@ app.get('/plugins', (req, res) => {
           const div = document.createElement('div');
           div.style.cssText = 'display:flex; align-items:center; gap:8px;';
           div.innerHTML = \`
-            <input type="text" value="\${alias}" oninput="currentAliases[\${index}] = this.value" style="flex:1; background:#060a14; border:1px solid rgba(255,255,255,0.15); color:#fff; padding:8px 12px; border-radius:6px; font-size:13px; outline:none;">
+            <input type="text" value="\${alias}" oninput="currentAliases[\${index}] = this.value" placeholder="e.g. n, nick, nickname" style="flex:1; background:#060a14; border:1px solid rgba(255,255,255,0.15); color:#fff; padding:8px 12px; border-radius:6px; font-size:13px; outline:none;">
             <button onclick="removeAliasField(\${index})" style="background:#ef4444; border:none; color:#fff; width:34px; height:34px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:13px;">
               <i class="fa-solid fa-trash"></i>
             </button>
@@ -711,7 +691,7 @@ app.get('/plugins', (req, res) => {
           if (response.ok) {
             location.reload();
           } else {
-            alert('Failed to save aliases');
+            alert('Failed to save aliases. Make sure bot token is valid.');
             saveBtn.disabled = false;
             saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save';
           }
