@@ -8,7 +8,6 @@ app.use(express.urlencoded({ extended: true }));
 const startTime = Date.now();
 const guildCreatedAt = new Date('2025-05-15T00:00:00Z').getTime();
 
-// دالة جلب صورة المستخدم من ديسكورد
 function getUserAvatar(user) {
   try {
     if (user && user.avatar) {
@@ -30,7 +29,6 @@ function getUserAvatar(user) {
   return 'https://cdn.discordapp.com/embed/avatars/0.png';
 }
 
-// دالة جلب صورة السيرفر من ديسكورد
 function getGuildIcon(guild) {
   try {
     if (guild && guild.icon) {
@@ -44,7 +42,6 @@ function getGuildIcon(guild) {
   return 'https://cdn.discordapp.com/embed/avatars/1.png';
 }
 
-// بيانات مؤقتة تمثل بيانات المستخدم والسيرفر
 const currentUser = { id: '154057416353677415', avatar: null, discriminator: '0' };
 const currentGuild = { id: '119830128491028391', icon: null };
 
@@ -58,11 +55,11 @@ let botConfig = {
 };
 
 let pluginsList = [
-  { id: 'ban', name: 'Ban', dev: 'Mohammed Alhajri', desc: 'Bans a user from the server.', usage: '-ban {@user}', aliases: 'خلخو', icon: 'fa-gavel', color: '#ef4444', enabled: true },
-  { id: 'clear', name: 'clear', dev: 'Mohammed Alhajri', desc: 'Clears messages from a channel.', usage: '-clear {amount}', aliases: 'None', icon: 'fa-trash-alt', color: '#06b6d4', enabled: true },
-  { id: 'coin', name: 'coin', dev: 'Mohammed Alhajri', desc: 'Simple coin flip command', usage: '-coin', aliases: 'None', icon: 'fa-coins', color: '#eab308', enabled: true },
-  { id: 'kick', name: 'kick', dev: 'Mohammed Alhajri', desc: 'Kicks a user from the server.', usage: '-kick {@user}', aliases: 'None', icon: 'fa-user-minus', color: '#f97316', enabled: true },
-  { id: 'ping', name: 'ping', dev: 'Mohammed Alhajri', desc: 'Ping / Pong!', usage: '-ping', aliases: 'None', icon: 'fa-tachometer-alt', color: '#10b981', enabled: true }
+  { id: 'ban', name: 'Ban', dev: 'Mohammed Alhajri', desc: 'Bans a user from the server.', usage: '-ban {@user}', aliases: ['خلخو'], icon: 'fa-gavel', color: '#ef4444', enabled: true },
+  { id: 'clear', name: 'clear', dev: 'Mohammed Alhajri', desc: 'Clears messages from a channel.', usage: '-clear {amount}', aliases: [], icon: 'fa-trash-alt', color: '#06b6d4', enabled: true },
+  { id: 'coin', name: 'coin', dev: 'Mohammed Alhajri', desc: 'Simple coin flip command', usage: '-coin', aliases: [], icon: 'fa-coins', color: '#eab308', enabled: true },
+  { id: 'kick', name: 'kick', dev: 'Mohammed Alhajri', desc: 'Kicks a user from the server.', usage: '-kick {@user}', aliases: [], icon: 'fa-user-minus', color: '#f97316', enabled: true },
+  { id: 'ping', name: 'ping', dev: 'Mohammed Alhajri', desc: 'Ping / Pong!', usage: '-ping', aliases: [], icon: 'fa-tachometer-alt', color: '#10b981', enabled: true }
 ];
 
 function getUptime() {
@@ -72,18 +69,6 @@ function getUptime() {
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
   return `${days}d ${hours}h ${minutes}m ${seconds}s`;
-}
-
-function getGuildAgeParts() {
-  const diff = Math.floor((Date.now() - guildCreatedAt) / 1000);
-  const years = Math.floor(diff / (365 * 24 * 3600));
-  const months = Math.floor((diff % (365 * 24 * 3600)) / (30 * 24 * 3600));
-  const days = Math.floor((diff % (30 * 24 * 3600)) / (24 * 3600));
-  const hours = Math.floor((diff % (24 * 3600)) / 3600);
-  const minutes = Math.floor((diff % 3600) / 60);
-  const seconds = diff % 60;
-
-  return { years, months, days, hours, minutes, seconds };
 }
 
 function renderLayout(title, content) {
@@ -120,6 +105,7 @@ function renderLayout(title, content) {
           .stat-box { background: #111827; border: 1px solid #1f2937; border-radius: 8px; padding: 15px; text-align: center; }
           .stat-value { font-size: 20px; font-weight: bold; color: #38bdf8; margin-top: 5px; }
           .btn { background: #2563eb; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; text-decoration: none; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; }
+          .btn-danger { background: #ef4444; }
           .btn-success { background: #16a34a; }
           .form-control { width: 100%; padding: 10px; background: #1f2937; border: 1px solid #374151; border-radius: 6px; color: #fff; outline: none; margin-top: 5px; }
           .switch { position: relative; display: inline-block; width: 44px; height: 22px; }
@@ -133,6 +119,14 @@ function renderLayout(title, content) {
           .img-avatar-fixed { width: 38px; height: 38px; border-radius: 50%; border: 2px solid #38bdf8; object-fit: cover; background-color: #1e293b; }
           .img-guild-fixed { width: 65px; height: 65px; border-radius: 50%; border: 2px solid #38bdf8; box-shadow: 0 0 15px rgba(56,189,248,0.3); object-fit: cover; background-color: #1e293b; }
           .footer { text-align: center; padding: 20px; background: #111827; border-top: 1px solid #1f2937; font-size: 13px; color: #6b7280; }
+
+          .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); z-index: 2000; align-items: center; justify-content: center; }
+          .modal-overlay.active { display: flex; }
+          .modal-box { background: #111827; border: 1px solid #1f2937; border-radius: 12px; width: 90%; max-width: 450px; padding: 20px; color: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
+          .modal-header { display: flex; justify-content: space-between; align-items: center; font-size: 18px; font-weight: bold; margin-bottom: 15px; border-bottom: 1px solid #1f2937; padding-bottom: 10px; }
+          .alias-item { display: flex; gap: 8px; margin-bottom: 10px; }
+          .alias-item input { flex: 1; }
+          .alias-limit-msg { color: #ef4444; font-size: 12px; font-weight: bold; margin-top: 5px; display: none; text-transform: uppercase; }
       </style>
   </head>
   <body>
@@ -202,8 +196,10 @@ app.get('/dashboard', (req, res) => {
 });
 
 app.get('/plugins', (req, res) => {
-  let pluginsHTML = pluginsList.map(p => `
-      <div class="card" style="position:relative; overflow:hidden;">
+  let pluginsHTML = pluginsList.map(p => {
+    const aliasStr = p.aliases.length > 0 ? p.aliases.join(', ') : 'None';
+    return `
+      <div class="card">
           <div style="display:flex; justify-content:space-between; align-items:center;">
               <h3 style="color:#fff; display:flex; align-items:center; gap:12px;">
                   <div style="width:42px; height:42px; border-radius:10px; background:${p.color}22; border:1px solid ${p.color}; display:flex; align-items:center; justify-content:center;">
@@ -218,26 +214,101 @@ app.get('/plugins', (req, res) => {
           </div>
           <p style="margin: 12px 0 6px 0; font-size: 14px;"><b>Developer:</b> ${p.dev}</p>
           <p style="margin: 6px 0; font-size: 14px;"><b>Description:</b> ${p.desc}</p>
-          <p style="margin: 6px 0; font-size: 14px;"><b>Aliases:</b> <span style="color:#38bdf8">${p.aliases}</span></p>
-          <div style="margin-top:12px;">
-              <button onclick="editAlias('${p.id}', '${p.aliases}')" class="btn"><i class="fas fa-edit"></i> Edit</button>
+          <p style="margin: 6px 0; font-size: 14px;"><b>Usage:</b> <code style="background:#1f2937; padding:2px 6px; border-radius:4px; color:#38bdf8;">${p.usage}</code></p>
+          <p style="margin: 6px 0; font-size: 14px;"><b>Aliases:</b> <span style="color:#38bdf8">${aliasStr}</span></p>
+          <div style="margin-top:15px; display:flex; gap:10px;">
+              <button onclick="openAliasModal('${p.id}')" class="btn"><i class="fas fa-edit"></i> Edit</button>
+              <button class="btn btn-danger"><i class="fas fa-trash"></i> Remove</button>
           </div>
       </div>
-  `).join('');
+    `;
+  }).join('');
 
   const content = `
       <h2 style="color:#fff; margin-bottom: 10px;">Plugins</h2>
       ${pluginsHTML}
+
+      <div class="modal-overlay" id="aliasModal">
+          <div class="modal-box">
+              <div class="modal-header">
+                  <span><i class="fas fa-edit"></i> Edit Aliases</span>
+                  <i class="fas fa-times" style="cursor:pointer;" onclick="closeAliasModal()"></i>
+              </div>
+              <p style="font-size:13px; color:#94a3b8; margin-bottom:10px;">Aliases (up to 5)</p>
+              <div id="aliasInputsContainer"></div>
+              <div class="alias-limit-msg" id="limitMsg">YOU HAVE REACHED 5 LIMIT ONLY</div>
+              <div style="margin-top:15px; display:flex; justify-content:space-between; align-items:center;">
+                  <button class="btn" type="button" id="addAliasBtn" onclick="addAliasField()"><i class="fas fa-plus"></i> Add Alias</button>
+                  <div style="display:flex; gap:8px;">
+                      <button class="btn" style="background:#374151;" onclick="closeAliasModal()">Cancel</button>
+                      <button class="btn btn-success" onclick="saveAliases()"><i class="fas fa-save"></i> Save</button>
+                  </div>
+              </div>
+          </div>
+      </div>
+
       <script>
-          function editAlias(id, old) {
-              const val = prompt('Edit Aliases:', old);
-              if(val !== null) {
-                  fetch('/api/plugins/alias/' + id, {
-                      method: 'POST',
-                      headers: {'Content-Type': 'application/json'},
-                      body: JSON.stringify({ alias: val })
-                  }).then(() => location.reload());
+          const pluginsData = ${JSON.stringify(pluginsList)};
+          let currentPluginId = null;
+          let currentAliases = [];
+
+          function openAliasModal(id) {
+              currentPluginId = id;
+              const plugin = pluginsData.find(x => x.id === id);
+              currentAliases = plugin ? [...plugin.aliases] : [];
+              renderAliasFields();
+              document.getElementById('aliasModal').classList.add('active');
+          }
+
+          function closeAliasModal() {
+              document.getElementById('aliasModal').classList.remove('active');
+          }
+
+          function renderAliasFields() {
+              const container = document.getElementById('aliasInputsContainer');
+              container.innerHTML = '';
+              currentAliases.forEach((alias, index) => {
+                  const div = document.createElement('div');
+                  div.className = 'alias-item';
+                  div.innerHTML = \`
+                      <input type="text" class="form-control" value="\${alias}" oninput="currentAliases[\${index}] = this.value">
+                      <button class="btn btn-danger" onclick="removeAliasField(\${index})"><i class="fas fa-trash"></i></button>
+                  \`;
+                  container.appendChild(div);
+              });
+
+              const limitMsg = document.getElementById('limitMsg');
+              const addBtn = document.getElementById('addAliasBtn');
+              if (currentAliases.length >= 5) {
+                  limitMsg.style.display = 'block';
+                  addBtn.style.opacity = '0.5';
+                  addBtn.style.pointerEvents = 'none';
+              } else {
+                  limitMsg.style.display = 'none';
+                  addBtn.style.opacity = '1';
+                  addBtn.style.pointerEvents = 'auto';
               }
+          }
+
+          function addAliasField() {
+              if (currentAliases.length < 5) {
+                  currentAliases.push('');
+                  renderAliasFields();
+              }
+          }
+
+          function removeAliasField(index) {
+              currentAliases.splice(index, 1);
+              renderAliasFields();
+          }
+
+          function saveAliases() {
+              const cleaned = currentAliases.map(a => a.trim()).filter(a => a !== '');
+              fetch('/api/plugins/alias/' + currentPluginId, {
+                  method: 'POST',
+                  headers: {'Content-Type': 'application/json'},
+                  body: JSON.stringify({ aliases: cleaned })
+              }).then(() => location.reload());
           }
       </script>
   `;
@@ -245,7 +316,6 @@ app.get('/plugins', (req, res) => {
 });
 
 app.get('/guilds', (req, res) => {
-  const age = getGuildAgeParts();
   const content = `
       <h2 style="color:#fff; margin-bottom: 10px;">Guilds</h2>
       <p style="margin-bottom: 20px;">See all the Guilds (Servers) that your BOT is in.</p>
@@ -266,18 +336,53 @@ app.get('/guilds', (req, res) => {
           </div>
           <div style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%); padding: 25px; border-radius: 16px; border: 1px solid #312e81; box-shadow: 0 10px 30px rgba(0,0,0,0.6); text-align: center; margin-top:20px; position:relative; overflow:hidden;">
               <h4 style="color: #facc15; font-size: 16px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; font-weight:800;">
-                  <i class="fas fa-crown" style="margin-right: 8px; color:#facc15;"></i> Server Created Duration
+                  <i class="fas fa-crown" style="margin-right: 8px; color:#facc15;"></i> SERVER CREATED DURATION
               </h4>
               <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
-                  <div style="background:#111827; border:1px solid #374151; padding:10px 14px; border-radius:10px; min-width:80px;"><span style="font-size:22px; font-weight:bold; color:#38bdf8;">${age.years}</span><div style="font-size:10px; color:#94a3b8;">Years</div></div>
-                  <div style="background:#111827; border:1px solid #374151; padding:10px 14px; border-radius:10px; min-width:80px;"><span style="font-size:22px; font-weight:bold; color:#38bdf8;">${age.months}</span><div style="font-size:10px; color:#94a3b8;">Months</div></div>
-                  <div style="background:#111827; border:1px solid #374151; padding:10px 14px; border-radius:10px; min-width:80px;"><span style="font-size:22px; font-weight:bold; color:#38bdf8;">${age.days}</span><div style="font-size:10px; color:#94a3b8;">Days</div></div>
-                  <div style="background:#111827; border:1px solid #374151; padding:10px 14px; border-radius:10px; min-width:80px;"><span style="font-size:22px; font-weight:bold; color:#38bdf8;">${age.hours}</span><div style="font-size:10px; color:#94a3b8;">Hours</div></div>
-                  <div style="background:#111827; border:1px solid #374151; padding:10px 14px; border-radius:10px; min-width:80px;"><span style="font-size:22px; font-weight:bold; color:#38bdf8;">${age.minutes}</span><div style="font-size:10px; color:#94a3b8;">Mins</div></div>
-                  <div style="background:#111827; border:1px solid #374151; padding:10px 14px; border-radius:10px; min-width:80px;"><span style="font-size:22px; font-weight:bold; color:#38bdf8;">${age.seconds}</span><div style="font-size:10px; color:#94a3b8;">Secs</div></div>
+                  <div style="background:#111827; border:1px solid #374151; padding:10px 14px; border-radius:10px; min-width:70px;"><span id="timer-years" style="font-size:22px; font-weight:bold; color:#38bdf8;">0</span><div style="font-size:10px; color:#94a3b8;">Years</div></div>
+                  <div style="background:#111827; border:1px solid #374151; padding:10px 14px; border-radius:10px; min-width:70px;"><span id="timer-months" style="font-size:22px; font-weight:bold; color:#38bdf8;">0</span><div style="font-size:10px; color:#94a3b8;">Months</div></div>
+                  <div style="background:#111827; border:1px solid #374151; padding:10px 14px; border-radius:10px; min-width:70px;"><span id="timer-days" style="font-size:22px; font-weight:bold; color:#38bdf8;">0</span><div style="font-size:10px; color:#94a3b8;">Days</div></div>
+                  <div style="background:#111827; border:1px solid #374151; padding:10px 14px; border-radius:10px; min-width:70px;"><span id="timer-hours" style="font-size:22px; font-weight:bold; color:#38bdf8;">0</span><div style="font-size:10px; color:#94a3b8;">Hours</div></div>
+                  <div style="background:#111827; border:1px solid #374151; padding:10px 14px; border-radius:10px; min-width:70px;"><span id="timer-mins" style="font-size:22px; font-weight:bold; color:#38bdf8;">0</span><div style="font-size:10px; color:#94a3b8;">Mins</div></div>
+                  <div style="background:#111827; border:1px solid #374151; padding:10px 14px; border-radius:10px; min-width:70px;"><span id="timer-secs" style="font-size:22px; font-weight:bold; color:#38bdf8;">0</span><div style="font-size:10px; color:#94a3b8;">Secs</div></div>
               </div>
           </div>
       </div>
+
+      <script>
+          const createdTimestamp = ${guildCreatedAt};
+
+          function updateLiveAge() {
+              const now = Date.now();
+              let diff = Math.floor((now - createdTimestamp) / 1000);
+              if (diff < 0) diff = 0;
+
+              const years = Math.floor(diff / (365 * 24 * 3600));
+              diff %= (365 * 24 * 3600);
+
+              const months = Math.floor(diff / (30 * 24 * 3600));
+              diff %= (30 * 24 * 3600);
+
+              const days = Math.floor(diff / (24 * 3600));
+              diff %= (24 * 3600);
+
+              const hours = Math.floor(diff / 3600);
+              diff %= 3600;
+
+              const minutes = Math.floor(diff / 60);
+              const seconds = diff % 60;
+
+              document.getElementById('timer-years').innerText = years;
+              document.getElementById('timer-months').innerText = months;
+              document.getElementById('timer-days').innerText = days;
+              document.getElementById('timer-hours').innerText = hours;
+              document.getElementById('timer-mins').innerText = minutes;
+              document.getElementById('timer-secs').innerText = seconds;
+          }
+
+          updateLiveAge();
+          setInterval(updateLiveAge, 1000);
+      </script>
   `;
   res.send(renderLayout('Guilds', content));
 });
@@ -331,7 +436,9 @@ app.post('/api/plugins/toggle/:id', (req, res) => {
 
 app.post('/api/plugins/alias/:id', (req, res) => {
   const p = pluginsList.find(x => x.id === req.params.id);
-  if (p) p.aliases = req.body.alias || 'None';
+  if (p) {
+    p.aliases = Array.isArray(req.body.aliases) ? req.body.aliases : [];
+  }
   res.json({ success: true });
 });
 
