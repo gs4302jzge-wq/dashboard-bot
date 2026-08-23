@@ -55,11 +55,11 @@ let botConfig = {
 };
 
 let pluginsList = [
-  { id: 'ban', name: 'Ban', dev: 'Mohammed Alhajri', desc: 'Bans a user from the server.', usage: '-ban {@user}', aliases: ['خلخو'], icon: 'fa-gavel', color: '#ef4444', enabled: true },
-  { id: 'clear', name: 'clear', dev: 'Mohammed Alhajri', desc: 'Clears messages from a channel.', usage: '-clear {amount}', aliases: [], icon: 'fa-trash-alt', color: '#06b6d4', enabled: true },
-  { id: 'coin', name: 'coin', dev: 'Mohammed Alhajri', desc: 'Simple coin flip command', usage: '-coin', aliases: [], icon: 'fa-coins', color: '#eab308', enabled: true },
-  { id: 'kick', name: 'kick', dev: 'Mohammed Alhajri', desc: 'Kicks a user from the server.', usage: '-kick {@user}', aliases: [], icon: 'fa-user-minus', color: '#f97316', enabled: true },
-  { id: 'ping', name: 'ping', dev: 'Mohammed Alhajri', desc: 'Ping / Pong!', usage: '-ping', aliases: [], icon: 'fa-tachometer-alt', color: '#10b981', enabled: true }
+  { id: 'ban', name: 'Ban', dev: 'Mohammed Alhajri', desc: 'Bans a user from the server.', usageTemplate: 'ban {@user}', aliases: ['خلخو'], icon: 'fa-gavel', color: '#ef4444', enabled: true },
+  { id: 'clear', name: 'clear', dev: 'Mohammed Alhajri', desc: 'Clears messages from a channel.', usageTemplate: 'clear {amount}', aliases: [], icon: 'fa-trash-alt', color: '#06b6d4', enabled: true },
+  { id: 'coin', name: 'coin', dev: 'Mohammed Alhajri', desc: 'Simple coin flip command', usageTemplate: 'coin', aliases: [], icon: 'fa-coins', color: '#eab308', enabled: true },
+  { id: 'kick', name: 'kick', dev: 'Mohammed Alhajri', desc: 'Kicks a user from the server.', usageTemplate: 'kick {@user}', aliases: [], icon: 'fa-user-minus', color: '#f97316', enabled: true },
+  { id: 'ping', name: 'ping', dev: 'Mohammed Alhajri', desc: 'Ping / Pong!', usageTemplate: 'ping', aliases: [], icon: 'fa-tachometer-alt', color: '#10b981', enabled: true }
 ];
 
 function getUptime() {
@@ -198,6 +198,7 @@ app.get('/dashboard', (req, res) => {
 app.get('/plugins', (req, res) => {
   let pluginsHTML = pluginsList.map(p => {
     const aliasStr = p.aliases.length > 0 ? p.aliases.join(', ') : 'None';
+    const dynamicUsage = botConfig.prefix + p.usageTemplate;
     return `
       <div class="card">
           <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -214,7 +215,7 @@ app.get('/plugins', (req, res) => {
           </div>
           <p style="margin: 12px 0 6px 0; font-size: 14px;"><b>Developer:</b> ${p.dev}</p>
           <p style="margin: 6px 0; font-size: 14px;"><b>Description:</b> ${p.desc}</p>
-          <p style="margin: 6px 0; font-size: 14px;"><b>Usage:</b> <code style="background:#1f2937; padding:2px 6px; border-radius:4px; color:#38bdf8;">${p.usage}</code></p>
+          <p style="margin: 6px 0; font-size: 14px;"><b>Usage:</b> <code style="background:#1f2937; padding:2px 6px; border-radius:4px; color:#38bdf8;">${dynamicUsage}</code></p>
           <p style="margin: 6px 0; font-size: 14px;"><b>Aliases:</b> <span style="color:#38bdf8">${aliasStr}</span></p>
           <div style="margin-top:15px; display:flex; gap:10px;">
               <button onclick="openAliasModal('${p.id}')" class="btn"><i class="fas fa-edit"></i> Edit</button>
@@ -422,8 +423,8 @@ app.get('/settings', (req, res) => {
 });
 
 app.post('/settings/save', (req, res) => {
-  if (req.body.prefix && req.body.prefix.length <= 1) {
-    botConfig.prefix = req.body.prefix;
+  if (req.body.prefix && req.body.prefix.trim() !== '') {
+    botConfig.prefix = req.body.prefix.trim();
   }
   res.redirect('/settings');
 });
