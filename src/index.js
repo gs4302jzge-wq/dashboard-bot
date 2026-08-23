@@ -7,6 +7,16 @@ const PORT = process.env.PORT || 10000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+const PREFIX = '-';
+
+// Memory Store for Aliases
+const pluginsStore = {
+  ban: [],
+  clear: [],
+  coin: [],
+  kick: []
+};
+
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -17,6 +27,73 @@ const client = new Client({
 
 const BOT_TOKEN = process.env.DISCORD_TOKEN;
 
+// Command Handler Execution
+client.on('messageCreate', async (message) => {
+  if (message.author.bot || !message.content.startsWith(PREFIX)) return;
+
+  const args = message.content.slice(PREFIX.length).trim().split(/ +/);
+  const commandName = args.shift().toLowerCase();
+
+  // Helper to check if command matches main name OR aliases
+  const isCommand = (name) => {
+    return commandName === name || pluginsStore[name].includes(commandName);
+  };
+
+  // 1. BAN Command
+  if (isCommand('ban')) {
+    if (!message.member.permissions.has('BanMembers')) {
+      return message.reply('❌ You do not have permission to ban members.');
+    }
+    const member = message.mentions.members.first();
+    if (!member) return message.reply('⚠️ Usage: `-ban {@user}`');
+    try {
+      await member.ban();
+      message.channel.send(`🔨 **${member.user.tag}** has been banned.`);
+    } catch (err) {
+      message.reply('❌ Could not ban user. Check my role permissions.');
+    }
+  }
+
+  // 2. CLEAR Command
+  else if (isCommand('clear')) {
+    if (!message.member.permissions.has('ManageMessages')) {
+      return message.reply('❌ You do not have permission to clear messages.');
+    }
+    const amount = parseInt(args[0]);
+    if (isNaN(amount) || amount < 1 || amount > 100) {
+      return message.reply('⚠️ Usage: `-clear {amount}` (1 to 100)');
+    }
+    try {
+      await message.channel.bulkDelete(amount, true);
+      const msg = await message.channel.send(`🧹 Deleted **${amount}** messages.`);
+      setTimeout(() => msg.delete().catch(() => {}), 3000);
+    } catch (err) {
+      message.reply('❌ Error clearing messages.');
+    }
+  }
+
+  // 3. COIN Command
+  else if (isCommand('coin')) {
+    const result = Math.random() < 0.5 ? '🪙 Heads (ملك)' : '🪙 Tails (كتابة)';
+    message.reply(`Result: **${result}**`);
+  }
+
+  // 4. KICK Command
+  else if (isCommand('kick')) {
+    if (!message.member.permissions.has('KickMembers')) {
+      return message.reply('❌ You do not have permission to kick members.');
+    }
+    const member = message.mentions.members.first();
+    if (!member) return message.reply('⚠️ Usage: `-kick {@user}`');
+    try {
+      await member.kick();
+      message.channel.send(`👞 **${member.user.tag}** has been kicked.`);
+    } catch (err) {
+      message.reply('❌ Could not kick user. Check my role permissions.');
+    }
+  }
+});
+
 if (BOT_TOKEN) {
   client.once('ready', () => {
     console.log(`🤖 Logged in as: ${client.user.tag}`);
@@ -25,14 +102,6 @@ if (BOT_TOKEN) {
     console.error('❌ Login Error:', err.message);
   });
 }
-
-// Memory Store for Aliases
-const pluginsStore = {
-  ban: [],
-  clear: [],
-  coin: [],
-  kick: []
-};
 
 const sidebarScript = `
 <script>
@@ -234,11 +303,11 @@ function layout(title, content, currentPath) {
   `;
 }
 
-// API endpoint to save aliases
+// API Endpoint to save aliases
 app.post('/api/aliases', (req, res) => {
   const { pluginId, aliases } = req.body;
   if (pluginId && Array.isArray(aliases)) {
-    pluginsStore[pluginId] = aliases.filter(a => a.trim() !== '');
+    pluginsStore[pluginId] = aliases.map(a => a.trim().toLowerCase()).filter(a => a !== '');
     return res.json({ success: true });
   }
   res.status(400).json({ success: false });
@@ -295,32 +364,7 @@ app.get('/', (req, res) => {
 
       <div style="margin-top:16px; background:#0b1224; border:1px solid rgba(255,255,255,0.06); border-radius:8px; padding:14px;">
         <span style="background:rgba(52, 211, 153, 0.2); color:#34d399; font-size:11px; padding:3px 8px; border-radius:4px; font-weight:600;"><i class="fa-solid fa-circle" style="font-size:7px;"></i> Uptime</span>
-        <div style="margin-top:10px; color:#cbd5e1; font-size:14px;"><i class="fa-solid fa-rotate" style="font-size:12px; color:#64748b;"></i> 0d 0h 2m 45s</div>
-      </div>
-    </div>
-
-    <div style="margin-top:24px;">
-      <h3 style="margin-bottom:6px; font-size:22px; font-weight:700;">Dashboard</h3>
-      <p style="color:#94a3b8; font-size:13px; margin-top:0; margin-bottom:16px;">Find the latest news with Discord BOT Dashboard and information about "OS | System"</p>
-
-      <div class="card">
-        <h4 style="margin:0 0 12px 0; font-size:15px; color:#fff;"><i class="fa-solid fa-party-horn" style="color:#fcd34d;"></i> 🎉 Welcome</h4>
-        <p style="color:#94a3b8; font-size:13px; line-height:1.5; margin:0 0 10px 0;">Welcome to Discord BOT Dashboard V2, this is an early version of the final product! Please report any issues you find!</p>
-        <div style="font-size:12px; font-weight:bold; color:#cbd5e1;">Version: 3.0</div>
-      </div>
-
-      <div class="card">
-        <h4 style="margin:0 0 14px 0; font-size:15px; color:#fff;"><i class="fa-solid fa-magnifying-glass" style="color:#38bdf8;"></i> 🔎 OS | System - Details</h4>
-        <ul style="margin:0; padding-left:18px; color:#cbd5e1; font-size:13px; line-height:2;">
-          <li><strong>Username:</strong> OS | System#3523</li>
-          <li><strong>Client ID:</strong> 1540577416353677415</li>
-          <li><strong>Joined:</strong> Saturday, August 22nd, 2026, 4:24 AM</li>
-        </ul>
-      </div>
-
-      <div class="card">
-        <h4 style="margin:0 0 10px 0; font-size:15px; color:#fff;"><i class="fa-solid fa-bullhorn" style="color:#38bdf8;"></i> 📢 News</h4>
-        <p style="color:#94a3b8; font-size:13px; margin:0;">The Discord BOT Dashboard Marketplace is here, you can find plugins and modules easily!</p>
+        <div style="margin-top:10px; color:#cbd5e1; font-size:14px;"><i class="fa-solid fa-rotate" style="font-size:12px; color:#64748b;"></i> Active</div>
       </div>
     </div>
   `;
@@ -562,22 +606,6 @@ app.get('/guilds', (req, res) => {
         <span style="background:rgba(52, 211, 153, 0.15); color:#34d399; padding:5px 12px; border-radius:20px; font-size:12px; font-weight:600; border:1px solid rgba(52, 211, 153, 0.3);">
           ● Connected
         </span>
-      </div>
-
-      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:16px;">
-        <div style="background:#0b1224; padding:14px; border-radius:10px;">
-          <div style="font-size:12px; color:#94a3b8;">Text Channels</div>
-          <div style="font-size:18px; font-weight:bold; color:#fff; margin-top:4px;"><i class="fa-solid fa-hashtag" style="color:#38bdf8;"></i> 6 Channels</div>
-        </div>
-        <div style="background:#0b1224; padding:14px; border-radius:10px;">
-          <div style="font-size:12px; color:#94a3b8;">Voice Channels</div>
-          <div style="font-size:18px; font-weight:bold; color:#fff; margin-top:4px;"><i class="fa-solid fa-microphone" style="color:#a855f7;"></i> 4 Channels</div>
-        </div>
-      </div>
-
-      <div style="display:flex; gap:12px;">
-        <button onclick="alert('Manage Guild')" class="btn" style="flex:1; justify-content:center;"><i class="fa-solid fa-sliders"></i> Manage Guild</button>
-        <button onclick="alert('Guild Data Synchronized!')" class="btn" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);"><i class="fa-solid fa-rotate"></i> Sync Data</button>
       </div>
     </div>
   `;
