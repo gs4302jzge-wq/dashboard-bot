@@ -1,10 +1,41 @@
 const express = require('express');
+const { Client, GatewayIntentBits } = require('discord.js');
+
 const app = express();
 const PORT = process.env.PORT || 10000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// ================= =================
+// 1. إعدادات وتشغيل بوت ديسكورد
+// ================= =================
+const client = new Client({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent
+  ]
+});
+
+// يقرأ التوكن بأمان من متغيرات البيئة
+const BOT_TOKEN = process.env.DISCORD_TOKEN;
+
+if (BOT_TOKEN) {
+  client.once('ready', () => {
+    console.log(`🤖 تم تسجيل الدخول بنجاح باسم البوت: ${client.user.tag}`);
+  });
+
+  client.login(BOT_TOKEN).catch(err => {
+    console.error('❌ فشل تسجيل دخول البوت! تأكد من صحة التوكن:', err.message);
+  });
+} else {
+  console.log('⚠️ لم يتم العثور على DISCORD_TOKEN في متغيرات البيئة.');
+}
+
+// ================= =================
+// 2. إعدادات الـ Dashboard (Express Web Server)
+// ================= =================
 const startTime = Date.now();
 const guildCreatedAt = new Date('2025-05-15T00:00:00Z').getTime();
 
@@ -15,17 +46,7 @@ function getUserAvatar(user) {
       const format = isAnimated ? 'gif' : 'png';
       return `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${format}?size=512`;
     }
-    if (user && user.discriminator && user.discriminator !== '0') {
-      const defaultIndex = parseInt(user.discriminator, 10) % 5;
-      return `https://cdn.discordapp.com/embed/avatars/${defaultIndex}.png`;
-    }
-    if (user && user.id) {
-      const idNum = parseInt(String(user.id).slice(-4), 10) || 0;
-      return `https://cdn.discordapp.com/embed/avatars/${idNum % 6}.png`;
-    }
-  } catch (e) {
-    console.error('Avatar error:', e);
-  }
+  } catch (e) {}
   return 'https://cdn.discordapp.com/embed/avatars/0.png';
 }
 
@@ -36,9 +57,7 @@ function getGuildIcon(guild) {
       const format = isAnimated ? 'gif' : 'png';
       return `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.${format}?size=512`;
     }
-  } catch (e) {
-    console.error('Guild icon error:', e);
-  }
+  } catch (e) {}
   return 'https://cdn.discordapp.com/embed/avatars/1.png';
 }
 
@@ -50,10 +69,8 @@ const currentUser = {
   avatar: null, 
   discriminator: '0' 
 };
-const currentGuild = { id: '119830128491028391', icon: null };
 
 const userAvatarUrl = getUserAvatar(currentUser);
-const guildIconUrl = getGuildIcon(currentGuild);
 
 let botConfig = {
   clientId: '154057416353677415',
@@ -100,7 +117,6 @@ function renderLayout(title, content) {
           .card { background: #0f131d; border: 1px solid #1a202c; border-radius: 8px; padding: 16px; margin-bottom: 14px; }
           .card-header { font-size: 16px; font-weight: 600; color: #ffffff; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
           
-          /* Combined Stats Card */
           .stats-card-container { background: #0f131d; border: 1px solid #1a202c; border-radius: 8px; overflow: hidden; margin-bottom: 14px; }
           .refresh-btn-bar { padding: 10px 12px; border-bottom: 1px solid #1a202c; }
           .btn-refresh { background: #1d4ed8; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
@@ -110,7 +126,6 @@ function renderLayout(title, content) {
           .stat-title { font-size: 11px; font-weight: 600; color: #94a3b8; margin-bottom: 8px; white-space: nowrap; }
           .stat-val { font-size: 16px; font-weight: 700; color: #ffffff; display: flex; align-items: center; justify-content: center; gap: 5px; }
 
-          /* Uptime Card */
           .uptime-badge { display: inline-flex; align-items: center; gap: 6px; background: #064e3b; color: #34d399; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; margin-bottom: 12px; }
           .uptime-dot { width: 6px; height: 6px; background: #34d399; border-radius: 50%; }
 
@@ -118,30 +133,12 @@ function renderLayout(title, content) {
           .btn-danger { background: #ef4444; }
           .btn-success { background: #16a34a; }
           .form-control { width: 100%; padding: 10px; background: #1a202c; border: 1px solid #2d3748; border-radius: 6px; color: #fff; outline: none; margin-top: 5px; }
-          .switch { position: relative; display: inline-block; width: 44px; height: 22px; }
-          .switch input { opacity: 0; width: 0; height: 0; }
-          .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #2d3748; transition: .4s; border-radius: 22px; }
-          .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
-          input:checked + .slider { background-color: #2563eb; }
-          input:checked + .slider:before { transform: translateX(22px); }
-          .link-blue { color: #38bdf8; text-decoration: none; font-weight: bold; }
-          .link-blue:hover { text-decoration: underline; }
           .img-avatar-fixed { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; background-color: #1e293b; }
-          .img-guild-fixed { width: 65px; height: 65px; border-radius: 50%; border: 2px solid #38bdf8; box-shadow: 0 0 15px rgba(56,189,248,0.3); object-fit: cover; background-color: #1e293b; }
           .footer { text-align: center; padding: 15px; background: #0f131d; border-top: 1px solid #1a202c; font-size: 12px; color: #6b7280; }
 
-          /* Details List */
           .details-list { list-style: none; padding-left: 5px; margin-top: 10px; }
           .details-list li { color: #cbd5e1; font-size: 14px; margin-bottom: 8px; font-weight: 500; }
           .details-list li b { color: #ffffff; }
-
-          .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); z-index: 2000; align-items: center; justify-content: center; }
-          .modal-overlay.active { display: flex; }
-          .modal-box { background: #0f131d; border: 1px solid #1a202c; border-radius: 12px; width: 90%; max-width: 450px; padding: 20px; color: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
-          .modal-header { display: flex; justify-content: space-between; align-items: center; font-size: 18px; font-weight: bold; margin-bottom: 15px; border-bottom: 1px solid #1a202c; padding-bottom: 10px; }
-          .alias-item { display: flex; gap: 8px; margin-bottom: 10px; }
-          .alias-item input { flex: 1; }
-          .alias-limit-msg { color: #ef4444; font-size: 12px; font-weight: bold; margin-top: 5px; display: none; text-transform: uppercase; }
 
           @media (max-width: 600px) {
               .stats-grid-4 { grid-template-columns: repeat(2, 1fr); }
@@ -192,6 +189,10 @@ function renderLayout(title, content) {
 app.get('/', (req, res) => res.redirect('/dashboard'));
 
 app.get('/dashboard', (req, res) => {
+  const guildCount = client.guilds ? client.guilds.cache.size : 1;
+  const userCount = client.users ? client.users.cache.size : 9;
+  const ping = client.ws && client.ws.ping > 0 ? Math.round(client.ws.ping) : 94;
+
   const content = `
       <h3 style="color:#fff; font-size:18px; font-weight:600; margin-bottom:4px;">Welcome, nfyp_</h3>
       <p style="font-size:13px; color:#94a3b8; margin-bottom:16px;">Here's what's happening with <b>OS | System</b> today.</p>
@@ -205,19 +206,19 @@ app.get('/dashboard', (req, res) => {
           <div class="stats-grid-4">
               <div class="stat-item">
                   <div class="stat-title">Server Count (Guilds)</div>
-                  <div class="stat-val"><i class="fas fa-bars" style="font-size:13px; color:#94a3b8;"></i> 1</div>
+                  <div class="stat-val"><i class="fas fa-bars" style="font-size:13px; color:#94a3b8;"></i> ${guildCount}</div>
               </div>
               <div class="stat-item">
                   <div class="stat-title">User Count (All Guilds)</div>
-                  <div class="stat-val"><i class="fas fa-users" style="font-size:13px; color:#94a3b8;"></i> 9</div>
+                  <div class="stat-val"><i class="fas fa-users" style="font-size:13px; color:#94a3b8;"></i> ${userCount}</div>
               </div>
               <div class="stat-item">
                   <div class="stat-title">API Latency</div>
-                  <div class="stat-val"><i class="fas fa-broadcast-tower" style="font-size:13px; color:#94a3b8;"></i> 94ms</div>
+                  <div class="stat-val"><i class="fas fa-broadcast-tower" style="font-size:13px; color:#94a3b8;"></i> ${ping}ms</div>
               </div>
               <div class="stat-item">
                   <div class="stat-title">Prefix</div>
-                  <div class="stat-val"><i class="fas fa-bullhorn" style="font-size:13px; color:#94a3b8;"></i> -</div>
+                  <div class="stat-val"><i class="fas fa-bullhorn" style="font-size:13px; color:#94a3b8;"></i> ${botConfig.prefix}</div>
               </div>
           </div>
       </div>
@@ -246,8 +247,8 @@ app.get('/dashboard', (req, res) => {
       <div class="card">
           <div class="card-header">🔎 OS | System - Details</div>
           <ul class="details-list">
-              <li>• <b>Username:</b> OS | System#3523</li>
-              <li>• <b>Client ID:</b> 154057416353677415</li>
+              <li>• <b>Username:</b> ${client.user ? client.user.tag : 'OS | System#3523'}</li>
+              <li>• <b>Client ID:</b> ${client.user ? client.user.id : '154057416353677415'}</li>
               <li>• <b>Joined:</b> Saturday, August 22nd, 2026, 4:24 AM</li>
           </ul>
       </div>
@@ -274,289 +275,6 @@ app.get('/dashboard', (req, res) => {
   res.send(renderLayout('Dashboard', content));
 });
 
-app.get('/plugins', (req, res) => {
-  let pluginsHTML = pluginsList.map(p => {
-    const aliasStr = p.aliases.length > 0 ? p.aliases.join(', ') : 'None';
-    const dynamicUsage = botConfig.prefix + p.usageTemplate;
-    return `
-      <div class="card">
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-              <h3 style="color:#fff; display:flex; align-items:center; gap:12px;">
-                  <div style="width:42px; height:42px; border-radius:10px; background:${p.color}22; border:1px solid ${p.color}; display:flex; align-items:center; justify-content:center;">
-                      <i class="fas ${p.icon}" style="color:${p.color}; font-size:20px;"></i>
-                  </div>
-                  ${p.name}
-              </h3>
-              <label class="switch">
-                  <input type="checkbox" ${p.enabled ? 'checked' : ''} onchange="fetch('/api/plugins/toggle/${p.id}', {method:'POST'})">
-                  <span class="slider"></span>
-              </label>
-          </div>
-          <p style="margin: 12px 0 6px 0; font-size: 14px;"><b>Developer:</b> ${p.dev}</p>
-          <p style="margin: 6px 0; font-size: 14px;"><b>Description:</b> ${p.desc}</p>
-          <p style="margin: 6px 0; font-size: 14px;"><b>Usage:</b> <code style="background:#1a202c; padding:2px 6px; border-radius:4px; color:#38bdf8;">${dynamicUsage}</code></p>
-          <p style="margin: 6px 0; font-size: 14px;"><b>Aliases:</b> <span style="color:#38bdf8">${aliasStr}</span></p>
-          <div style="margin-top:15px; display:flex; gap:10px;">
-              <button onclick="openAliasModal('${p.id}')" class="btn"><i class="fas fa-edit"></i> Edit</button>
-              <button class="btn btn-danger"><i class="fas fa-trash"></i> Remove</button>
-          </div>
-      </div>
-    `;
-  }).join('');
-
-  const content = `
-      <h2 style="color:#fff; margin-bottom: 10px;">Plugins</h2>
-      ${pluginsHTML}
-
-      <div class="modal-overlay" id="aliasModal">
-          <div class="modal-box">
-              <div class="modal-header">
-                  <span><i class="fas fa-edit"></i> Edit Aliases</span>
-                  <i class="fas fa-times" style="cursor:pointer;" onclick="closeAliasModal()"></i>
-              </div>
-              <p style="font-size:13px; color:#94a3b8; margin-bottom:10px;">Aliases (up to 5)</p>
-              <div id="aliasInputsContainer"></div>
-              <div class="alias-limit-msg" id="limitMsg">YOU HAVE REACHED 5 LIMIT ONLY</div>
-              <div style="margin-top:15px; display:flex; justify-content:space-between; align-items:center;">
-                  <button class="btn" type="button" id="addAliasBtn" onclick="addAliasField()"><i class="fas fa-plus"></i> Add Alias</button>
-                  <div style="display:flex; gap:8px;">
-                      <button class="btn" style="background:#2d3748;" onclick="closeAliasModal()">Cancel</button>
-                      <button class="btn btn-success" onclick="saveAliases()"><i class="fas fa-save"></i> Save</button>
-                  </div>
-              </div>
-          </div>
-      </div>
-
-      <script>
-          const pluginsData = ${JSON.stringify(pluginsList)};
-          let currentPluginId = null;
-          let currentAliases = [];
-
-          function openAliasModal(id) {
-              currentPluginId = id;
-              const plugin = pluginsData.find(x => x.id === id);
-              currentAliases = plugin ? [...plugin.aliases] : [];
-              renderAliasFields();
-              document.getElementById('aliasModal').classList.add('active');
-          }
-
-          function closeAliasModal() {
-              document.getElementById('aliasModal').classList.remove('active');
-          }
-
-          function renderAliasFields() {
-              const container = document.getElementById('aliasInputsContainer');
-              container.innerHTML = '';
-              currentAliases.forEach((alias, index) => {
-                  const div = document.createElement('div');
-                  div.className = 'alias-item';
-                  div.innerHTML = \`
-                      <input type="text" class="form-control" value="\${alias}" oninput="currentAliases[\${index}] = this.value">
-                      <button class="btn btn-danger" onclick="removeAliasField(\${index})"><i class="fas fa-trash"></i></button>
-                  \`;
-                  container.appendChild(div);
-              });
-
-              const limitMsg = document.getElementById('limitMsg');
-              const addBtn = document.getElementById('addAliasBtn');
-              if (currentAliases.length >= 5) {
-                  limitMsg.style.display = 'block';
-                  addBtn.style.opacity = '0.5';
-                  addBtn.style.pointerEvents = 'none';
-              } else {
-                  limitMsg.style.display = 'none';
-                  addBtn.style.opacity = '1';
-                  addBtn.style.pointerEvents = 'auto';
-              }
-          }
-
-          function addAliasField() {
-              if (currentAliases.length < 5) {
-                  currentAliases.push('');
-                  renderAliasFields();
-              }
-          }
-
-          function removeAliasField(index) {
-              currentAliases.splice(index, 1);
-              renderAliasFields();
-          }
-
-          function saveAliases() {
-              const cleaned = currentAliases.map(a => a.trim()).filter(a => a !== '');
-              fetch('/api/plugins/alias/' + currentPluginId, {
-                  method: 'POST',
-                  headers: {'Content-Type': 'application/json'},
-                  body: JSON.stringify({ aliases: cleaned })
-              }).then(() => location.reload());
-          }
-      </script>
-  `;
-  res.send(renderLayout('Plugins', content));
-});
-
-app.get('/guilds', (req, res) => {
-  const content = `
-      <h2 style="color:#fff; margin-bottom: 10px;">Guilds</h2>
-      <p style="margin-bottom: 20px;">See all the Guilds (Servers) that your BOT is in.</p>
-      <div class="card">
-          <div style="display:flex; align-items:center; gap:15px; margin-bottom:20px; padding-bottom:15px; border-bottom:1px solid #1a202c;">
-              <img src="${guildIconUrl}" class="img-guild-fixed" />
-              <div>
-                  <h2 style="color:#fff;">Oscorp (OSCORP RP)</h2>
-                  <p style="font-size:13px; color:#94a3b8;"><b>Guild ID:</b> 119830128491028391</p>
-                  <p style="font-size:13px; color:#94a3b8;"><b>Owner:</b> nfyp_</p>
-              </div>
-          </div>
-          <div class="stats-grid-4" style="border:1px solid #1a202c; border-radius:8px;">
-              <div class="stat-item"><div class="stat-title">Total Members</div><div class="stat-val">👥 9</div></div>
-              <div class="stat-item"><div class="stat-title">Total Roles</div><div class="stat-val">🛡️ 8</div></div>
-              <div class="stat-item"><div class="stat-title">Text Channels</div><div class="stat-val">💬 10</div></div>
-              <div class="stat-item"><div class="stat-title">Voice Channels</div><div class="stat-val">🔊 4</div></div>
-          </div>
-          <div style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%); padding: 25px; border-radius: 16px; border: 1px solid #312e81; box-shadow: 0 10px 30px rgba(0,0,0,0.6); text-align: center; margin-top:20px;">
-              <h4 style="color: #facc15; font-size: 16px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; font-weight:800;">
-                  <i class="fas fa-crown" style="margin-right: 8px; color:#facc15;"></i> SERVER CREATED DURATION
-              </h4>
-              <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
-                  <div style="background:#0f131d; border:1px solid #2d3748; padding:10px 14px; border-radius:10px; min-width:70px;"><span id="timer-years" style="font-size:22px; font-weight:bold; color:#38bdf8;">0</span><div style="font-size:10px; color:#94a3b8;">Years</div></div>
-                  <div style="background:#0f131d; border:1px solid #2d3748; padding:10px 14px; border-radius:10px; min-width:70px;"><span id="timer-months" style="font-size:22px; font-weight:bold; color:#38bdf8;">0</span><div style="font-size:10px; color:#94a3b8;">Months</div></div>
-                  <div style="background:#0f131d; border:1px solid #2d3748; padding:10px 14px; border-radius:10px; min-width:70px;"><span id="timer-days" style="font-size:22px; font-weight:bold; color:#38bdf8;">0</span><div style="font-size:10px; color:#94a3b8;">Days</div></div>
-                  <div style="background:#0f131d; border:1px solid #2d3748; padding:10px 14px; border-radius:10px; min-width:70px;"><span id="timer-hours" style="font-size:22px; font-weight:bold; color:#38bdf8;">0</span><div style="font-size:10px; color:#94a3b8;">Hours</div></div>
-                  <div style="background:#0f131d; border:1px solid #2d3748; padding:10px 14px; border-radius:10px; min-width:70px;"><span id="timer-mins" style="font-size:22px; font-weight:bold; color:#38bdf8;">0</span><div style="font-size:10px; color:#94a3b8;">Mins</div></div>
-                  <div style="background:#0f131d; border:1px solid #2d3748; padding:10px 14px; border-radius:10px; min-width:70px;"><span id="timer-secs" style="font-size:22px; font-weight:bold; color:#38bdf8;">0</span><div style="font-size:10px; color:#94a3b8;">Secs</div></div>
-              </div>
-          </div>
-      </div>
-
-      <script>
-          const createdTimestamp = ${guildCreatedAt};
-
-          function updateLiveAge() {
-              const now = Date.now();
-              let diff = Math.floor((now - createdTimestamp) / 1000);
-              if (diff < 0) diff = 0;
-
-              const years = Math.floor(diff / (365 * 24 * 3600));
-              diff %= (365 * 24 * 3600);
-
-              const months = Math.floor(diff / (30 * 24 * 3600));
-              diff %= (30 * 24 * 3600);
-
-              const days = Math.floor(diff / (24 * 3600));
-              diff %= (24 * 3600);
-
-              const hours = Math.floor(diff / 3600);
-              diff %= 3600;
-
-              const minutes = Math.floor(diff / 60);
-              const seconds = diff % 60;
-
-              document.getElementById('timer-years').innerText = years;
-              document.getElementById('timer-months').innerText = months;
-              document.getElementById('timer-days').innerText = days;
-              document.getElementById('timer-hours').innerText = hours;
-              document.getElementById('timer-mins').innerText = minutes;
-              document.getElementById('timer-secs').innerText = seconds;
-          }
-
-          updateLiveAge();
-          setInterval(updateLiveAge, 1000);
-      </script>
-  `;
-  res.send(renderLayout('Guilds', content));
-});
-
-app.get('/support', (req, res) => {
-  const content = `
-      <h2 style="color:#fff; margin-bottom: 10px;">Support</h2>
-      <p style="margin-bottom: 20px;">Contact us using any of the following methods!</p>
-      <div class="card">
-          <div class="card-header"><i class="fas fa-envelope" style="color:#38bdf8"></i> Contact Details</div>
-          <p style="margin-bottom:12px;"><b>Email:</b> <a href="mailto:mail@MohammedAlhajri-dev.com" class="link-blue">mail@MohammedAlhajri-dev.com</a></p>
-          <p style="margin-bottom:12px;"><b>Twitter:</b> <a href="https://x.com/i661y" target="_blank" class="link-blue">@i661y</a></p>
-          <p style="margin-bottom:12px;"><b>Instagram:</b> <a href="https://instagram.com/i661y" target="_blank" class="link-blue">@i661y</a></p>
-          <p style="margin-bottom:12px;"><b>Discord Developer:</b> <span style="color:#fff;">Mohammed Alhajri</span></p>
-          <div style="margin-top:20px;">
-              <a href="https://discord.gg" target="_blank" class="btn" style="background:#5865F2;"><i class="fab fa-discord"></i> Join Discord Server</a>
-          </div>
-      </div>
-  `;
-  res.send(renderLayout('Support', content));
-});
-
-app.get('/settings', (req, res) => {
-  const content = `
-      <h2 style="color:#fff; margin-bottom: 10px;">Settings</h2>
-      <p style="margin-bottom: 20px;">Customize your BOT and update settings within the dashboard!</p>
-      
-      <form method="POST" action="/settings/save" class="card" style="margin-bottom: 25px;">
-          <div class="card-header"><i class="fas fa-sliders-h" style="color:#38bdf8"></i> BOT Config</div>
-          <div style="margin-bottom: 15px;">
-              <label style="display:block; color:#d1d5db; margin-bottom:5px;">Bot Prefix:</label>
-              <input type="text" id="prefixInput" name="prefix" class="form-control" value="${botConfig.prefix}">
-          </div>
-          <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Save Settings</button>
-      </form>
-
-      <div class="card" style="border: 1px solid #2d3748; background: #0f131d;">
-          <div class="card-header"><i class="fab fa-discord" style="color:#5865F2"></i> Authorized Discord Account</div>
-          
-          <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:15px; background:#1a202c; padding:18px; border-radius:8px; border:1px solid #2d3748; margin-bottom:18px;">
-              <div style="display:flex; align-items:center; gap:15px;">
-                  <img src="${userAvatarUrl}" class="img-avatar-fixed" style="width:50px; height:50px;" />
-                  <div>
-                      <h3 style="color:#fff; font-size:16px;">
-                          ${currentUser.global_name} 
-                          <span style="font-size:12px; color:#38bdf8;">@${currentUser.username}</span>
-                      </h3>
-                      <p style="font-size:13px; color:#94a3b8; margin-top:4px;"><b>User ID:</b> ${currentUser.id}</p>
-                  </div>
-              </div>
-          </div>
-
-          <div style="display:flex; justify-content:flex-end;">
-              <form method="POST" action="/logout">
-                  <button type="submit" class="btn btn-danger">
-                      <i class="fas fa-sign-out-alt"></i> Log Out Account
-                  </button>
-              </form>
-          </div>
-      </div>
-  `;
-  res.send(renderLayout('Settings', content));
-});
-
-app.post('/settings/save', (req, res) => {
-  if (req.body.prefix && req.body.prefix.trim() !== '') {
-    botConfig.prefix = req.body.prefix.trim();
-  }
-  res.redirect('/settings');
-});
-
-app.post('/logout', (req, res) => {
-  res.send(`
-    <script>
-      alert('Logged out successfully!');
-      window.location.href = '/settings';
-    </script>
-  `);
-});
-
-app.post('/api/plugins/toggle/:id', (req, res) => {
-  const p = pluginsList.find(x => x.id === req.params.id);
-  if (p) p.enabled = !p.enabled;
-  res.json({ success: true });
-});
-
-app.post('/api/plugins/alias/:id', (req, res) => {
-  const p = pluginsList.find(x => x.id === req.params.id);
-  if (p) {
-    p.aliases = Array.isArray(req.body.aliases) ? req.body.aliases : [];
-  }
-  res.json({ success: true });
-});
-
 app.listen(PORT, '0.0.0.0', () => {
-  console.log('Server running on port ' + PORT);
+  console.log('🌐 Dashboard Server running on port ' + PORT);
 });
