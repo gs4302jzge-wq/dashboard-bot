@@ -6,6 +6,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const startTime = Date.now();
+// تاريخ افتراضي لإنشاء السيرفر (سنة و3 أشهر)
+const guildCreatedAt = new Date('2025-05-15T00:00:00Z').getTime();
 
 let botConfig = {
     clientId: '154057416353677415',
@@ -30,6 +32,18 @@ function getUptime() {
     return `${days}d ${hours}h ${minutes}m ${seconds}s`;
 }
 
+function getGuildAge() {
+    const diff = Math.floor((Date.now() - guildCreatedAt) / 1000);
+    const years = Math.floor(diff / (365 * 24 * 3600));
+    const months = Math.floor((diff % (365 * 24 * 3600)) / (30 * 24 * 3600));
+    const days = Math.floor((diff % (30 * 24 * 3600)) / (24 * 3600));
+    const hours = Math.floor((diff % (24 * 3600)) / 3600);
+    const minutes = Math.floor((diff % 3600) / 60);
+    const seconds = diff % 60;
+
+    return `${years} Years, ${months} Months, ${days} Days, ${hours} Hours, ${minutes} Mins, ${seconds} Secs`;
+}
+
 function renderLayout(title, content) {
     return `
     <!DOCTYPE html>
@@ -43,30 +57,40 @@ function renderLayout(title, content) {
             * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
             body { background-color: #0b0f19; color: #94a3b8; display: flex; flex-direction: column; min-height: 100vh; }
             
-            /* Banner GIF Zikr */
-            .dhikr-banner { background: linear-gradient(90deg, #1e1b4b, #312e81, #1e1b4b); color: #facc15; text-align: center; padding: 10px; font-weight: bold; font-size: 15px; border-bottom: 1px solid #4338ca; letter-spacing: 0.5px; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+            /* Banner Zikr */
+            .dhikr-banner { background: linear-gradient(90deg, #0f172a, #1e1b4b, #0f172a); color: #facc15; text-align: center; padding: 12px; font-weight: bold; font-size: 16px; border-bottom: 1px solid #312e81; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
             
             .navbar { background: #111827; padding: 15px 20px; border-bottom: 1px solid #1f2937; display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 100; }
-            .sidebar-toggle { color: #fff; font-size: 22px; cursor: pointer; padding: 5px 10px; background: #1f2937; border-radius: 6px; }
+            .sidebar-toggle { color: #fff; font-size: 20px; cursor: pointer; padding: 8px 12px; background: #1f2937; border-radius: 6px; }
             .user-profile { display: flex; align-items: center; gap: 10px; color: #fff; }
             .user-avatar { width: 35px; height: 35px; border-radius: 50%; background: #2563eb; display: flex; align-items: center; justify-content: center; font-weight: bold; }
             
             .layout { display: flex; flex: 1; position: relative; }
-            .sidebar { width: 240px; background: #111827; border-right: 1px solid #1f2937; padding: 20px 0; transition: all 0.3s ease; }
-            .sidebar a { display: flex; align-items: center; gap: 12px; padding: 12px 25px; color: #94a3b8; text-decoration: none; font-weight: 500; transition: 0.2s; }
-            .sidebar a:hover, .sidebar a.active { background: #1f2937; color: #38bdf8; border-left: 4px solid #38bdf8; }
             
+            /* Overlay Sidebar Style */
+            .sidebar { 
+                position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background: #111827; border-right: 1px solid #1f2937; 
+                padding: 20px 0; z-index: 999; transition: all 0.3s ease; box-shadow: 5px 0 25px rgba(0,0,0,0.5);
+            }
+            .sidebar.active { left: 0; }
+            .sidebar-header { padding: 0 20px 20px 20px; border-bottom: 1px solid #1f2937; margin-bottom: 15px; display: flex; align-items: center; gap: 12px; }
+            .sidebar a { display: flex; align-items: center; gap: 12px; padding: 14px 25px; color: #94a3b8; text-decoration: none; font-weight: 500; transition: 0.2s; }
+            .sidebar a:hover, .sidebar a.active { background: #1f2937; color: #38bdf8; border-left: 4px solid #38bdf8; }
+            .overlay-backdrop { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.7); z-index: 998; }
+            .overlay-backdrop.active { display: block; }
+
             .main-content { flex: 1; padding: 25px; background: #0b0f19; overflow-y: auto; }
-            .card { background: #111827; border: 1px solid #1f2937; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+            .card { background: #111827; border: 1px solid #1f2937; border-radius: 10px; padding: 20px; margin-bottom: 20px; }
             .card-header { font-size: 18px; font-weight: bold; color: #f3f4f6; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
-            .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; }
+            .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
             .stat-box { background: #111827; border: 1px solid #1f2937; border-radius: 8px; padding: 15px; text-align: center; }
             .stat-value { font-size: 20px; font-weight: bold; color: #38bdf8; margin-top: 5px; }
             
             .btn { background: #2563eb; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; text-decoration: none; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; }
             .btn-danger { background: #dc2626; }
             .btn-success { background: #16a34a; }
-            
+            .form-control { width: 100%; padding: 10px; background: #1f2937; border: 1px solid #374151; border-radius: 6px; color: #fff; outline: none; margin-top: 5px; }
+
             .switch { position: relative; display: inline-block; width: 44px; height: 22px; }
             .switch input { opacity: 0; width: 0; height: 0; }
             .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #374151; transition: .4s; border-radius: 22px; }
@@ -75,18 +99,11 @@ function renderLayout(title, content) {
             input:checked + .slider:before { transform: translateX(22px); }
             
             .footer { text-align: center; padding: 20px; background: #111827; border-top: 1px solid #1f2937; font-size: 13px; color: #6b7280; }
-
-            /* Mobile Sidebar Hidden by default */
-            @media (max-width: 768px) {
-                .layout { flex-direction: column; }
-                .sidebar { display: none; width: 100%; border-right: none; border-bottom: 1px solid #1f2937; }
-                .sidebar.active { display: block; }
-            }
         </style>
     </head>
     <body>
         <div class="dhikr-banner">
-            ✨ ✨
+            ✨ سبحان الله وبحمده ، سبحان الله العظيم ✨
         </div>
 
         <div class="navbar">
@@ -98,13 +115,22 @@ function renderLayout(title, content) {
         </div>
 
         <div class="layout">
+            <div class="overlay-backdrop" id="backdrop" onclick="toggleSidebar()"></div>
             <div class="sidebar" id="sidebar">
-                <a href="/dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
-                <a href="/plugins"><i class="fas fa-puzzle-piece"></i> Plugins</a>
+                <div class="sidebar-header">
+                    <div class="user-avatar" style="width:45px; height:45px; font-size:18px;">N</div>
+                    <div>
+                        <h4 style="color:#fff;">nfyp_</h4>
+                        <span style="font-size:12px; color:#38bdf8;">Administrator</span>
+                    </div>
+                </div>
+                <a href="/dashboard"><i class="fas fa-home"></i> Dashboard</a>
+                <a href="/plugins"><i class="fas fa-rocket"></i> Plugins</a>
                 <a href="/guilds"><i class="fas fa-server"></i> Guilds</a>
-                <a href="/support"><i class="fas fa-headset"></i> Support</a>
+                <a href="/support"><i class="fas fa-question-circle"></i> Support</a>
                 <a href="/settings"><i class="fas fa-cog"></i> Settings</a>
             </div>
+            
             <div class="main-content">
                 ${content}
             </div>
@@ -116,8 +142,8 @@ function renderLayout(title, content) {
 
         <script>
             function toggleSidebar() {
-                const sb = document.getElementById('sidebar');
-                sb.classList.toggle('active');
+                document.getElementById('sidebar').classList.toggle('active');
+                document.getElementById('backdrop').classList.toggle('active');
             }
         </script>
     </body>
@@ -140,20 +166,16 @@ app.get('/dashboard', (req, res) => {
         </div>
 
         <div class="card">
-            <div class="card-header"><i class="fas fa-server" style="color:#38bdf8"></i> Active Server: Oscorp (OSCORP RP)</div>
-            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:10px; margin-top:10px;">
-                <p><b>Guild ID:</b> 1198301284910283</p>
-                <p><b>Owner:</b> nfyp_</p>
-                <p><b>Channels:</b> 14</p>
-                <p><b>Roles:</b> 8</p>
-                <p><b>Region:</b> Dubai / Middle East</p>
-            </div>
+            <div class="card-header"><i class="fas fa-bullhorn" style="color:#38bdf8"></i> Dashboard Notice</div>
+            <p>Welcome to Discord BOT Dashboard V2, this is an early version of the final product! Please report any issues you find!</p>
+            <p style="margin-top:10px;"><b>Version:</b> 3.5</p>
         </div>
 
         <div class="card">
-            <div class="card-header"><i class="fas fa-bullhorn"></i> Announcement</div>
-            <p>Welcome to Discord BOT Dashboard V2! Toggle button and uptime tracker are now live.</p>
-            <p style="margin-top:10px;"><b>Version:</b> 3.5</p>
+            <div class="card-header"><i class="fas fa-info-circle" style="color:#38bdf8"></i> OS | System - Details</div>
+            <p style="margin-bottom:6px;"><b>Username:</b> OS | System#3523</p>
+            <p style="margin-bottom:6px;"><b>Client ID:</b> 154057416353677415</p>
+            <p style="margin-bottom:6px;"><b>Joined:</b> Saturday, August 22nd, 2026</p>
         </div>
     `;
     res.send(renderLayout('Dashboard', content));
@@ -197,6 +219,91 @@ app.get('/plugins', (req, res) => {
     res.send(renderLayout('Plugins', content));
 });
 
+app.get('/guilds', (req, res) => {
+    const content = `
+        <h2 style="color:#fff; margin-bottom: 10px;">Guilds</h2>
+        <p style="margin-bottom: 20px;">See all the Guilds (Servers) that your BOT is in.</p>
+        
+        <div class="card">
+            <div style="display:flex; align-items:center; gap:15px; margin-bottom:20px; padding-bottom:15px; border-bottom:1px solid #1f2937;">
+                <div style="width:65px; height:65px; border-radius:50%; background:#2563eb; display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:bold; color:#fff; border:2px solid #38bdf8;">O</div>
+                <div>
+                    <h2 style="color:#fff;">Oscorp (OSCORP RP)</h2>
+                    <p style="font-size:13px; color:#94a3b8;"><b>Guild ID:</b> 119830128491028391</p>
+                    <p style="font-size:13px; color:#94a3b8;"><b>Owner:</b> nfyp_</p>
+                </div>
+            </div>
+
+            <div class="grid">
+                <div class="stat-box"><div>Total Members</div><div class="stat-value">👥 9</div></div>
+                <div class="stat-box"><div>Total Roles</div><div class="stat-value">🛡️ 8</div></div>
+                <div class="stat-box"><div>Text Channels</div><div class="stat-value">💬 10</div></div>
+                <div class="stat-box"><div>Voice Channels</div><div class="stat-value">🔊 4</div></div>
+            </div>
+
+            <div style="background:#1f2937; padding:15px; border-radius:8px; margin-top:15px;">
+                <h4 style="color:#38bdf8; margin-bottom:5px;"><i class="fas fa-clock"></i> Server Created Duration:</h4>
+                <p style="color:#fff; font-size:15px; font-weight:bold;">${getGuildAge()}</p>
+            </div>
+        </div>
+    `;
+    res.send(renderLayout('Guilds', content));
+});
+
+app.get('/support', (req, res) => {
+    const content = `
+        <h2 style="color:#fff; margin-bottom: 10px;">Support</h2>
+        <p style="margin-bottom: 20px;">Contact us using any of the following methods!</p>
+        <div class="card">
+            <div class="card-header"><i class="fas fa-envelope" style="color:#38bdf8"></i> Contact Details</div>
+            <p style="margin-bottom:12px;"><b>Email:</b> mail@MohammedAlhajri-dev.com</p>
+            <p style="margin-bottom:12px;"><b>Twitter:</b> @i661y</p>
+            <p style="margin-bottom:12px;"><b>Instagram:</b> @i661y</p>
+            <p style="margin-bottom:12px;"><b>Discord Developer:</b> Mohammed Alhajri</p>
+            <div style="margin-top:20px;">
+                <a href="https://discord.gg" target="_blank" class="btn" style="background:#5865F2;"><i class="fab fa-discord"></i> Join Discord Server</a>
+            </div>
+        </div>
+    `;
+    res.send(renderLayout('Support', content));
+});
+
+app.get('/settings', (req, res) => {
+    const content = `
+        <h2 style="color:#fff; margin-bottom: 10px;">Settings</h2>
+        <p style="margin-bottom: 20px;">Customize your BOT and update settings within the dashboard!</p>
+        
+        <form method="POST" action="/settings/save" class="card">
+            <div class="card-header"><i class="fas fa-sliders-h" style="color:#38bdf8"></i> BOT Config</div>
+            
+            <div style="margin-bottom: 15px;">
+                <label style="display:block; color:#d1d5db; margin-bottom:5px;">Bot Prefix:</label>
+                <input type="text" id="prefixInput" name="prefix" class="form-control" value="${botConfig.prefix}" maxlength="1" oninput="checkPrefix(this)">
+                <span id="prefixError" style="color:#ef4444; font-size:12px; display:none; margin-top:5px;">maxed letter of prefix "1"</span>
+            </div>
+
+            <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Save Settings</button>
+        </form>
+
+        <script>
+            function checkPrefix(input) {
+                const err = document.getElementById('prefixError');
+                if (input.value.length >= 1) {
+                    err.style.display = 'block';
+                } else {
+                    err.style.display = 'none';
+                }
+            }
+        </script>
+    `;
+    res.send(renderLayout('Settings', content));
+});
+
+app.post('/settings/save', (req, res) => {
+    if (req.body.prefix) botConfig.prefix = req.body.prefix[0];
+    res.redirect('/settings');
+});
+
 app.post('/api/plugins/toggle/:id', (req, res) => {
     const p = pluginsList.find(x => x.id === req.params.id);
     if(p) p.enabled = !p.enabled;
@@ -207,30 +314,6 @@ app.post('/api/plugins/alias/:id', (req, res) => {
     const p = pluginsList.find(x => x.id === req.params.id);
     if(p) p.aliases = req.body.alias || 'None';
     res.json({ success: true });
-});
-
-app.get('/guilds', (req, res) => {
-    res.send(renderLayout('Guilds', `
-        <h2 style="color:#fff; margin-bottom: 10px;">Guilds</h2>
-        <div class="card">
-            <h3>Oscorp</h3>
-            <p>Members: 9</p>
-        </div>
-    `));
-});
-
-app.get('/support', (req, res) => {
-    res.send(renderLayout('Support', `
-        <h2 style="color:#fff; margin-bottom: 10px;">Support</h2>
-        <div class="card"><p>Contact: Mohammed Alhajri</p></div>
-    `));
-});
-
-app.get('/settings', (req, res) => {
-    res.send(renderLayout('Settings', `
-        <h2 style="color:#fff; margin-bottom: 10px;">Settings</h2>
-        <div class="card"><p>Prefix: ${botConfig.prefix}</p></div>
-    `));
 });
 
 app.listen(PORT, '0.0.0.0', () => {
