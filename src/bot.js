@@ -59,3 +59,48 @@ if (process.env.BOT_TOKEN) {
 }
 
 module.exports = { client };
+
+// === ProBot Canvas Welcome System ===
+const { AttachmentBuilder } = require('discord.js');
+const { createCanvas, loadImage } = require('@napi-rs/canvas');
+
+client.on('guildMemberAdd', async (member) => {
+    const WELCOME_CHANNEL_ID = process.env.WELCOME_CHANNEL_ID || 'ضع_آيدي_الروم_هنا';
+    const channel = member.guild.channels.cache.get(WELCOME_CHANNEL_ID);
+    if (!channel) return;
+
+    try {
+        const canvas = createCanvas(1024, 450);
+        const ctx = canvas.getContext('2d');
+
+        const background = await loadImage('https://probot.media/IqoX.png');
+        ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(512, 180, 100, 0, Math.PI * 2, true);
+        ctx.closePath();
+        ctx.clip();
+
+        const avatar = await loadImage(member.user.displayAvatarURL({ extension: 'png', size: 256 }));
+        ctx.drawImage(avatar, 412, 80, 200, 200);
+        ctx.restore();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 42px Sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(`Welcome, ${member.user.username}!`, 512, 340);
+
+        ctx.font = '30px Sans-serif';
+        ctx.fillStyle = '#aaaaaa';
+        ctx.fillText(`Member #${member.guild.memberCount}`, 512, 390);
+
+        const attachment = new AttachmentBuilder(await canvas.encode('png'), { name: 'welcome-image.png' });
+        channel.send({
+            content: `مرحبًا بك ${member} في السيرفر!`,
+            files: [attachment]
+        });
+    } catch (err) {
+        console.error('Welcome Image Error:', err);
+    }
+});
