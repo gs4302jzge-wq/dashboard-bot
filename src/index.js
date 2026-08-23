@@ -1,5 +1,5 @@
 const express = require('express');
-const { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
+const { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 
 const app = express();
 const PORT = process.env.PORT || 10000;
@@ -8,59 +8,42 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const PREFIX = '-';
+const BOT_START_TIME = Date.now();
 
-// تخزين الاختصارات لكل أمر (تترك فارغة ليتم تعديلها من الداشبورد)
+// Storage for plugins aliases dynamically set from dashboard
 const pluginsStore = {
-  setnick: [],
-  ban: [],
-  unban: [],
-  kick: [],
-  vkick: [],
-  mute_text: [],
-  unmute_text: [],
-  mute_voice: [],
-  unmute_voice: [],
-  timeout: [],
-  untimeout: [],
-  clear: [],
-  move: [],
-  role: [],
-  points: [],
-  warn: [],
-  warn_remove: [],
-  warnings: [],
-  lock: [],
-  unlock: [],
-  setcolor: [],
-  slowmode: [],
-  reset: []
+  setnick: [], ban: [], unban: [], kick: [], vkick: [],
+  mute_text: [], unmute_text: [], mute_voice: [], unmute_voice: [],
+  timeout: [], untimeout: [], clear: [], move: [], role: [],
+  points: [], warn: [], warn_remove: [], warnings: [],
+  lock: [], unlock: [], setcolor: [], slowmode: [], reset: []
 };
 
-// تعريف جميع الأوامر الأساسية وخياراتها
+// Base command definitions and settings
 const commandsConfig = [
-  { id: 'setnick', name: 'setnick', desc: '✏️ تغيير اللقب لعضو', options: [ { name: 'user', desc: 'العضو', type: 'user', req: true }, { name: 'nick', desc: 'اللقب الجديد', type: 'string', req: true } ] },
-  { id: 'ban', name: 'ban', desc: '🔨 حظر عضو من السيرفر', options: [ { name: 'user', desc: 'العضو', type: 'user', req: true } ] },
-  { id: 'unban', name: 'unban', desc: '🔓 إلغاء حظر عضو', options: [ { name: 'userid', desc: 'ID العضو', type: 'string', req: true } ] },
-  { id: 'kick', name: 'kick', desc: '👢 طرد عضو من السيرفر', options: [ { name: 'user', desc: 'العضو', type: 'user', req: true } ] },
-  { id: 'vkick', name: 'vkick', desc: '🔇 طرد عضو من الروم الصوتي', options: [ { name: 'user', desc: 'العضو', type: 'user', req: true } ] },
-  { id: 'mute_text', name: 'mute_text', desc: '🔕 كتم كتابي لعضو', options: [ { name: 'user', desc: 'العضو', type: 'user', req: true } ] },
-  { id: 'unmute_text', name: 'unmute_text', desc: '🔔 إلغاء الكتم الكتابي', options: [ { name: 'user', desc: 'العضو', type: 'user', req: true } ] },
-  { id: 'mute_voice', name: 'mute_voice', desc: '🎙️ كتم صوتي لعضو', options: [ { name: 'user', desc: 'العضو', type: 'user', req: true } ] },
-  { id: 'unmute_voice', name: 'unmute_voice', desc: '🔊 إلغاء الكتم الصوتي', options: [ { name: 'user', desc: 'العضو', type: 'user', req: true } ] },
-  { id: 'timeout', name: 'timeout', desc: '⏱️ عزل مؤقت لعضو', options: [ { name: 'user', desc: 'العضو', type: 'user', req: true }, { name: 'minutes', desc: 'المدة بالدقائق', type: 'int', req: true } ] },
-  { id: 'untimeout', name: 'untimeout', desc: '⏰ إلغاء العزل المؤقت', options: [ { name: 'user', desc: 'العضو', type: 'user', req: true } ] },
-  { id: 'clear', name: 'clear', desc: '🧹 مسح الرسائل من القناة', options: [ { name: 'amount', desc: 'عدد الرسائل (1-100)', type: 'int', req: true } ] },
-  { id: 'move', name: 'move', desc: '🚀 نقل عضو لروم صوتي', options: [ { name: 'user', desc: 'العضو', type: 'user', req: true }, { name: 'channel', desc: 'الروم الصوتي', type: 'channel', req: true } ] },
-  { id: 'role', name: 'role', desc: '🏷️ إعطاء أو سحب رتبة', options: [ { name: 'user', desc: 'العضو', type: 'user', req: true }, { name: 'role', desc: 'الرتبة', type: 'role', req: true } ] },
-  { id: 'points', name: 'points', desc: '⭐ عرض أو إضافة نقاط', options: [ { name: 'user', desc: 'العضو', type: 'user', req: true } ] },
-  { id: 'warn', name: 'warn', desc: '⚠️ توجيه تحذير لعضو', options: [ { name: 'user', desc: 'العضو', type: 'user', req: true }, { name: 'reason', desc: 'السبب', type: 'string', req: false } ] },
-  { id: 'warn_remove', name: 'warn_remove', desc: '🗑️ إزالة تحذير عن عضو', options: [ { name: 'user', desc: 'العضو', type: 'user', req: true } ] },
-  { id: 'warnings', name: 'warnings', desc: '📋 عرض تحذيرات عضو', options: [ { name: 'user', desc: 'العضو', type: 'user', req: true } ] },
-  { id: 'lock', name: 'lock', desc: '🔒 قفل القناة الحالية', options: [] },
-  { id: 'unlock', name: 'unlock', desc: '🔓 فتح القناة الحالية', options: [] },
-  { id: 'setcolor', name: 'setcolor', desc: '🎨 تغيير لون رتبة', options: [ { name: 'role', desc: 'الرتبة', type: 'role', req: true }, { name: 'color', desc: 'رمز اللون Hex', type: 'string', req: true } ] },
-  { id: 'slowmode', name: 'slowmode', desc: '⏳ تحديد وضع البطء', options: [ { name: 'seconds', desc: 'المدة بالثواني', type: 'int', req: true } ] },
-  { id: 'reset', name: 'reset', desc: '🔄 إعادة ضبط نقاط الخبرة (XP)', options: [] }
+  { id: 'setnick', name: 'setnick', desc: '✏️ Change nickname of a member', options: [ { name: 'user', desc: 'Target user', type: 'user', req: true }, { name: 'nick', desc: 'New nickname', type: 'string', req: true } ] },
+  { id: 'ban', name: 'ban', desc: '🔨 Ban a member', options: [ { name: 'user', desc: 'Target user', type: 'user', req: true } ] },
+  { id: 'unban', name: 'unban', desc: '🔓 Unban a member', options: [ { name: 'userid', desc: 'User ID', type: 'string', req: true } ] },
+  { id: 'kick', name: 'kick', desc: '👢 Kick a member', options: [ { name: 'user', desc: 'Target user', type: 'user', req: true } ] },
+  { id: 'vkick', name: 'vkick', desc: '🔇 Kick member from voice channel', options: [ { name: 'user', desc: 'Target user', type: 'user', req: true } ] },
+  { id: 'mute_text', name: 'mute_text', desc: '🔕 Mute member in text channels', options: [ { name: 'user', desc: 'Target user', type: 'user', req: true } ] },
+  { id: 'unmute_text', name: 'unmute_text', desc: '🔔 Unmute text channel mute', options: [ { name: 'user', desc: 'Target user', type: 'user', req: true } ] },
+  { id: 'mute_voice', name: 'mute_voice', desc: '🎙️ Mute member in voice channels', options: [ { name: 'user', desc: 'Target user', type: 'user', req: true } ] },
+  { id: 'unmute_voice', name: 'unmute_voice', desc: '🔊 Unmute voice channel mute', options: [ { name: 'user', desc: 'Target user', type: 'user', req: true } ] },
+  { id: 'timeout', name: 'timeout', desc: '⏱️ Timeout member', options: [ { name: 'user', desc: 'Target user', type: 'user', req: true }, { name: 'minutes', desc: 'Duration in minutes', type: 'int', req: true } ] },
+  { id: 'untimeout', name: 'untimeout', desc: '⏰ Remove timeout', options: [ { name: 'user', desc: 'Target user', type: 'user', req: true } ] },
+  { id: 'clear', name: 'clear', desc: '🧹 Clear messages', options: [ { name: 'amount', desc: 'Amount of messages (1-100)', type: 'int', req: true } ] },
+  { id: 'move', name: 'move', desc: '🚀 Move member to voice channel', options: [ { name: 'user', desc: 'Target user', type: 'user', req: true }, { name: 'channel', desc: 'Voice Channel', type: 'channel', req: true } ] },
+  { id: 'role', name: 'role', desc: '🏷️ Add or remove role', options: [ { name: 'user', desc: 'Target user', type: 'user', req: true }, { name: 'role', desc: 'Role', type: 'role', req: true } ] },
+  { id: 'points', name: 'points', desc: '⭐ Show or manage user points', options: [ { name: 'user', desc: 'Target user', type: 'user', req: true } ] },
+  { id: 'warn', name: 'warn', desc: '⚠️ Issue warning to member', options: [ { name: 'user', desc: 'Target user', type: 'user', req: true }, { name: 'reason', desc: 'Reason', type: 'string', req: false } ] },
+  { id: 'warn_remove', name: 'warn_remove', desc: '🗑️ Remove warning from user', options: [ { name: 'user', desc: 'Target user', type: 'user', req: true } ] },
+  { id: 'warnings', name: 'warnings', desc: '📋 List member warnings', options: [ { name: 'user', desc: 'Target user', type: 'user', req: true } ] },
+  { id: 'lock', name: 'lock', desc: '🔒 Lock current channel', options: [] },
+  { id: 'unlock', name: 'unlock', desc: '🔓 Unlock current channel', options: [] },
+  { id: 'setcolor', name: 'setcolor', desc: '🎨 Change role color', options: [ { name: 'role', desc: 'Role', type: 'role', req: true }, { name: 'color', desc: 'Hex Code', type: 'string', req: true } ] },
+  { id: 'slowmode', name: 'slowmode', desc: '⏳ Set channel slowmode', options: [ { name: 'seconds', desc: 'Seconds', type: 'int', req: true } ] },
+  { id: 'reset', name: 'reset', desc: '🔄 Reset user XP/Points', options: [] }
 ];
 
 const client = new Client({
@@ -75,6 +58,20 @@ const client = new Client({
 
 const BOT_TOKEN = process.env.DISCORD_TOKEN;
 
+// Helper Uptime Calculator
+function getFormattedUptime() {
+  const diff = Date.now() - BOT_START_TIME;
+  const seconds = Math.floor((diff / 1000) % 60);
+  const minutes = Math.floor((diff / (1000 * 60)) % 60);
+  const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+  const days = Math.floor((diff / (1000 * 60 * 60 * 24)) % 30);
+  const months = Math.floor((diff / (1000 * 60 * 60 * 24 * 30)) % 12);
+  const years = Math.floor(diff / (1000 * 60 * 60 * 24 * 365));
+
+  return { years, months, days, hours, minutes, seconds, rawMs: diff };
+}
+
+// Embed Helpers
 const createSuccessEmbed = (title, description) => {
   return new EmbedBuilder()
     .setColor('#38bdf8')
@@ -87,22 +84,20 @@ const createSuccessEmbed = (title, description) => {
 const createErrorEmbed = (description) => {
   return new EmbedBuilder()
     .setColor('#f43f5e')
-    .setTitle('❌ خطأ في التنفيذ')
+    .setTitle('❌ Execution Error')
     .setDescription(description)
     .setFooter({ text: 'OS | System Security', iconURL: client.user?.displayAvatarURL() });
 };
 
-// دالة لبناء وتسجيل Slash Commands الأساسية بالإضافة للـ Aliases ديناميكياً
+// Register Slash Commands Register Function
 async function registerSlashCommands() {
   if (!client.user) return;
   const slashList = [];
 
   for (const cmd of commandsConfig) {
-    // تجميع الاسم الأساسي للأمر + أي Aliases تم إضافتها من الداشبورد
     const namesToRegister = [cmd.name, ...(pluginsStore[cmd.id] || [])];
 
     for (const name of namesToRegister) {
-      // التأكد من أن اسم الـ Slash يتوافق مع شروط ديسكورد (حروف صغيرة وبدون مسافات)
       const validName = name.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-z_]/g, '');
       if (!validName) continue;
 
@@ -110,7 +105,6 @@ async function registerSlashCommands() {
         .setName(validName)
         .setDescription(cmd.desc);
 
-      // إضافة الخيارات لكل أمر
       cmd.options.forEach(opt => {
         if (opt.type === 'user') builder.addUserOption(o => o.setName(opt.name).setDescription(opt.desc).setRequired(opt.req));
         else if (opt.type === 'string') builder.addStringOption(o => o.setName(opt.name).setDescription(opt.desc).setRequired(opt.req));
@@ -132,7 +126,6 @@ async function registerSlashCommands() {
   }
 }
 
-// ربط كل أسم أو اختصار بالأمر الرئيسي لتنفيذه
 function getCommandIdByName(name) {
   const cleanName = name.toLowerCase().replace(/_/g, ' ').trim();
   for (const cmd of commandsConfig) {
@@ -143,7 +136,7 @@ function getCommandIdByName(name) {
   return null;
 }
 
-// تنفيذ منطق الأمر الموحد (سواء تم استدعاؤه بـ Slash Command أو Text Prefix)
+// Unified Command Handler
 async function handleExecution(commandId, interactionOrMessage, options) {
   const guild = interactionOrMessage.guild;
   const channel = interactionOrMessage.channel;
@@ -154,72 +147,63 @@ async function handleExecution(commandId, interactionOrMessage, options) {
     const member = await guild.members.fetch(user.id).catch(() => null);
     if (member) {
       await member.setNickname(nick).catch(() => null);
-      return interactionOrMessage.reply({ embeds: [createSuccessEmbed('✏️ تغيير اللقب', `تم تغيير لقب **${user.tag}** إلى **${nick}**`)] });
+      return interactionOrMessage.reply({ embeds: [createSuccessEmbed('✏️ Nickname Changed', `Successfully changed **${user.tag}** nickname to **${nick}**`)] });
     }
   }
-
   else if (commandId === 'ban') {
     const user = options.user;
     const member = await guild.members.fetch(user.id).catch(() => null);
     if (member) {
       await member.ban().catch(() => null);
-      return interactionOrMessage.reply({ embeds: [createSuccessEmbed('🔨 تم حظر العضو', `تم حظر **${user.tag}** بنجاح.`)] });
+      return interactionOrMessage.reply({ embeds: [createSuccessEmbed('🔨 Member Banned', `Successfully banned **${user.tag}**.`)] });
     }
   }
-
   else if (commandId === 'unban') {
     const userId = options.userid;
     await guild.members.unban(userId).catch(() => null);
-    return interactionOrMessage.reply({ embeds: [createSuccessEmbed('🔓 إلغاء الحظر', `تم إلغاء حظر الـ ID: **${userId}**`)] });
+    return interactionOrMessage.reply({ embeds: [createSuccessEmbed('🔓 Member Unbanned', `Successfully unbanned User ID: **${userId}**`)] });
   }
-
   else if (commandId === 'kick') {
     const user = options.user;
     const member = await guild.members.fetch(user.id).catch(() => null);
     if (member) {
       await member.kick().catch(() => null);
-      return interactionOrMessage.reply({ embeds: [createSuccessEmbed('👢 طرد عضو', `تم طرد **${user.tag}** بنجاح.`)] });
+      return interactionOrMessage.reply({ embeds: [createSuccessEmbed('👢 Member Kicked', `Successfully kicked **${user.tag}**.`)] });
     }
   }
-
   else if (commandId === 'vkick') {
     const user = options.user;
     const member = await guild.members.fetch(user.id).catch(() => null);
     if (member && member.voice.channel) {
       await member.voice.disconnect().catch(() => null);
-      return interactionOrMessage.reply({ embeds: [createSuccessEmbed('🔇 طرد صفي', `تم فصل **${user.tag}** من الروم الصوتي.`)] });
+      return interactionOrMessage.reply({ embeds: [createSuccessEmbed('🔇 Voice Kick', `Disconnected **${user.tag}** from voice channel.`)] });
     }
-    return interactionOrMessage.reply({ embeds: [createErrorEmbed('العضو غير متواجد في روم صوتي.')] });
+    return interactionOrMessage.reply({ embeds: [createErrorEmbed('User is not connected to any voice channel.')] });
   }
-
   else if (commandId === 'lock') {
     await channel.permissionOverwrites.edit(guild.roles.everyone, { SendMessages: false });
-    return interactionOrMessage.reply({ embeds: [createSuccessEmbed('🔒 قفل القناة', 'تم إغلاق الكتابة في هذه القناة.')] });
+    return interactionOrMessage.reply({ embeds: [createSuccessEmbed('🔒 Channel Locked', 'Disabled message sending in this channel.')] });
   }
-
   else if (commandId === 'unlock') {
     await channel.permissionOverwrites.edit(guild.roles.everyone, { SendMessages: true });
-    return interactionOrMessage.reply({ embeds: [createSuccessEmbed('🔓 فتح القناة', 'تم فتح الكتابة في هذه القناة.')] });
+    return interactionOrMessage.reply({ embeds: [createSuccessEmbed('🔓 Channel Unlocked', 'Allowed message sending in this channel.')] });
   }
-
   else if (commandId === 'clear') {
     const amount = options.amount || 10;
     await channel.bulkDelete(amount, true).catch(() => null);
-    return interactionOrMessage.reply({ embeds: [createSuccessEmbed('🧹 تطهير الشات', `تم مسح **${amount}** رسالة.`)].map(e => e.toJSON()), ephemeral: true });
+    return interactionOrMessage.reply({ embeds: [createSuccessEmbed('🧹 Channel Cleared', `Deleted **${amount}** messages.`)].map(e => e.toJSON()), ephemeral: true });
   }
-
   else if (commandId === 'slowmode') {
     const seconds = options.seconds || 0;
     await channel.setRateLimitPerUser(seconds);
-    return interactionOrMessage.reply({ embeds: [createSuccessEmbed('⏳ وضع البطء', `تم ضبط وضع البطء إلى **${seconds}** ثانية.`)] });
+    return interactionOrMessage.reply({ embeds: [createSuccessEmbed('⏳ Slowmode Set', `Channel slowmode set to **${seconds}** seconds.`)] });
   }
-
   else {
-    return interactionOrMessage.reply({ embeds: [createSuccessEmbed(`✅ ${commandId}`, `تم تنفيذ الأمر **${commandId}** بنجاح.`)] });
+    return interactionOrMessage.reply({ embeds: [createSuccessEmbed(`✅ Command Executed`, `Successfully executed **${commandId}**.`)] });
   }
 }
 
-// استقبال الـ Slash Commands
+// Interaction Event Listener
 client.on('interactionCreate', async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
   const commandId = getCommandIdByName(interaction.commandName);
@@ -241,7 +225,7 @@ client.on('interactionCreate', async (interaction) => {
   }
 });
 
-// استقبال الأوامر العادية بالطريقة العادية Prefix
+// Text Prefix Event Listener
 client.on('messageCreate', async (message) => {
   if (message.author.bot || !message.content.startsWith(PREFIX)) return;
 
@@ -273,6 +257,7 @@ if (BOT_TOKEN) {
   });
 }
 
+// UI Components
 const sidebarScript = `
 <script>
 function toggleSidebar() {
@@ -294,6 +279,7 @@ function toggleSidebar() {
 function getSidebarHtml(activePath) {
   const navItems = [
     { path: '/', label: 'Dashboard', icon: 'fa-solid fa-chart-pie' },
+    { path: '/welcome', label: 'Welcome & System', icon: 'fa-solid fa-hand-wave' },
     { path: '/plugins', label: 'Plugins', icon: 'fa-solid fa-rocket' },
     { path: '/guilds', label: 'Guilds', icon: 'fa-solid fa-server' },
     { path: '/support', label: 'Support', icon: 'fa-solid fa-circle-question' },
@@ -355,6 +341,9 @@ function layout(title, content, currentPath) {
       .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
       input:checked + .slider { background-color: #3b82f6; }
       input:checked + .slider:before { transform: translateX(22px); }
+      .uptime-unit { background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 10px; padding: 12px; text-align: center; }
+      .uptime-val { font-size: 20px; font-weight: 800; color: #38bdf8; }
+      .uptime-lbl { font-size: 11px; color: #94a3b8; text-transform: uppercase; margin-top: 4px; font-weight: 600; }
     </style>
   </head>
   <body>
@@ -376,27 +365,55 @@ function layout(title, content, currentPath) {
   `;
 }
 
-// عند تحديث الـ Aliases من الداشبورد يعيد تسجيل الـ Slash Commands فوراً لتعمل مباشرة بـ /
+// REST API for Live Uptime updates
+app.get('/api/uptime', (req, res) => {
+  res.json(getFormattedUptime());
+});
+
+// Update Aliases POST Handler
 app.post('/api/aliases', async (req, res) => {
   const { pluginId, aliases } = req.body;
   if (pluginId && Array.isArray(aliases)) {
     pluginsStore[pluginId] = aliases.map(a => a.trim().toLowerCase()).filter(a => a !== '');
-    await registerSlashCommands(); // تحديث السلاش كاماندز تلقائياً
+    await registerSlashCommands();
     return res.json({ success: true });
   }
   res.status(400).json({ success: false });
 });
 
+// Main Dashboard Page
 app.get('/', (req, res) => {
   const guildCount = client.guilds?.cache?.size || 1;
-  const userCount = client.users?.cache?.size || 9;
-  const ping = client.ws?.ping || 94;
+  const userCount = client.users?.cache?.size || 2;
+  const ping = client.ws?.ping || 16;
+  const uptime = getFormattedUptime();
 
   const content = `
     <div style="margin-bottom: 20px;">
       <h2 style="margin:0; font-size: 24px; font-weight:700;">Welcome, nfyp_</h2>
       <p style="color: #94a3b8; margin: 4px 0 0 0; font-size: 14px;">Here's what's happening with <strong style="color:#fff;">OS | System</strong> today.</p>
     </div>
+
+    <!-- Live Uptime Panel -->
+    <div class="card" style="padding:18px; margin-bottom:16px; background: linear-gradient(135deg, #0d1527, #0f1c38); border: 1px solid rgba(56, 189, 248, 0.2);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span style="width:10px; height:10px; background:#22c55e; border-radius:50%; box-shadow:0 0 10px #22c55e;"></span>
+          <h3 style="margin:0; font-size:16px; font-weight:700; color:#fff;">Live System Uptime</h3>
+        </div>
+        <span style="font-size:12px; color:#38bdf8; font-weight:600;"><i class="fa-solid fa-bolt"></i> Realtime Sync</span>
+      </div>
+      <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap:8px;">
+        <div class="uptime-unit"><div class="uptime-val" id="ut-years">${uptime.years}</div><div class="uptime-lbl">Years</div></div>
+        <div class="uptime-unit"><div class="uptime-val" id="ut-months">${uptime.months}</div><div class="uptime-lbl">Months</div></div>
+        <div class="uptime-unit"><div class="uptime-val" id="ut-days">${uptime.days}</div><div class="uptime-lbl">Days</div></div>
+        <div class="uptime-unit"><div class="uptime-val" id="ut-hours">${uptime.hours}</div><div class="uptime-lbl">Hours</div></div>
+        <div class="uptime-unit"><div class="uptime-val" id="ut-minutes">${uptime.minutes}</div><div class="uptime-lbl">Minutes</div></div>
+        <div class="uptime-unit"><div class="uptime-val" id="ut-seconds">${uptime.seconds}</div><div class="uptime-lbl">Seconds</div></div>
+      </div>
+    </div>
+
+    <!-- Stats Table Grid -->
     <div class="card" style="padding:16px; margin-bottom:16px;">
       <div style="margin-bottom:12px;">
         <button class="btn btn-sky" style="padding:6px 14px; font-size:13px;" onclick="location.reload();"><i class="fa-solid fa-rotate"></i> Refresh Data</button>
@@ -420,10 +437,77 @@ app.get('/', (req, res) => {
         </div>
       </div>
     </div>
+
+    <script>
+      setInterval(async () => {
+        try {
+          const res = await fetch('/api/uptime');
+          const data = await res.json();
+          document.getElementById('ut-years').innerText = data.years;
+          document.getElementById('ut-months').innerText = data.months;
+          document.getElementById('ut-days').innerText = data.days;
+          document.getElementById('ut-hours').innerText = data.hours;
+          document.getElementById('ut-minutes').innerText = data.minutes;
+          document.getElementById('ut-seconds').innerText = data.seconds;
+        } catch(e){}
+      }, 1000);
+    </script>
   `;
   res.send(layout('Dashboard - OS | System', content, '/'));
 });
 
+// Welcome & System Page (Fully in English with presets & custom inputs)
+app.get('/welcome', (req, res) => {
+  const content = `
+    <div style="margin-bottom: 20px;">
+      <h2 style="margin:0; font-size: 24px; font-weight:700;">Welcome & System Greetings</h2>
+      <p style="color: #94a3b8; margin: 4px 0 0 0; font-size: 14px;">Manage custom English welcome messages and server announcements.</p>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0; font-size:18px; color:#fff;"><i class="fa-solid fa-envelope-open-text" style="color:#38bdf8;"></i> Welcome Banner Configurations</h3>
+      <p style="color:#94a3b8; font-size:13px; line-height:1.6;">Configure default English templates for new member join events.</p>
+
+      <div style="display:flex; flex-direction:column; gap:14px; margin-top:16px;">
+        <div>
+          <label style="display:block; font-size:12px; font-weight:600; color:#cbd5e1; margin-bottom:6px;">WELCOME TITLE</label>
+          <input type="text" value="Welcome to the Official OS Community Server!" style="width:100%; box-sizing:border-box; background:#060a14; border:1px solid rgba(255,255,255,0.12); color:#fff; padding:10px 14px; border-radius:8px; font-size:13px; outline:none;">
+        </div>
+
+        <div>
+          <label style="display:block; font-size:12px; font-weight:600; color:#cbd5e1; margin-bottom:6px;">WELCOME BODY PHRASE</label>
+          <textarea rows="3" style="width:100%; box-sizing:border-box; background:#060a14; border:1px solid rgba(255,255,255,0.12); color:#fff; padding:10px 14px; border-radius:8px; font-size:13px; outline:none; font-family:inherit;">We are thrilled to have you here! Make sure to read the server guidelines and grab your self-roles in the information channel. Enjoy your stay!</textarea>
+        </div>
+
+        <div>
+          <label style="display:block; font-size:12px; font-weight:600; color:#cbd5e1; margin-bottom:6px;">FOOTER ANNOUNCEMENT</label>
+          <input type="text" value="OS System Security • Automated Verification Enabled" style="width:100%; box-sizing:border-box; background:#060a14; border:1px solid rgba(255,255,255,0.12); color:#fff; padding:10px 14px; border-radius:8px; font-size:13px; outline:none;">
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; margin-top:8px;">
+          <button class="btn" style="background:#22c55e;"><i class="fa-solid fa-floppy-disk"></i> Save Configurations</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0; font-size:18px; color:#fff;"><i class="fa-solid fa-sliders" style="color:#38bdf8;"></i> English Preset Messages</h3>
+      <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:12px; margin-top:14px;">
+        <div style="background:#060a14; padding:12px; border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
+          <div style="font-weight:700; color:#38bdf8; font-size:13px; margin-bottom:4px;">Standard Welcome</div>
+          <div style="font-size:12px; color:#94a3b8;">"Welcome {user}! Glad to see you joined our server!"</div>
+        </div>
+        <div style="background:#060a14; padding:12px; border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
+          <div style="font-weight:700; color:#38bdf8; font-size:13px; margin-bottom:4px;">Gaming Community</div>
+          <div style="font-size:12px; color:#94a3b8;">"A wild {user} appeared! Welcome to the battlefield!"</div>
+        </div>
+      </div>
+    </div>
+  `;
+  res.send(layout('Welcome & System - OS | System', content, '/welcome'));
+});
+
+// Plugins Page
 app.get('/plugins', (req, res) => {
   const rawPlugins = [
     { id: "setnick", name: "setnick", icon: "fa-solid fa-pen", iconBg: "rgba(59, 130, 246, 0.2)", iconColor: "#3b82f6", desc: "Changes the nickname of a member.", usage: "/setnick {@user} {nick}" },
@@ -622,8 +706,8 @@ app.get('/guilds', (req, res) => {
 
 app.get('/support', (req, res) => {
   const content = `
-    <h2>Support</h2>
-    <p style="color: #94a3b8;">Contact support team</p>
+    <h2>Support & Contact</h2>
+    <p style="color: #94a3b8;">Official support channel for OS | System</p>
     <div class="card">
       <div><strong>Developer:</strong> Mohammed Alhajri</div>
     </div>
@@ -634,7 +718,7 @@ app.get('/support', (req, res) => {
 app.get('/settings', (req, res) => {
   const content = `
     <h2>Global Settings</h2>
-    <div class="card"><p style="color:#94a3b8;">Manage global parameters.</p></div>
+    <div class="card"><p style="color:#94a3b8;">Manage global bot system configuration.</p></div>
   `;
   res.send(layout('Settings - OS | System', content, '/settings'));
 });
