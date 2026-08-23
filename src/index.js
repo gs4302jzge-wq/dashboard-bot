@@ -141,9 +141,9 @@ function layout(title, content, currentPath) {
         margin: 0 auto;
       }
       .card {
-        background: #0f172a;
+        background: #0d1527;
         border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 12px;
+        border-radius: 14px;
         padding: 20px;
         margin-bottom: 16px;
       }
@@ -151,18 +151,57 @@ function layout(title, content, currentPath) {
         background: #2563eb;
         color: white;
         border: none;
-        padding: 10px 18px;
+        padding: 8px 16px;
         border-radius: 8px;
         font-weight: 600;
         cursor: pointer;
         text-decoration: none;
         display: inline-flex;
         align-items: center;
-        gap: 8px;
-        font-size: 14px;
+        gap: 6px;
+        font-size: 13px;
       }
       .btn-sky {
         background: #0284c7;
+      }
+      .btn-danger {
+        background: #ef4444;
+      }
+      .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 46px;
+        height: 24px;
+      }
+      .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background-color: #334155;
+        transition: .3s;
+        border-radius: 24px;
+      }
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: .3s;
+        border-radius: 50%;
+      }
+      input:checked + .slider {
+        background-color: #3b82f6;
+      }
+      input:checked + .slider:before {
+        transform: translateX(22px);
       }
     </style>
   </head>
@@ -187,7 +226,7 @@ function layout(title, content, currentPath) {
   `;
 }
 
-// 1. Dashboard (Exact Layout matching drawing)
+// 1. Dashboard Page
 app.get('/', (req, res) => {
   const guildCount = client.guilds?.cache?.size || 1;
   const userCount = client.users?.cache?.size || 9;
@@ -199,7 +238,6 @@ app.get('/', (req, res) => {
       <p style="color: #94a3b8; margin: 4px 0 0 0; font-size: 14px;">Here's what's happening with <strong style="color:#fff;">OS | System</strong> today.</p>
     </div>
 
-    <!-- 4 Stats Card Box Grid (Matching Exact Screenshot) -->
     <div class="card" style="padding:16px; margin-bottom:16px;">
       <div style="margin-bottom:12px;">
         <button class="btn btn-sky" style="padding:6px 14px; font-size:13px;" onclick="location.reload();"><i class="fa-solid fa-rotate"></i> Refresh Data</button>
@@ -207,28 +245,28 @@ app.get('/', (req, res) => {
 
       <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:1px; background:rgba(255,255,255,0.08); border-radius:8px; overflow:hidden; border:1px solid rgba(255,255,255,0.08);">
         
-        <div style="background:#0f172a; padding:16px 12px; text-align:left;">
+        <div style="background:#0d1527; padding:16px 12px; text-align:left;">
           <div style="font-size:11px; color:#94a3b8; font-weight:600;">Server Count (Guilds)</div>
           <div style="font-size:22px; font-weight:bold; color:#fff; margin-top:8px; display:flex; align-items:center; gap:8px;">
             <i class="fa-solid fa-bars-staggered" style="font-size:16px; color:#94a3b8;"></i> ${guildCount}
           </div>
         </div>
 
-        <div style="background:#0f172a; padding:16px 12px; text-align:left;">
+        <div style="background:#0d1527; padding:16px 12px; text-align:left;">
           <div style="font-size:11px; color:#94a3b8; font-weight:600;">User Count (All Guilds)</div>
           <div style="font-size:22px; font-weight:bold; color:#fff; margin-top:8px; display:flex; align-items:center; gap:8px;">
             <i class="fa-solid fa-users" style="font-size:16px; color:#94a3b8;"></i> ${userCount}
           </div>
         </div>
 
-        <div style="background:#0f172a; padding:16px 12px; text-align:left;">
+        <div style="background:#0d1527; padding:16px 12px; text-align:left;">
           <div style="font-size:11px; color:#94a3b8; font-weight:600;">API Latency</div>
           <div style="font-size:22px; font-weight:bold; color:#fff; margin-top:8px; display:flex; align-items:center; gap:8px;">
             <i class="fa-solid fa-tower-broadcast" style="font-size:16px; color:#94a3b8;"></i> ${ping}ms
           </div>
         </div>
 
-        <div style="background:#0f172a; padding:16px 12px; text-align:left;">
+        <div style="background:#0d1527; padding:16px 12px; text-align:left;">
           <div style="font-size:11px; color:#94a3b8; font-weight:600;">Prefix</div>
           <div style="font-size:22px; font-weight:bold; color:#fff; margin-top:8px; display:flex; align-items:center; gap:8px;">
             <i class="fa-solid fa-bullhorn" style="font-size:16px; color:#94a3b8;"></i> -
@@ -237,14 +275,12 @@ app.get('/', (req, res) => {
 
       </div>
 
-      <!-- Uptime Box Section -->
       <div style="margin-top:16px; background:#0b1224; border:1px solid rgba(255,255,255,0.06); border-radius:8px; padding:14px;">
         <span style="background:rgba(52, 211, 153, 0.2); color:#34d399; font-size:11px; padding:3px 8px; border-radius:4px; font-weight:600;"><i class="fa-solid fa-circle" style="font-size:7px;"></i> Uptime</span>
         <div style="margin-top:10px; color:#cbd5e1; font-size:14px;"><i class="fa-solid fa-rotate" style="font-size:12px; color:#64748b;"></i> 0d 0h 2m 45s</div>
       </div>
     </div>
 
-    <!-- Lower Section: Dashboard Info -->
     <div style="margin-top:24px;">
       <h3 style="margin-bottom:6px; font-size:22px; font-weight:700;">Dashboard</h3>
       <p style="color:#94a3b8; font-size:13px; margin-top:0; margin-bottom:16px;">Find the latest news with Discord BOT Dashboard and information about "OS | System"</p>
@@ -273,7 +309,105 @@ app.get('/', (req, res) => {
   res.send(layout('Dashboard - OS | System', content, '/'));
 });
 
-// 2. Guilds Route (With Updated Manage Guild Suggestions)
+// 2. Plugins Page (Exact Replica of provided Image)
+app.get('/plugins', (req, res) => {
+  const pluginsData = [
+    {
+      name: "Ban",
+      icon: "fa-solid fa-hammer",
+      iconBg: "rgba(239, 68, 68, 0.2)",
+      iconColor: "#ef4444",
+      iconBorder: "rgba(239, 68, 68, 0.4)",
+      developer: "Mohammed Alhajri",
+      description: "Bans a user from the server.",
+      usage: "-ban {@user}",
+      aliases: "خلخو",
+      aliasesColor: "#38bdf8",
+      enabled: true
+    },
+    {
+      name: "clear",
+      icon: "fa-solid fa-trash-can",
+      iconBg: "rgba(20, 184, 166, 0.2)",
+      iconColor: "#14b8a6",
+      iconBorder: "rgba(20, 184, 166, 0.4)",
+      developer: "Mohammed Alhajri",
+      description: "Clears messages from a channel.",
+      usage: "-clear {amount}",
+      aliases: "None",
+      aliasesColor: "#94a3b8",
+      enabled: true
+    },
+    {
+      name: "coin",
+      icon: "fa-solid fa-coins",
+      iconBg: "rgba(245, 158, 11, 0.2)",
+      iconColor: "#f59e0b",
+      iconBorder: "rgba(245, 158, 11, 0.4)",
+      developer: "Mohammed Alhajri",
+      description: "Simple coin flip command",
+      usage: "-coin",
+      aliases: "None",
+      aliasesColor: "#94a3b8",
+      enabled: true
+    },
+    {
+      name: "kick",
+      icon: "fa-solid fa-user-minus",
+      iconBg: "rgba(249, 115, 22, 0.2)",
+      iconColor: "#f97316",
+      iconBorder: "rgba(249, 115, 22, 0.4)",
+      developer: "Mohammed Alhajri",
+      description: "Kicks a user from the server.",
+      usage: "-kick {@user}",
+      aliases: "None",
+      aliasesColor: "#94a3b8",
+      enabled: true
+    }
+  ];
+
+  const pluginCards = pluginsData.map(p => `
+    <div class="card" style="padding:20px; margin-bottom:18px;">
+      <!-- Card Header -->
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <div style="display:flex; align-items:center; gap:14px;">
+          <div style="width:42px; height:42px; border-radius:10px; background:${p.iconBg}; border:1px solid ${p.iconBorder}; color:${p.iconColor}; display:flex; align-items:center; justify-content:center; font-size:18px;">
+            <i class="${p.icon}"></i>
+          </div>
+          <h3 style="margin:0; font-size:20px; font-weight:700; color:#fff;">${p.name}</h3>
+        </div>
+        
+        <label class="toggle-switch">
+          <input type="checkbox" ${p.enabled ? 'checked' : ''}>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <!-- Card Details -->
+      <div style="font-size:13px; color:#cbd5e1; line-height:1.8; margin-bottom:16px;">
+        <div><strong>Developer:</strong> ${p.developer}</div>
+        <div><strong>Description:</strong> ${p.description}</div>
+        <div><strong>Usage:</strong> <span style="background:rgba(56, 189, 248, 0.12); color:#38bdf8; padding:2px 8px; border-radius:4px; font-family:monospace; font-size:12px;">${p.usage}</span></div>
+        <div><strong>Aliases:</strong> <span style="color:${p.aliasesColor}; font-weight:600;">${p.aliases}</span></div>
+      </div>
+
+      <!-- Card Actions -->
+      <div style="display:flex; gap:10px;">
+        <button class="btn" style="background:#2563eb; font-size:12px; padding:6px 14px;"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+        <button class="btn btn-danger" style="font-size:12px; padding:6px 14px;"><i class="fa-solid fa-trash"></i> Remove</button>
+      </div>
+    </div>
+  `).join('');
+
+  const content = `
+    <h2 style="margin-bottom: 18px; font-size:26px; font-weight:700;">Plugins</h2>
+    <div>${pluginCards}</div>
+  `;
+
+  res.send(layout('Plugins - OS | System', content, '/plugins'));
+});
+
+// 3. Guilds Route
 app.get('/guilds', (req, res) => {
   const content = `
     <h2 style="margin-bottom: 20px; font-size:24px;">Guilds Overview</h2>
@@ -305,180 +439,16 @@ app.get('/guilds', (req, res) => {
         </div>
       </div>
 
-      <!-- Live Duration Grid -->
-      <div style="background:#0b1224; border-radius:10px; padding:16px; margin-bottom:20px;">
-        <div style="color:#fcd34d; font-size:11px; font-weight:700; letter-spacing:1px; margin-bottom:12px; text-transform:uppercase;">
-          <i class="fa-solid fa-clock"></i> CREATED DURATION (LIVE)
-        </div>
-        <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap:6px; text-align:center;">
-          <div style="background:#0f172a; padding:8px 2px; border-radius:6px;"><div id="years" style="font-size:16px; font-weight:bold; color:#38bdf8;">0</div><div style="font-size:8px; color:#64748b;">YEARS</div></div>
-          <div style="background:#0f172a; padding:8px 2px; border-radius:6px;"><div id="months" style="font-size:16px; font-weight:bold; color:#38bdf8;">0</div><div style="font-size:8px; color:#64748b;">MONTHS</div></div>
-          <div style="background:#0f172a; padding:8px 2px; border-radius:6px;"><div id="days" style="font-size:16px; font-weight:bold; color:#38bdf8;">15</div><div style="font-size:8px; color:#64748b;">DAYS</div></div>
-          <div style="background:#0f172a; padding:8px 2px; border-radius:6px;"><div id="hours" style="font-size:16px; font-weight:bold; color:#38bdf8;">2</div><div style="font-size:8px; color:#64748b;">HOURS</div></div>
-          <div style="background:#0f172a; padding:8px 2px; border-radius:6px;"><div id="minutes" style="font-size:16px; font-weight:bold; color:#38bdf8;">45</div><div style="font-size:8px; color:#64748b;">MINS</div></div>
-          <div style="background:#0f172a; padding:8px 2px; border-radius:6px;"><div id="seconds" style="font-size:16px; font-weight:bold; color:#fcd34d;">0</div><div style="font-size:8px; color:#64748b;">SECS</div></div>
-        </div>
-      </div>
-
       <div style="display:flex; gap:12px;">
-        <button onclick="openManageModal()" class="btn" style="flex:1; justify-content:center;"><i class="fa-solid fa-sliders"></i> Manage Guild</button>
+        <button onclick="alert('Manage Guild')" class="btn" style="flex:1; justify-content:center;"><i class="fa-solid fa-sliders"></i> Manage Guild</button>
         <button onclick="alert('Guild Data Synchronized!')" class="btn" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);"><i class="fa-solid fa-rotate"></i> Sync Data</button>
       </div>
     </div>
-
-    <!-- Manage Modal -->
-    <div id="manageModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; align-items:center; justify-content:center;">
-      <div class="card" style="width:90%; max-width:440px; margin:0;">
-        <h3 style="margin-top:0; color:#fff; font-size:18px;"><i class="fa-solid fa-gear" style="color:#38bdf8;"></i> Manage OSCORP RP</h3>
-        <p style="color:#94a3b8; font-size:13px;">Modify bot behavior & settings for this guild.</p>
-        
-        <div style="display:flex; flex-direction:column; gap:14px; margin:20px 0;">
-          <label style="color:#cbd5e1; font-size:14px; display:flex; justify-content:space-between; align-items:center;">
-            <span>Prefix</span>
-            <input type="text" value="!" style="background:#060913; border:1px solid rgba(255,255,255,0.15); color:#fff; padding:6px 12px; border-radius:6px; width:70px; text-align:center;">
-          </label>
-          <label style="color:#cbd5e1; font-size:14px; display:flex; justify-content:space-between; align-items:center;">
-            <span>Log Channel (Recommended)</span>
-            <input type="text" value="#logs" style="background:#060913; border:1px solid rgba(255,255,255,0.15); color:#fff; padding:6px 12px; border-radius:6px; width:110px; text-align:center;">
-          </label>
-          <label style="color:#cbd5e1; font-size:14px; display:flex; justify-content:space-between; align-items:center;">
-            <span>Bot Nickname</span>
-            <input type="text" value="OS | System" style="background:#060913; border:1px solid rgba(255,255,255,0.15); color:#fff; padding:6px 12px; border-radius:6px; width:110px; text-align:center;">
-          </label>
-        </div>
-
-        <div style="display:flex; justify-content:flex-end; gap:10px;">
-          <button onclick="closeManageModal()" class="btn" style="background:rgba(255,255,255,0.1);">Cancel</button>
-          <button onclick="closeManageModal(); alert('Changes Saved!')" class="btn">Save Changes</button>
-        </div>
-      </div>
-    </div>
-
-    <script>
-      let totalSeconds = (15 * 86400) + (2 * 3600) + (45 * 60);
-      setInterval(() => {
-        totalSeconds++;
-        const yrs = Math.floor(totalSeconds / (365 * 86400));
-        let rem = totalSeconds % (365 * 86400);
-        const mths = Math.floor(rem / (30 * 86400));
-        rem %= (30 * 86400);
-        const dys = Math.floor(rem / 86400);
-        rem %= 86400;
-        const hrs = Math.floor(rem / 3600);
-        rem %= 3600;
-        const mins = Math.floor(rem / 60);
-        const secs = rem % 60;
-
-        document.getElementById('years').innerText = yrs;
-        document.getElementById('months').innerText = mths;
-        document.getElementById('days').innerText = dys;
-        document.getElementById('hours').innerText = hrs;
-        document.getElementById('minutes').innerText = mins;
-        document.getElementById('seconds').innerText = secs;
-      }, 1000);
-
-      function openManageModal() { document.getElementById('manageModal').style.display = 'flex'; }
-      function closeManageModal() { document.getElementById('manageModal').style.display = 'none'; }
-    </script>
   `;
   res.send(layout('Guilds - OS | System', content, '/guilds'));
 });
 
-// 3. Plugins Route (Restored Original Items & Icons including Ban/Kick)
-app.get('/plugins', (req, res) => {
-  const content = `
-    <h2 style="margin-bottom: 6px; font-size:24px;">Bot Plugins</h2>
-    <p style="color: #94a3b8; margin-top: 0; margin-bottom: 20px; font-size:14px;">Enable or disable system modules for your bot.</p>
-
-    <div style="display:flex; flex-direction:column; gap:12px;">
-      
-      <!-- Moderation / Ban & Kick -->
-      <div class="card" style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px;">
-        <div style="display:flex; align-items:center; gap:14px;">
-          <div style="width:40px; height:40px; border-radius:10px; background:rgba(239, 68, 68, 0.15); color:#ef4444; display:flex; align-items:center; justify-content:center; font-size:18px;">
-            <i class="fa-solid fa-gavel"></i>
-          </div>
-          <div>
-            <h4 style="margin:0; font-size:15px; color:#fff;">Moderation System (Ban / Kick)</h4>
-            <div style="color:#64748b; font-size:12px; margin-top:2px;">Enable commands like ban, kick, timeout, and warn.</div>
-          </div>
-        </div>
-        <span style="color:#34d399; font-size:24px; cursor:pointer;"><i class="fa-solid fa-toggle-on"></i></span>
-      </div>
-
-      <!-- Welcome System -->
-      <div class="card" style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px;">
-        <div style="display:flex; align-items:center; gap:14px;">
-          <div style="width:40px; height:40px; border-radius:10px; background:rgba(56,189,248,0.15); color:#38bdf8; display:flex; align-items:center; justify-content:center; font-size:18px;">
-            <i class="fa-solid fa-user-plus"></i>
-          </div>
-          <div>
-            <h4 style="margin:0; font-size:15px; color:#fff;">Welcome System</h4>
-            <div style="color:#64748b; font-size:12px; margin-top:2px;">Sends custom greeting cards when new members join.</div>
-          </div>
-        </div>
-        <span style="color:#34d399; font-size:24px; cursor:pointer;"><i class="fa-solid fa-toggle-on"></i></span>
-      </div>
-
-      <!-- Auto Role Engine -->
-      <div class="card" style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px;">
-        <div style="display:flex; align-items:center; gap:14px;">
-          <div style="width:40px; height:40px; border-radius:10px; background:rgba(168,85,247,0.15); color:#a855f7; display:flex; align-items:center; justify-content:center; font-size:18px;">
-            <i class="fa-solid fa-user-shield"></i>
-          </div>
-          <div>
-            <h4 style="margin:0; font-size:15px; color:#fff;">Auto Role Engine</h4>
-            <div style="color:#64748b; font-size:12px; margin-top:2px;">Automatically assigns default roles to new users.</div>
-          </div>
-        </div>
-        <span style="color:#34d399; font-size:24px; cursor:pointer;"><i class="fa-solid fa-toggle-on"></i></span>
-      </div>
-
-      <!-- Economy Module -->
-      <div class="card" style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px;">
-        <div style="display:flex; align-items:center; gap:14px;">
-          <div style="width:40px; height:40px; border-radius:10px; background:rgba(251,191,36,0.15); color:#fbbf24; display:flex; align-items:center; justify-content:center; font-size:18px;">
-            <i class="fa-solid fa-coins"></i>
-          </div>
-          <div>
-            <h4 style="margin:0; font-size:15px; color:#fff;">Economy Module</h4>
-            <div style="color:#64748b; font-size:12px; margin-top:2px;">Enables daily coins, rewards, and shop systems.</div>
-          </div>
-        </div>
-        <span style="color:#64748b; font-size:24px; cursor:pointer;"><i class="fa-solid fa-toggle-off"></i></span>
-      </div>
-
-    </div>
-  `;
-  res.send(layout('Plugins - OS | System', content, '/plugins'));
-});
-
-// 4. Settings Route
-app.get('/settings', (req, res) => {
-  const content = `
-    <h2 style="margin-bottom: 6px; font-size:24px;">Global Settings</h2>
-    <p style="color: #94a3b8; margin-top: 0; margin-bottom: 20px; font-size:14px;">Configure general system configurations for OS | System.</p>
-
-    <div class="card">
-      <h3 style="margin-top:0; font-size:16px; color:#fff;"><i class="fa-solid fa-sliders" style="color:#38bdf8;"></i> System Configuration</h3>
-      <p style="color:#94a3b8; font-size:13px;">Manage global dashboard parameters.</p>
-      
-      <div style="display:flex; flex-direction:column; gap:14px; margin-top:16px;">
-        <label style="color:#cbd5e1; font-size:14px; display:flex; justify-content:space-between; align-items:center;">
-          <span>Maintenance Mode</span>
-          <input type="checkbox" style="width:18px; height:18px;">
-        </label>
-        <label style="color:#cbd5e1; font-size:14px; display:flex; justify-content:space-between; align-items:center;">
-          <span>Debug Logging</span>
-          <input type="checkbox" checked style="width:18px; height:18px;">
-        </label>
-      </div>
-    </div>
-  `;
-  res.send(layout('Settings - OS | System', content, '/settings'));
-});
-
-// 5. Support Route
+// 4. Support Route
 app.get('/support', (req, res) => {
   const content = `
     <h2 style="margin-bottom: 4px;">Support</h2>
@@ -493,6 +463,20 @@ app.get('/support', (req, res) => {
     </div>
   `;
   res.send(layout('Support - OS | System', content, '/support'));
+});
+
+// 5. Settings Route
+app.get('/settings', (req, res) => {
+  const content = `
+    <h2 style="margin-bottom: 6px; font-size:24px;">Global Settings</h2>
+    <p style="color: #94a3b8; margin-top: 0; margin-bottom: 20px; font-size:14px;">Configure general system configurations for OS | System.</p>
+
+    <div class="card">
+      <h3 style="margin-top:0; font-size:16px; color:#fff;"><i class="fa-solid fa-sliders" style="color:#38bdf8;"></i> System Configuration</h3>
+      <p style="color:#94a3b8; font-size:13px;">Manage global dashboard parameters.</p>
+    </div>
+  `;
+  res.send(layout('Settings - OS | System', content, '/settings'));
 });
 
 app.listen(PORT, () => {
