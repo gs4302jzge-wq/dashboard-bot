@@ -118,6 +118,11 @@ function renderLayout(title, content) {
           .img-guild-fixed { width: 65px; height: 65px; border-radius: 50%; border: 2px solid #38bdf8; box-shadow: 0 0 15px rgba(56,189,248,0.3); object-fit: cover; background-color: #1e293b; }
           .footer { text-align: center; padding: 20px; background: #111827; border-top: 1px solid #1f2937; font-size: 13px; color: #6b7280; }
 
+          .info-list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #1f2937; border: 1px solid #374151; border-radius: 8px; margin-bottom: 8px; }
+          .info-list-item:last-child { margin-bottom: 0; }
+          .info-label { display: flex; align-items: center; gap: 10px; color: #94a3b8; font-weight: 500; }
+          .info-value { color: #fff; font-weight: 600; font-family: monospace; background: #0f172a; padding: 4px 10px; border-radius: 6px; border: 1px solid #1e293b; }
+
           .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); z-index: 2000; align-items: center; justify-content: center; }
           .modal-overlay.active { display: flex; }
           .modal-box { background: #111827; border: 1px solid #1f2937; border-radius: 12px; width: 90%; max-width: 450px; padding: 20px; color: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
@@ -184,10 +189,19 @@ app.get('/dashboard', (req, res) => {
           <p style="margin-top:10px;"><b>Version:</b> 3.5</p>
       </div>
       <div class="card">
-          <div class="card-header"><i class="fas fa-info-circle" style="color:#38bdf8"></i> OS | System - Details</div>
-          <p style="margin-bottom:6px;"><b>Username:</b> OS | System#3523</p>
-          <p style="margin-bottom:6px;"><b>Client ID:</b> 154057416353677415</p>
-          <p style="margin-bottom:6px;"><b>Joined:</b> Saturday, August 22nd, 2026</p>
+          <div class="card-header"><i class="fas fa-robot" style="color:#38bdf8"></i> OS | System - Details</div>
+          <div class="info-list-item">
+              <span class="info-label"><i class="fas fa-user-tag" style="color:#38bdf8;"></i> Username</span>
+              <span class="info-value">OS | System#3523</span>
+          </div>
+          <div class="info-list-item">
+              <span class="info-label"><i class="fas fa-key" style="color:#38bdf8;"></i> Client ID</span>
+              <span class="info-value">154057416353677415</span>
+          </div>
+          <div class="info-list-item">
+              <span class="info-label"><i class="fas fa-calendar-alt" style="color:#38bdf8;"></i> Joined</span>
+              <span class="info-value">Saturday, August 22nd, 2026</span>
+          </div>
       </div>
 
       <script>
