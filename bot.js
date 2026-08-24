@@ -99,3 +99,8 @@ app.listen(PORT, () => console.log(`🚀 New Dashboard active on port ${PORT}`))
 client.login(process.env.DISCORD_TOKEN);
 
 client.on("guildMemberAdd", async (member) => { await handleWelcome(member); });
+
+app.get('/', (req, res) => {
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.sendFile(require('path').join(__dirname, 'public', 'index.html'));
+});
