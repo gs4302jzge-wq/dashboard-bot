@@ -354,7 +354,6 @@ app.post('/api/welcome', (req, res) => {
 
 // UI Components
 const sidebarScript = `
-<script>
 function toggleSidebar() {
   const sidebar = document.getElementById('sidebar');
   const overlay = document.getElementById('overlay');
@@ -368,7 +367,6 @@ function toggleSidebar() {
     sidebar.style.transform = 'translateX(0px)';
   }
 }
-</script>
 `;
 
 function getSidebarHtml(activePath) {
@@ -387,33 +385,15 @@ function getSidebarHtml(activePath) {
       ? 'background: linear-gradient(90deg, rgba(56, 189, 248, 0.25), rgba(56, 189, 248, 0.05)); color: #38bdf8; font-weight: 600; border-left: 3px solid #38bdf8;' 
       : 'color: #94a3b8;';
     return `
-      <a href="${item.path}" style="text-decoration:none; padding:12px 16px; border-radius:8px; display:flex; align-items:center; gap:14px; font-size:15px; transition:0.2s; ${activeStyle}">
-        <i class="${item.icon}" style="font-size:18px; width:22px; text-align:center;"></i>
-        <span>${item.label}</span>
-      </a>
     `;
   }).join('');
 
   return `
-        <i class="fa-brands fa-discord"></i>
-      </div>
-      </div>
-    </div>
-    <nav style="display:flex; flex-direction:column; gap:6px;">${navLinks}</nav>
-  </div>
   `;
 }
 
 function layout(title, content, currentPath) {
   return `
-  <!DOCTYPE html>
-  <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${title}</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
       body { margin: 0; padding: 0; background-color: #0b0f19; color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; min-height: 100vh; }
       .top-banner { text-align: center; padding: 10px; background: linear-gradient(90deg, #090e1c, #0f172a, #090e1c); color: #fcd34d; font-size: 14px; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.06); }
       .navbar { display: flex; justify-content: space-between; align-items: center; padding: 14px 22px; background-color: #0d1322; border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
@@ -435,19 +415,8 @@ function layout(title, content, currentPath) {
       .tab-btn { background: transparent; border: none; color: #94a3b8; padding: 8px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
       .tab-btn.active { background: #5865F2; color: #fff; }
       .unsaved-bar { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #090e1a; border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; gap: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); z-index: 1000; width: 90%; max-width: 600px; }
-    </style>
-  </head>
-  <body>
     ${getSidebarHtml(currentPath)}
-      <button class="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
-          <i class="fa-brands fa-discord"></i>
-        </div>
-        <span style="font-size:14px; font-weight:600;">nfyp_ <span style="color:#64748b; font-size:12px;">Admin</span></span>
-      </div>
-    </div>
     ${sidebarScript}
-  </body>
-  </html>
   `;
 }
 
@@ -459,16 +428,7 @@ app.get('/', (req, res) => {
   const uptime = getFormattedUptime();
 
   const content = `
-        <h2 style="margin:0; font-size: 26px; font-weight:800; background: linear-gradient(90deg, #ffffff, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Welcome, nfyp_</h2>
-        <p style="color: #94a3b8; margin: 6px 0 0 0; font-size: 14px;">Here's what's happening with <strong style="color:#fff;">OS | System</strong> today.</p>
-      </div>
-    </div>
 
-          <span style="width:10px; height:10px; background:#38bdf8; border-radius:50%; box-shadow:0 0 10px #38bdf8;"></span>
-        </div>
-      </div>
-      </div>
-    </div>
   `;
   res.send(layout('Dashboard - OS | System', content, '/'));
 });
@@ -483,80 +443,22 @@ app.get('/welcome', (req, res) => {
   });
 
   const content = `
-    <!-- Top Welcome Header Bar -->
-      <h2 style="margin:0; font-size:18px; font-weight:700; color:#fff;">Welcome & Goodbye</h2>
-        <span class="slider"></span>
-      </label>
-    </div>
 
-    <!-- Section 1: Send a message when a user joins the server -->
-        <span style="font-size:14px; font-weight:600; color:#fff;">Send a message when a user joins the server</span>
-          <span class="slider"></span>
-        </label>
-      </div>
 
-        <textarea id="welcomeText" oninput="markUnsaved()" rows="4" style="width:100%; box-sizing:border-box; background:#080d1a; border:1px solid rgba(255,255,255,0.12); color:#fff; padding:12px; border-radius:8px; font-size:13px; outline:none; resize:vertical; font-family:inherit;">${welcomeSettings.welcomeMessage}</textarea>
 
-          </div>
-        </div>
 
               SEND AS DM
-            </label>
               SEND TO A CHANNEL
-            </label>
-          </div>
 
-            <select id="welcomeChannel" onchange="markUnsaved()" style="width:100%; max-width:320px; background:#080d1a; border:1px solid rgba(255,255,255,0.12); color:#fff; padding:10px; border-radius:8px; font-size:13px; outline:none;">
               ${channelOptions}
-            </select>
-          </div>
-        </div>
-      </div>
-    </div>
 
-    <!-- Section 2: Send an image when a user joins the server -->
-        <span style="font-size:14px; font-weight:600; color:#fff;">Send an image when a user joins the server</span>
-          <span class="slider"></span>
-        </label>
-      </div>
 
-        </div>
 
-        <!-- Dynamic ProBot Canvas Box -->
-              <i class="fa-brands fa-discord"></i>
-            </div>
-          </div>
-        </div>
 
-        <!-- Controls Toolbar -->
-          <button class="tab-btn active" onclick="switchImgTab(this)"><i class="fa-solid fa-image"></i> Background</button>
-          <button class="tab-btn" onclick="switchImgTab(this)"><i class="fa-solid fa-user-circle"></i> Avatar</button>
-          <button class="tab-btn" onclick="switchImgTab(this)"><i class="fa-solid fa-signature"></i> Username</button>
-          <button class="tab-btn" onclick="switchImgTab(this)"><i class="fa-solid fa-font"></i> Text</button>
-        </div>
 
-          </div>
-          </div>
-        </div>
-      </div>
-    </div>
 
-    <!-- Section 3: Send a message when a user leaves the server -->
-        <span style="font-size:14px; font-weight:600; color:#fff;">Send a message when a user leaves the server</span>
-          <span class="slider"></span>
-        </label>
-      </div>
-    </div>
 
-    <!-- Floating Unsaved Changes Warning Bar (ProBot Style) -->
-        <i class="fa-solid fa-triangle-exclamation"></i> Careful — you have unsaved changes!
-      </div>
-        <button onclick="location.reload()" style="background:rgba(255,255,255,0.1); border:none; color:#cbd5e1; padding:6px 14px; border-radius:6px; font-size:12px; cursor:pointer;">Cancel</button>
-        <button onclick="saveWelcomeSettings()" style="background:#5865F2; border:none; color:#fff; padding:6px 16px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer;">Save Changes</button>
-      </div>
-    </div>
 
-    <script>
       function markUnsaved() {
         document.getElementById('unsavedBar').style.display = 'flex';
       }
@@ -619,7 +521,6 @@ app.get('/welcome', (req, res) => {
           alert('Failed to save settings.');
         }
       }
-    </script>
   `;
 
   res.send(layout('Welcome & Goodbye - ProBot Style', content, '/welcome'));
@@ -661,32 +562,13 @@ app.get('/plugins', (req, res) => {
       : `<span style="color:#94a3b8; font-weight:600;">None</span>`;
 
     return `
-            <i class="${p.icon}"></i>
-          </div>
-        </div>
-          <span class="slider"></span>
-        </label>
-      </div>
 
-      </div>
 
-      <button class="btn" onclick="openEditModal('${p.id}', '${p.name}', ${jsonAliases})" style="background:#2563eb; font-size:12px; padding:6px 14px;"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
-    </div>
   `}).join('');
 
   const content = `
-    <h2 style="margin-bottom: 18px; font-size:24px; font-weight:700;">Plugins Management</h2>
 
-        <button id="addAliasBtn" onclick="addAliasField()" class="btn" style="background:rgba(255,255,255,0.06); color:#cbd5e1; width:100%; justify-content:center; margin-bottom:16px;">
-          <i class="fa-solid fa-plus"></i> Add Alias
-        </button>
-          <button onclick="closeEditModal()" class="btn" style="background:rgba(255,255,255,0.08); color:#cbd5e1;">Cancel</button>
-          <button id="saveBtn" onclick="saveAliases()" class="btn" style="background:#22c55e;"><i class="fa-solid fa-floppy-disk"></i> Save</button>
-        </div>
-      </div>
-    </div>
 
-    <script>
       let currentPluginId = '';
       let currentAliases = [];
 
@@ -708,7 +590,6 @@ app.get('/plugins', (req, res) => {
           const div = document.createElement('div');
           div.style.cssText = 'display:flex; align-items:center; gap:8px;';
           div.innerHTML = \`
-            <button onclick="removeAliasField(\${index})" style="background:#ef4444; border:none; color:#fff; width:34px; height:34px; border-radius:6px; cursor:pointer; font-size:13px;"><i class="fa-solid fa-trash"></i></button>
           \`;
           container.appendChild(div);
         });
@@ -741,7 +622,6 @@ app.get('/plugins', (req, res) => {
           alert('Error saving aliases');
         }
       }
-    </script>
   `;
 
   res.send(layout('Plugins - OS | System', content, '/plugins'));
@@ -749,27 +629,18 @@ app.get('/plugins', (req, res) => {
 
 app.get('/guilds', (req, res) => {
   const content = `
-    <h2 style="margin-bottom: 20px; font-size:24px;">Guilds Overview</h2>
-          </div>
-        </div>
-        <span style="background:rgba(52, 211, 153, 0.15); color:#34d399; padding:5px 12px; border-radius:20px; font-size:12px; font-weight:600;">● Connected</span>
-      </div>
-    </div>
   `;
   res.send(layout('Guilds - OS | System', content, '/guilds'));
 });
 
 app.get('/support', (req, res) => {
   const content = `
-    <h2>Support & Contact</h2>
-    </div>
   `;
   res.send(layout('Support - OS | System', content, '/support'));
 });
 
 app.get('/settings', (req, res) => {
   const content = `
-    <h2>Global Settings</h2>
   `;
   res.send(layout('Settings - OS | System', content, '/settings'));
 });
@@ -778,8 +649,3 @@ app.listen(PORT, () => {
   console.log(`🌐 Dashboard live on port ${PORT}`);
 });
 
-  </div>
-  </div>
-  </div>
-  </div>
-</div>
