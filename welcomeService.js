@@ -36,9 +36,14 @@ async function handleWelcome(member) {
 
     // أ) الخلفية (صورة مرفوعة أو رابط أو لون)
     let bgImage;
-    if (config.bgImagePath && fs.existsSync(config.bgImagePath)) {
-      bgImage = await loadImage(config.bgImagePath);
-    } else if (config.bgUrl) {
+    if (config.bgImagePath) {
+      const relativePath = config.bgImagePath.replace(/^\/+/, '');
+      const localPath = path.join(__dirname, 'public', relativePath);
+      if (fs.existsSync(localPath)) {
+        try { bgImage = await loadImage(localPath); } catch (e) {}
+      }
+    }
+    if (!bgImage && config.bgUrl) {
       try { bgImage = await loadImage(config.bgUrl); } catch (e) {}
     }
 

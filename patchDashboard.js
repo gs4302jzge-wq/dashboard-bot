@@ -1,4 +1,27 @@
-const fs = require('fs');
+@workspace I need to fix the Welcome System in this dashboard bot. 
+
+Please analyze the whole project (EJS view files, Express routes, welcomeService.js, and welcomeConfig.json) and generate the full fixed code for us:
+
+1. Frontend UI (EJS Views):
+- Fix the Welcome Settings page UI tabs (Background, Avatar, Text) so they correctly toggle their options.
+- Ensure the main welcome form has `enctype="multipart/form-data"` enabled.
+- Add an <input type="file" name="bgImage" accept="image/*"> in the Background tab to allow uploading local background images, plus a text input for URL.
+- Add input range sliders for Avatar position and size:
+  - avatarX (min 0, max 800)
+    - avatarY (min 0, max 360)
+      - avatarRadius (min 20, max 160)
+      
+      2. Backend Routes:
+      - Update the POST welcome settings route using `multer` to handle uploaded background images.
+      - Save the uploaded image path (or bgUrl), avatarX, avatarY, and avatarRadius into `welcomeConfig.json`.
+      
+      3. Welcome Service (`welcomeService.js`):
+      - Read `welcomeConfig.json` on member join.
+      - Use Canvas to render the uploaded background image (or URL), and draw the user's avatar circle according to avatarX, avatarY, and avatarRadius.
+      - Send the generated image to the welcome channel.
+      
+      Show me the exact updated code or files to apply.
+      const fs = require('fs');
 const path = require('path');
 
 // 1. فحص وتحديث جميع ملفات الواجهة (EJS / HTML)
