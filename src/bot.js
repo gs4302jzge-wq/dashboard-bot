@@ -1,11 +1,8 @@
 const { Client, GatewayIntentBits, AttachmentBuilder } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
-const express = require('express');
-const multer = require('multer');
 const { renderProbotCard } = require('./modules/probotWelcome');
 
-const app = express();
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -15,81 +12,47 @@ const client = new Client({
     ]
 });
 
-// إعداد التخزين لرفع الصور من جهازك
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, 'uploads/'),
-    filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
-});
-const upload = multer({ storage });
-
-app.use(express.json());
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
-
 const CONFIG_PATH = path.join(__dirname, 'welcomeConfig.json');
 
-function getConfig() {
+function getWelcomeConfig() {
     try {
         if (fs.existsSync(CONFIG_PATH)) {
             return JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
         }
     } catch (e) {}
-    return {};
+    return global.welcomeConfig || {};
 }
 
-function saveConfig(cfg) {
-    fs.writeFileSync(CONFIG_PATH, JSON.stringify(cfg, null, 2));
-}
-
-// Route لرفع صورة الخلفية والأفتار وتحديث الإعدادات مباشرة
-app.post('/api/welcome/config', upload.fields([{ name: 'bgFile' }, { name: 'avatarFile' }]), (req, res) => {
-    let currentConfig = getConfig();
-    let updatedData = { ...req.body };
-
-    if (req.files?.bgFile?.[0]) {
-        updatedData.uploadedBgPath = path.join(__dirname, '../uploads', req.files.bgFile[0].filename);
-    }
-    if (req.files?.avatarFile?.[0]) {
-        updatedData.uploadedAvatarPath = path.join(__dirname, '../uploads', req.files.avatarFile[0].filename);
-    }
-
-    const finalConfig = { ...currentConfig, ...updatedData };
-    saveConfig(finalConfig);
-    global.welcomeConfig = finalConfig;
-
-    res.json({ success: true, config: finalConfig });
+client.on('ready', () => {
+    console.log(`✅ Bot ready: ${client.user.tag}`);
 });
 
-// Route للمعاينة المباشرة على اللوحة (Live Preview)
-app.get('/api/welcome/preview', async (req, res) => {
-    try {
-        const config = getConfig();
-        const buffer = await renderProbotCard(config, {
-            avatarUrl: 'https://cdn.discordapp.com/embed/avatars/0.png',
-            username: 'SampleUser#0000'
-        });
-        res.set('Content-Type', 'image/png');
-        res.send(buffer);
-    } catch (e) {
-        res.status(500).send('Error rendering preview');
-    }
-});
-
-// === حدث الترحيب الرئيسي عند الانضمام ===
 client.on('guildMemberAdd', async (member) => {
-    const config = getConfig();
+    const config = getWelcomeConfig();
 
-    if (config.welcomeEnabled === false) return;
+    // 1. التفتيش عن القناة من اللوحة أو من القناة الافتراضية للفرع
+    let channelId = config.welcomeChannelId || config.channelId || config.channel;
+    let channel = member.guild.channels.cache.get(channelId);
 
-    const channelId = config.welcomeChannelId || process.env.WELCOME_CHANNEL_ID;
-    const channel = member.guild.channels.cache.get(channelId) || member.guild.systemChannel;
-    if (!channel) return;
+    if (!channel) {
+        // في حال لم يتم تحديد القناة من اللوحة، نستخدم روم النظام أو أول روم كتابي
+        channel = member.guild.systemChannel || member.guild.channels.cache.find(c => c.isTextBased() && c.permissionsFor(member.guild.members.me).has('SendMessages'));
+    }
 
-    const messageContent = (config.welcomeMsg || 'Welcome {user} to {server}!')
+    if (!channel) {
+        console.error('❌ لم يتم العثور على أي قناة صالحة لإرسال الترحيب.');
+        return;
+    }
+
+    // 2. تجهيز نص الترحيب
+    const rawText = config.welcomeMsg || config.text || 'Welcome {user} to {server}!';
+    const messageContent = rawText
         .replace('{user}', `<@${member.id}>`)
         .replace('{username}', member.user.username)
         .replace('{memberCount}', member.guild.memberCount)
         .replace('{server}', member.guild.name);
 
+    // 3. إنتاج وإرسال الصورة
     try {
         const buffer = await renderProbotCard(config, {
             avatarUrl: member.user.displayAvatarURL({ extension: 'png', size: 256 }),
@@ -98,13 +61,11 @@ client.on('guildMemberAdd', async (member) => {
 
         const attachment = new AttachmentBuilder(buffer, { name: 'welcome.png' });
         await channel.send({ content: messageContent, files: [attachment] });
+        console.log('🖼️ تم إرسال الصورة والنص بنجاح في القناة:', channel.name);
     } catch (err) {
-        console.error('Error sending welcome image:', err);
+        console.error('❌ خطأ أثناء توليد/إرسال الصورة:', err);
         await channel.send({ content: messageContent });
     }
 });
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
 client.login(process.env.DISCORD_TOKEN);
