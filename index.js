@@ -395,15 +395,8 @@ function getSidebarHtml(activePath) {
   }).join('');
 
   return `
-  <div id="overlay" onclick="toggleSidebar()" style="display:none; opacity:0; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); backdrop-filter: blur(6px); z-index:998; transition: opacity 0.3s ease;"></div>
-  <div id="sidebar" style="position:fixed; top:0; left:0; width:270px; height:100%; background:#090e1a; border-right:1px solid rgba(255, 255, 255, 0.08); z-index:999; transform:translateX(-100%); transition:transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); padding:24px 18px; box-sizing:border-box; color:#f8fafc; box-shadow: 10px 0 30px rgba(0,0,0,0.8);">
-    <div style="display:flex; align-items:center; gap:12px; margin-bottom:30px; padding-bottom:20px; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
-      <div style="width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg, #5865F2, #3b82f6); display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:20px; color:#fff; box-shadow:0 0 15px rgba(88,101,242,0.5);">
         <i class="fa-brands fa-discord"></i>
       </div>
-      <div>
-        <div style="font-weight:700; font-size:16px; color:#fff;">nfyp_</div>
-        <div style="font-size:12px; color:#38bdf8; font-weight:600; margin-top:2px; display:flex; align-items:center; gap:4px;"><span style="width:6px; height:6px; background:#38bdf8; border-radius:50%;"></span> Admin</div>
       </div>
     </div>
     <nav style="display:flex; flex-direction:column; gap:6px;">${navLinks}</nav>
@@ -445,18 +438,13 @@ function layout(title, content, currentPath) {
     </style>
   </head>
   <body>
-    <div class="top-banner">✨ سبحان الله وبحمده ، سبحان الله العظيم ✨</div>
     ${getSidebarHtml(currentPath)}
-    <div class="navbar">
       <button class="menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
-      <div style="display:flex; align-items:center; gap:10px;">
-        <div style="width:34px; height:34px; border-radius:50%; background:#5865F2; display:flex; align-items:center; justify-content:center; font-size:16px; color:white;">
           <i class="fa-brands fa-discord"></i>
         </div>
         <span style="font-size:14px; font-weight:600;">nfyp_ <span style="color:#64748b; font-size:12px;">Admin</span></span>
       </div>
     </div>
-    <div class="container">${content}</div>
     ${sidebarScript}
   </body>
   </html>
@@ -471,27 +459,14 @@ app.get('/', (req, res) => {
   const uptime = getFormattedUptime();
 
   const content = `
-    <div style="margin-bottom: 20px; display:flex; justify-content:space-between; align-items:flex-end;">
-      <div>
         <h2 style="margin:0; font-size: 26px; font-weight:800; background: linear-gradient(90deg, #ffffff, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Welcome, nfyp_</h2>
         <p style="color: #94a3b8; margin: 6px 0 0 0; font-size: 14px;">Here's what's happening with <strong style="color:#fff;">OS | System</strong> today.</p>
       </div>
     </div>
 
-    <div class="card" style="padding:20px; margin-bottom:16px; background: linear-gradient(135deg, #0d1527, #0f1c38); border: 1px solid rgba(56, 189, 248, 0.25);">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-        <div style="display:flex; align-items:center; gap:10px;">
           <span style="width:10px; height:10px; background:#38bdf8; border-radius:50%; box-shadow:0 0 10px #38bdf8;"></span>
-          <h3 style="margin:0; font-size:16px; font-weight:700; color:#fff;">Live System Uptime Tracker</h3>
         </div>
       </div>
-      <div style="display:grid; grid-template-columns: repeat(6, 1fr); gap:10px;">
-        <div class="uptime-unit" style="background:rgba(15, 23, 42, 0.8); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:12px; text-align:center;"><div style="font-size:20px; font-weight:800; color:#38bdf8;" id="ut-years">${uptime.years}</div><div style="font-size:11px; color:#94a3b8; text-transform:uppercase; margin-top:4px;">Years</div></div>
-        <div class="uptime-unit" style="background:rgba(15, 23, 42, 0.8); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:12px; text-align:center;"><div style="font-size:20px; font-weight:800; color:#38bdf8;" id="ut-months">${uptime.months}</div><div style="font-size:11px; color:#94a3b8; text-transform:uppercase; margin-top:4px;">Months</div></div>
-        <div class="uptime-unit" style="background:rgba(15, 23, 42, 0.8); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:12px; text-align:center;"><div style="font-size:20px; font-weight:800; color:#38bdf8;" id="ut-days">${uptime.days}</div><div style="font-size:11px; color:#94a3b8; text-transform:uppercase; margin-top:4px;">Days</div></div>
-        <div class="uptime-unit" style="background:rgba(15, 23, 42, 0.8); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:12px; text-align:center;"><div style="font-size:20px; font-weight:800; color:#38bdf8;" id="ut-hours">${uptime.hours}</div><div style="font-size:11px; color:#94a3b8; text-transform:uppercase; margin-top:4px;">Hours</div></div>
-        <div class="uptime-unit" style="background:rgba(15, 23, 42, 0.8); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:12px; text-align:center;"><div style="font-size:20px; font-weight:800; color:#38bdf8;" id="ut-minutes">${uptime.minutes}</div><div style="font-size:11px; color:#94a3b8; text-transform:uppercase; margin-top:4px;">Minutes</div></div>
-        <div class="uptime-unit" style="background:rgba(15, 23, 42, 0.8); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:12px; text-align:center;"><div style="font-size:20px; font-weight:800; color:#38bdf8;" id="ut-seconds">${uptime.seconds}</div><div style="font-size:11px; color:#94a3b8; text-transform:uppercase; margin-top:4px;">Seconds</div></div>
       </div>
     </div>
   `;
@@ -509,51 +484,28 @@ app.get('/welcome', (req, res) => {
 
   const content = `
     <!-- Top Welcome Header Bar -->
-    <div class="card" style="display:flex; justify-content:space-between; align-items:center; padding:14px 20px;">
       <h2 style="margin:0; font-size:18px; font-weight:700; color:#fff;">Welcome & Goodbye</h2>
-      <label class="toggle-switch">
-        <input type="checkbox" id="mainWelcomeToggle" ${welcomeSettings.enabled ? 'checked' : ''} onchange="markUnsaved()">
         <span class="slider"></span>
       </label>
     </div>
 
     <!-- Section 1: Send a message when a user joins the server -->
-    <div class="card">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
         <span style="font-size:14px; font-weight:600; color:#fff;">Send a message when a user joins the server</span>
-        <label class="toggle-switch">
-          <input type="checkbox" id="sendMsgToggle" ${welcomeSettings.sendMsgEnabled ? 'checked' : ''} onchange="toggleMsgSection(); markUnsaved();">
           <span class="slider"></span>
         </label>
       </div>
 
-      <div id="msgSectionBody" style="display:${welcomeSettings.sendMsgEnabled ? 'block' : 'none'}; border-top:1px solid rgba(255,255,255,0.06); padding-top:14px;">
         <textarea id="welcomeText" oninput="markUnsaved()" rows="4" style="width:100%; box-sizing:border-box; background:#080d1a; border:1px solid rgba(255,255,255,0.12); color:#fff; padding:12px; border-radius:8px; font-size:13px; outline:none; resize:vertical; font-family:inherit;">${welcomeSettings.welcomeMessage}</textarea>
 
-        <div style="margin-top:14px;">
-          <div style="font-size:12px; font-weight:700; color:#94a3b8; margin-bottom:8px;">Variables:</div>
-          <div style="display:flex; flex-direction:column; gap:6px; font-size:12px;">
-            <div><span class="var-badge" onclick="addVar('[user]')">[user]</span> <span style="color:#64748b;">Mentions the member</span></div>
-            <div><span class="var-badge" onclick="addVar('[userName]')">[userName]</span> <span style="color:#64748b;">Member name without mentioning</span></div>
-            <div><span class="var-badge" onclick="addVar('[memberCount]')">[memberCount]</span> <span style="color:#64748b;">Amount of members reached</span></div>
-            <div><span class="var-badge" onclick="addVar('[server]')">[server]</span> <span style="color:#64748b;">Server name</span></div>
           </div>
         </div>
 
-        <div style="margin-top:18px;">
-          <div style="font-size:12px; font-weight:700; color:#cbd5e1; margin-bottom:10px;">Send:</div>
-          <div style="display:flex; flex-direction:column; gap:8px;">
-            <label class="radio-opt">
-              <input type="radio" name="sendType" value="dm" ${welcomeSettings.sendType === 'dm' ? 'checked' : ''} onchange="toggleChannelDropdown(); markUnsaved();">
               SEND AS DM
             </label>
-            <label class="radio-opt">
-              <input type="radio" name="sendType" value="channel" ${welcomeSettings.sendType === 'channel' ? 'checked' : ''} onchange="toggleChannelDropdown(); markUnsaved();">
               SEND TO A CHANNEL
             </label>
           </div>
 
-          <div id="channelSelectWrap" style="margin-top:10px; display:${welcomeSettings.sendType === 'channel' ? 'block' : 'none'};">
             <select id="welcomeChannel" onchange="markUnsaved()" style="width:100%; max-width:320px; background:#080d1a; border:1px solid rgba(255,255,255,0.12); color:#fff; padding:10px; border-radius:8px; font-size:13px; outline:none;">
               ${channelOptions}
             </select>
@@ -563,70 +515,42 @@ app.get('/welcome', (req, res) => {
     </div>
 
     <!-- Section 2: Send an image when a user joins the server -->
-    <div class="card">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
         <span style="font-size:14px; font-weight:600; color:#fff;">Send an image when a user joins the server</span>
-        <label class="toggle-switch">
-          <input type="checkbox" id="sendImgToggle" ${welcomeSettings.sendImgEnabled ? 'checked' : ''} onchange="toggleImgSection(); markUnsaved();">
           <span class="slider"></span>
         </label>
       </div>
 
-      <div id="imgSectionBody" style="display:${welcomeSettings.sendImgEnabled ? 'block' : 'none'}; border-top:1px solid rgba(255,255,255,0.06); padding-top:14px;">
-        <div style="display:flex; gap:12px; margin-bottom:16px;">
-          <label class="radio-opt"><input type="radio" name="imgMode" value="with_text" checked onchange="markUnsaved()"> WITH TEXT MESSAGE</label>
-          <label class="radio-opt"><input type="radio" name="imgMode" value="before_text" onchange="markUnsaved()"> BEFORE TEXT MESSAGE</label>
-          <label class="radio-opt"><input type="radio" name="imgMode" value="to_channel" onchange="markUnsaved()"> TO A CHANNEL</label>
         </div>
 
         <!-- Dynamic ProBot Canvas Box -->
-        <div style="background:#090e1a; border:1px dashed rgba(255,255,255,0.15); border-radius:10px; padding:20px; text-align:center; position:relative; margin-bottom:16px;">
-          <div id="canvasPreview" style="width:100%; max-width:400px; height:180px; margin:0 auto; background:#1e293b; border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; position:relative; box-shadow:0 8px 20px rgba(0,0,0,0.5);">
-            <div style="width:60px; height:60px; border-radius:50%; background:#5865F2; display:flex; align-items:center; justify-content:center; color:#fff; font-size:28px;">
               <i class="fa-brands fa-discord"></i>
             </div>
-            <div id="canvasPreviewText" style="font-weight:700; font-size:15px; color:#fff;">Welcome to Our Server</div>
           </div>
         </div>
 
         <!-- Controls Toolbar -->
-        <div style="display:flex; gap:8px; margin-bottom:16px; background:#080d1a; padding:6px; border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
           <button class="tab-btn active" onclick="switchImgTab(this)"><i class="fa-solid fa-image"></i> Background</button>
           <button class="tab-btn" onclick="switchImgTab(this)"><i class="fa-solid fa-user-circle"></i> Avatar</button>
           <button class="tab-btn" onclick="switchImgTab(this)"><i class="fa-solid fa-signature"></i> Username</button>
           <button class="tab-btn" onclick="switchImgTab(this)"><i class="fa-solid fa-font"></i> Text</button>
         </div>
 
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-          <div>
-            <label style="display:block; font-size:11px; font-weight:700; color:#94a3b8; margin-bottom:4px;">TEXT CONTENT</label>
-            <input type="text" id="canvasTextVal" value="${welcomeSettings.canvas.textVal}" oninput="updateCanvasText(); markUnsaved();" style="width:100%; box-sizing:border-box; background:#080d1a; border:1px solid rgba(255,255,255,0.12); color:#fff; padding:8px 10px; border-radius:6px; font-size:12px; outline:none;">
           </div>
-          <div>
-            <label style="display:block; font-size:11px; font-weight:700; color:#94a3b8; margin-bottom:4px;">TEXT COLOR</label>
-            <input type="color" value="#ffffff" onchange="markUnsaved()" style="width:100%; height:35px; background:transparent; border:none; cursor:pointer;">
           </div>
         </div>
       </div>
     </div>
 
     <!-- Section 3: Send a message when a user leaves the server -->
-    <div class="card">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
         <span style="font-size:14px; font-weight:600; color:#fff;">Send a message when a user leaves the server</span>
-        <label class="toggle-switch">
-          <input type="checkbox" id="leaveMsgToggle" ${welcomeSettings.leaveMsgEnabled ? 'checked' : ''} onchange="markUnsaved()">
           <span class="slider"></span>
         </label>
       </div>
     </div>
 
     <!-- Floating Unsaved Changes Warning Bar (ProBot Style) -->
-    <div id="unsavedBar" class="unsaved-bar" style="display:none;">
-      <div style="color:#fcd34d; font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px;">
         <i class="fa-solid fa-triangle-exclamation"></i> Careful — you have unsaved changes!
       </div>
-      <div style="display:flex; gap:10px;">
         <button onclick="location.reload()" style="background:rgba(255,255,255,0.1); border:none; color:#cbd5e1; padding:6px 14px; border-radius:6px; font-size:12px; cursor:pointer;">Cancel</button>
         <button onclick="saveWelcomeSettings()" style="background:#5865F2; border:none; color:#fff; padding:6px 16px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer;">Save Changes</button>
       </div>
@@ -737,25 +661,13 @@ app.get('/plugins', (req, res) => {
       : `<span style="color:#94a3b8; font-weight:600;">None</span>`;
 
     return `
-    <div class="card" style="padding:18px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-        <div style="display:flex; align-items:center; gap:12px;">
-          <div style="width:38px; height:38px; border-radius:8px; background:${p.iconBg}; color:${p.iconColor}; display:flex; align-items:center; justify-content:center; font-size:16px;">
             <i class="${p.icon}"></i>
           </div>
-          <h3 style="margin:0; font-size:18px; font-weight:700; color:#fff;">${p.name}</h3>
         </div>
-        <label class="toggle-switch">
-          <input type="checkbox" checked>
           <span class="slider"></span>
         </label>
       </div>
 
-      <div style="font-size:12px; color:#cbd5e1; line-height:1.7; margin-bottom:14px;">
-        <div><strong>Developer:</strong> Mohammed Alhajri</div>
-        <div><strong>Description:</strong> ${p.desc}</div>
-        <div><strong>Usage:</strong> <span style="background:rgba(56, 189, 248, 0.12); color:#38bdf8; padding:2px 6px; border-radius:4px; font-family:monospace;">${p.usage}</span></div>
-        <div><strong>Aliases:</strong> ${aliasesDisplay}</div>
       </div>
 
       <button class="btn" onclick="openEditModal('${p.id}', '${p.name}', ${jsonAliases})" style="background:#2563eb; font-size:12px; padding:6px 14px;"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
@@ -764,16 +676,10 @@ app.get('/plugins', (req, res) => {
 
   const content = `
     <h2 style="margin-bottom: 18px; font-size:24px; font-weight:700;">Plugins Management</h2>
-    <div>${pluginCards}</div>
 
-    <div id="editAliasModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; align-items:center; justify-content:center; padding:15px; box-sizing:border-box;">
-      <div class="card" style="width:100%; max-width:400px; margin:0; background:#0b1220; border:1px solid rgba(255,255,255,0.12); border-radius:12px; padding:20px;">
-        <h3 style="margin-top:0; color:#fff; font-size:16px; font-weight:700;"><i class="fa-solid fa-pen-to-square" style="color:#38bdf8;"></i> Edit Aliases</h3>
-        <div id="aliasesContainer" style="display:flex; flex-direction:column; gap:10px; margin-bottom:12px;"></div>
         <button id="addAliasBtn" onclick="addAliasField()" class="btn" style="background:rgba(255,255,255,0.06); color:#cbd5e1; width:100%; justify-content:center; margin-bottom:16px;">
           <i class="fa-solid fa-plus"></i> Add Alias
         </button>
-        <div style="display:flex; justify-content:flex-end; gap:10px;">
           <button onclick="closeEditModal()" class="btn" style="background:rgba(255,255,255,0.08); color:#cbd5e1;">Cancel</button>
           <button id="saveBtn" onclick="saveAliases()" class="btn" style="background:#22c55e;"><i class="fa-solid fa-floppy-disk"></i> Save</button>
         </div>
@@ -802,7 +708,6 @@ app.get('/plugins', (req, res) => {
           const div = document.createElement('div');
           div.style.cssText = 'display:flex; align-items:center; gap:8px;';
           div.innerHTML = \`
-            <input type="text" value="\${alias}" oninput="currentAliases[\${index}] = this.value" placeholder="e.g. n or nick or نك" style="flex:1; background:#060a14; border:1px solid rgba(255,255,255,0.15); color:#fff; padding:8px 12px; border-radius:6px; font-size:13px; outline:none;">
             <button onclick="removeAliasField(\${index})" style="background:#ef4444; border:none; color:#fff; width:34px; height:34px; border-radius:6px; cursor:pointer; font-size:13px;"><i class="fa-solid fa-trash"></i></button>
           \`;
           container.appendChild(div);
@@ -845,13 +750,6 @@ app.get('/plugins', (req, res) => {
 app.get('/guilds', (req, res) => {
   const content = `
     <h2 style="margin-bottom: 20px; font-size:24px;">Guilds Overview</h2>
-    <div class="card">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <div style="display:flex; align-items:center; gap:16px;">
-          <div style="width:52px; height:52px; border-radius:14px; background:#2563eb; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:24px; color:#fff;">O</div>
-          <div>
-            <h3 style="margin:0; font-size:20px; color:#fff;">OSCORP RP</h3>
-            <div style="color:#64748b; font-size:12px; margin-top:2px;">ID: 1540577416353677415</div>
           </div>
         </div>
         <span style="background:rgba(52, 211, 153, 0.15); color:#34d399; padding:5px 12px; border-radius:20px; font-size:12px; font-weight:600;">● Connected</span>
@@ -864,8 +762,6 @@ app.get('/guilds', (req, res) => {
 app.get('/support', (req, res) => {
   const content = `
     <h2>Support & Contact</h2>
-    <div class="card">
-      <div><strong>Developer:</strong> Mohammed Alhajri</div>
     </div>
   `;
   res.send(layout('Support - OS | System', content, '/support'));
@@ -874,7 +770,6 @@ app.get('/support', (req, res) => {
 app.get('/settings', (req, res) => {
   const content = `
     <h2>Global Settings</h2>
-    <div class="card"><p style="color:#94a3b8;">Manage global bot system configuration.</p></div>
   `;
   res.send(layout('Settings - OS | System', content, '/settings'));
 });
@@ -883,21 +778,8 @@ app.listen(PORT, () => {
   console.log(`🌐 Dashboard live on port ${PORT}`);
 });
 
-  <h3 style="color:#5865F2; margin-top:0;">🎨 إعدادات الترحيب والأفاتار</h3>
-  <div style="margin-bottom:10px;">
-    <label style="display:block; font-weight:bold;">📁 رفع صورة خلفية جديدة:</label>
-    <input type="file" name="bgImage" accept="image/*" style="background:#2b2d31; color:#fff; padding:6px; width:100%; border-radius:4px;">
   </div>
-  <div style="margin-bottom:10px;">
-    <label style="display:block; font-weight:bold;">↔️ موقع الأفاتار X:</label>
-    <input type="range" name="avatarX" min="0" max="800" value="400" style="width:100%;">
   </div>
-  <div style="margin-bottom:10px;">
-    <label style="display:block; font-weight:bold;">↕️ موقع الأفاتار Y:</label>
-    <input type="range" name="avatarY" min="0" max="360" value="120" style="width:100%;">
   </div>
-  <div style="margin-bottom:10px;">
-    <label style="display:block; font-weight:bold;">🔍 حجم الأفاتار:</label>
-    <input type="range" name="avatarRadius" min="20" max="150" value="60" style="width:100%;">
   </div>
 </div>
