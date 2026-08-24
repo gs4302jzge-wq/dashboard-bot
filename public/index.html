@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>OSCORP RP - Commands Dashboard</title>
+  <title>OSCORP RP - Advanced Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
@@ -16,6 +16,7 @@
       --card-bg: rgba(15, 22, 38, 0.85);
       --border: rgba(255, 255, 255, 0.08);
       --text-muted: #94a3b8;
+      --success: #22c55e;
     }
 
     body {
@@ -96,21 +97,36 @@
     }
 
     .main-content { flex: 1; padding: 20px; display: flex; justify-content: center; }
-    .tab-content { display: none; width: 100%; max-width: 760px; }
+    .tab-content { display: none; width: 100%; max-width: 800px; }
     .tab-content.active { display: block; }
 
-    .stats-banner {
-      background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.25); color: #818cf8; padding: 14px 20px; border-radius: 16px; font-size: 14px; font-weight: 800; display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;
+    /* Dashboard Widgets */
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px; }
+    .widget-card {
+      background: var(--card-bg); border: 1px solid var(--border); border-radius: 18px; padding: 20px; backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: space-between;
     }
+    .widget-val { font-size: 24px; font-weight: 900; color: #fff; margin-top: 4px; }
+    .widget-lbl { font-size: 13px; color: var(--text-muted); font-weight: 700; }
+    .widget-icon { width: 50px; height: 50px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #fff; }
 
-    .cmd-card {
-      background: var(--card-bg); border: 1px solid var(--border); border-radius: 18px; padding: 20px; margin-bottom: 16px; backdrop-filter: blur(20px);
+    /* Section Forms & Panels */
+    .panel-card {
+      background: var(--card-bg); border: 1px solid var(--border); border-radius: 18px; padding: 22px; margin-bottom: 20px; backdrop-filter: blur(20px);
     }
-    .cmd-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
-    .cmd-title-group { display: flex; align-items: center; gap: 12px; }
-    .cmd-icon-box { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #fff; }
-    .cmd-name { font-size: 18px; font-weight: 800; color: #f8fafc; }
+    .panel-header { font-size: 16px; font-weight: 800; color: #fff; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+    
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 13px; font-weight: 700; color: #cbd5e1; margin-bottom: 8px; }
+    .form-input, .form-select, .form-textarea {
+      width: 100%; background: #1e293b; border: 1px solid #334155; padding: 12px 14px; border-radius: 12px; color: #fff; font-size: 14px; outline: none; transition: 0.2s;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: #6366f1; }
+    .form-textarea { resize: vertical; min-height: 100px; }
 
+    .switch-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .switch-row:last-child { border-bottom: none; }
+
+    /* Switch Component */
     .switch { position: relative; display: inline-block; width: 46px; height: 24px; }
     .switch input { opacity: 0; width: 0; height: 0; }
     .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #334155; transition: .3s; border-radius: 30px; }
@@ -118,19 +134,31 @@
     input:checked + .slider { background-color: #3b82f6; }
     input:checked + .slider:before { transform: translateX(22px); }
 
+    /* Commands Styling */
+    .stats-banner {
+      background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.25); color: #818cf8; padding: 14px 20px; border-radius: 16px; font-size: 14px; font-weight: 800; display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;
+    }
+    .cmd-card {
+      background: var(--card-bg); border: 1px solid var(--border); border-radius: 18px; padding: 20px; margin-bottom: 16px; backdrop-filter: blur(20px);
+    }
+    .cmd-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+    .cmd-title-group { display: flex; align-items: center; gap: 12px; }
+    .cmd-icon-box { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #fff; }
+    .cmd-name { font-size: 18px; font-weight: 800; color: #f8fafc; }
     .cmd-details { display: flex; flex-direction: column; gap: 6px; font-size: 13px; margin-bottom: 16px; }
     .detail-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
     .detail-label { color: var(--text-muted); font-weight: 700; }
     .detail-val { color: #e2e8f0; font-weight: 600; }
     .usage-badge { background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(56, 189, 248, 0.2); color: #38bdf8; padding: 4px 10px; border-radius: 8px; font-family: monospace; font-weight: 700; font-size: 12px; }
     .alias-badge { color: #38bdf8; font-weight: 700; background: rgba(56, 189, 248, 0.1); padding: 2px 8px; border-radius: 6px; font-size: 12px; margin-left: 4px; }
-
     .cmd-actions { display: flex; gap: 10px; }
     .btn-action { padding: 8px 18px; border-radius: 10px; border: none; font-size: 13px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
     .btn-edit { background: #2563eb; color: #ffffff; }
     .btn-edit:hover { background: #1d4ed8; }
     .btn-remove { background: #dc2626; color: #ffffff; }
     .btn-remove:hover { background: #b91c1c; }
+    .btn-submit { background: #6366f1; color: #fff; padding: 12px 24px; border-radius: 12px; border: none; font-weight: 800; cursor: pointer; transition: 0.2s; width: 100%; margin-top: 10px; }
+    .btn-submit:hover { background: #4f46e5; }
 
     /* Modal Styling */
     .modal-overlay {
@@ -141,17 +169,14 @@
       background: #0f172a; border: 1px solid rgba(255,255,255,0.15); border-radius: 20px; width: 92%; max-width: 480px; padding: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.6);
     }
     .modal-title { font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
-    
     .alias-bars-container { display: flex; flex-direction: column; gap: 10px; max-height: 250px; overflow-y: auto; margin-bottom: 14px; padding-left: 4px; }
     .alias-input-row { display: flex; align-items: center; gap: 8px; }
     .alias-input { flex: 1; background: #1e293b; border: 1px solid #334155; padding: 10px 14px; border-radius: 12px; color: #fff; font-size: 14px; outline: none; }
     .alias-input:focus { border-color: #6366f1; }
     .btn-del-bar { background: rgba(220, 38, 38, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
     .btn-del-bar:hover { background: #dc2626; color: #fff; }
-
     .btn-add-bar { background: rgba(99, 102, 241, 0.15); border: 1px dashed #6366f1; color: #818cf8; width: 100%; padding: 10px; border-radius: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px; margin-bottom: 20px; transition: 0.2s; }
     .btn-add-bar:hover { background: rgba(99, 102, 241, 0.25); color: #fff; }
-
     .modal-btns { display: flex; justify-content: flex-end; gap: 10px; }
     .btn-modal-cancel { background: #334155; color: #fff; padding: 9px 20px; border-radius: 10px; border: none; font-weight: 700; cursor: pointer; }
     .btn-modal-save { background: #6366f1; color: #fff; padding: 9px 22px; border-radius: 10px; border: none; font-weight: 700; cursor: pointer; }
@@ -178,24 +203,172 @@
 
   <div class="layout">
     <aside class="sidebar">
-      <div class="nav-link" onclick="switchTab('dashboard', this)"><i class="fa-solid fa-chart-line"></i> Dashboard</div>
+      <div class="nav-link active" onclick="switchTab('dashboard', this)"><i class="fa-solid fa-chart-line"></i> Dashboard</div>
       <div class="nav-link" onclick="switchTab('welcome', this)"><i class="fa-solid fa-address-card"></i> Welcome System</div>
-      <div class="nav-link active" onclick="switchTab('commands', this)"><i class="fa-solid fa-cubes-stacked"></i> Commands & Aliases</div>
+      <div class="nav-link" onclick="switchTab('commands', this)"><i class="fa-solid fa-cubes-stacked"></i> Commands & Aliases</div>
       <div class="nav-link" onclick="switchTab('guild', this)"><i class="fa-solid fa-server"></i> Guild Support</div>
       <div class="nav-link" onclick="switchTab('settings', this)"><i class="fa-solid fa-sliders"></i> Settings</div>
     </aside>
 
     <main class="main-content">
-      <div id="tab-commands" class="tab-content active">
-        
+      
+      <!-- TAB 1: DASHBOARD -->
+      <div id="tab-dashboard" class="tab-content active">
+        <div class="grid-2">
+          <div class="widget-card">
+            <div>
+              <div class="widget-lbl">إجمالي الاعضاء</div>
+              <div class="widget-val">12,480</div>
+            </div>
+            <div class="widget-icon" style="background: linear-gradient(135deg, #6366f1, #4f46e5);"><i class="fa-solid fa-users"></i></div>
+          </div>
+          <div class="widget-card">
+            <div>
+              <div class="widget-lbl">حالة البوت</div>
+              <div class="widget-val" style="color:#22c55e;">متصل (Online)</div>
+            </div>
+            <div class="widget-icon" style="background: linear-gradient(135deg, #10b981, #047857);"><i class="fa-solid fa-signal"></i></div>
+          </div>
+          <div class="widget-card">
+            <div>
+              <div class="widget-lbl">التذاكر المفتوحة</div>
+              <div class="widget-val">8 تذاكر</div>
+            </div>
+            <div class="widget-icon" style="background: linear-gradient(135deg, #f59e0b, #b45309);"><i class="fa-solid fa-ticket"></i></div>
+          </div>
+          <div class="widget-card">
+            <div>
+              <div class="widget-lbl">سرعة الاستجابة</div>
+              <div class="widget-val">24ms</div>
+            </div>
+            <div class="widget-icon" style="background: linear-gradient(135deg, #06b6d4, #0e7490);"><i class="fa-solid fa-bolt"></i></div>
+          </div>
+        </div>
+
+        <div class="panel-card">
+          <div class="panel-header"><i class="fa-solid fa-chart-area" style="color:#6366f1;"></i> نشاط السيرفر اليومي</div>
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">معدل الأوامر والرسائل المنفذة خلال الـ 24 ساعة الماضية.</p>
+          <div style="background: rgba(255,255,255,0.03); height: 160px; border-radius: 12px; display: flex; align-items: flex-end; justify-content: space-around; padding: 15px;">
+            <div style="width: 10%; background: #6366f1; height: 40%; border-radius: 6px;"></div>
+            <div style="width: 10%; background: #6366f1; height: 65%; border-radius: 6px;"></div>
+            <div style="width: 10%; background: #6366f1; height: 90%; border-radius: 6px;"></div>
+            <div style="width: 10%; background: #6366f1; height: 50%; border-radius: 6px;"></div>
+            <div style="width: 10%; background: #6366f1; height: 75%; border-radius: 6px;"></div>
+            <div style="width: 10%; background: #6366f1; height: 95%; border-radius: 6px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: WELCOME SYSTEM -->
+      <div id="tab-welcome" class="tab-content">
+        <div class="panel-card">
+          <div class="panel-header"><i class="fa-solid fa-door-open" style="color:#6366f1;"></i> نظام الترحيب بالأعضاء الجدد</div>
+          
+          <div class="switch-row">
+            <div>
+              <div style="font-size: 14px; font-weight: 700;">تفعيل الترحيب في الشات</div>
+              <div style="font-size: 12px; color: var(--text-muted);">إرسال رسالة ترحيبية فور انضمام عضو جديد.</div>
+            </div>
+            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+          </div>
+
+          <div class="switch-row" style="margin-bottom: 16px;">
+            <div>
+              <div style="font-size: 14px; font-weight: 700;">إرسال رسالة في الخاص (DM)</div>
+              <div style="font-size: 12px; color: var(--text-muted);">إرسال رسالة ترحيب وقوانين على الخاص.</div>
+            </div>
+            <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">روم الترحيب (Welcome Channel)</label>
+            <select class="form-select">
+              <option>👋🏻-welcome (120492049284)</option>
+              <option>💬-chat-general</option>
+              <option>📢-announcements</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">نص رسالة الترحيب</label>
+            <textarea class="form-textarea" placeholder="أهلاً بك {user} في سيرفر OSCORP RP! نتمنى لك وقتاً ممتعاً.">أهلاً بك {user} في سيرفر OSCORP RP! نورت السيرفر يا غالي ❤️</textarea>
+          </div>
+
+          <button class="btn-submit"><i class="fa-solid fa-floppy-disk"></i> حفظ إعدادات الترحيب</button>
+        </div>
+      </div>
+
+      <!-- TAB 3: COMMANDS & ALIASES -->
+      <div id="tab-commands" class="tab-content">
         <div class="stats-banner">
           <span><i class="fa-solid fa-terminal"></i> قائمة أوامر البوت المتاحة (Bot Commands & Aliases)</span>
           <span style="font-size: 12px; background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 20px; color: #fff;" id="cmdCount">Active Commands 24</span>
         </div>
 
         <div id="commandsList"></div>
-
       </div>
+
+      <!-- TAB 4: GUILD SUPPORT -->
+      <div id="tab-guild" class="tab-content">
+        <div class="panel-card">
+          <div class="panel-header"><i class="fa-solid fa-headset" style="color:#6366f1;"></i> إعدادات الدعم الفني والتذاكر (Tickets System)</div>
+          
+          <div class="form-group">
+            <label class="form-label">روم إنشاء التذاكر (Ticket Panel Channel)</label>
+            <select class="form-select">
+              <option>🎫-open-ticket</option>
+              <option>🛠️-support-desk</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">رتبة الدعم الفني (Support Role)</label>
+            <select class="form-select">
+              <option>🛡️ Admin / Moderator</option>
+              <option>👑 Head Admin</option>
+              <option>🤝 Support Team</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">رسالة التذكرة المفتوحة</label>
+            <textarea class="form-textarea" placeholder="مرحباً بك! يرجى كتابة مشكلتك وسيقوم فريق الدعم بالرد عليك قريباً."></textarea>
+          </div>
+
+          <button class="btn-submit"><i class="fa-solid fa-floppy-disk"></i> حفظ نظام التذاكر</button>
+        </div>
+      </div>
+
+      <!-- TAB 5: SETTINGS -->
+      <div id="tab-settings" class="tab-content">
+        <div class="panel-card">
+          <div class="panel-header"><i class="fa-solid fa-gear" style="color:#6366f1;"></i> إعدادات البوت العامة</div>
+          
+          <div class="form-group">
+            <label class="form-label">بادئة الأوامر (Bot Prefix)</label>
+            <input type="text" class="form-input" value="-">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">لغة البوت (Bot Language)</label>
+            <select class="form-select">
+              <option>العربية (Arabic)</option>
+              <option>English</option>
+            </select>
+          </div>
+
+          <div class="switch-row">
+            <div>
+              <div style="font-size: 14px; font-weight: 700;">وضع الصيانة (Maintenance Mode)</div>
+              <div style="font-size: 12px; color: var(--text-muted);">تعطيل استجابة البوت للأوامر مؤقتاً.</div>
+            </div>
+            <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+          </div>
+
+          <button class="btn-submit" style="margin-top:20px;"><i class="fa-solid fa-floppy-disk"></i> حفظ الإعدادات العامة</button>
+        </div>
+      </div>
+
     </main>
   </div>
 
@@ -219,7 +392,7 @@
   </div>
 
   <script>
-    // 24 أمراً كاملاً ومفصلاً
+    // 24 أمراً كاملاً
     let commandsData = [
       { id: 'ban', name: 'Ban', icon: 'fa-hammer', color: 'linear-gradient(135deg, #ef4444, #991b1b)', dev: 'Mohammed Alhajri', desc: 'Bans a user permanently from the server.', usage: '-ban {@user} [reason]', aliases: ['م', 'حظر'] },
       { id: 'kick', name: 'Kick', icon: 'fa-user-slash', color: 'linear-gradient(135deg, #f59e0b, #b45309)', dev: 'Mohammed Alhajri', desc: 'Kicks a user from the server.', usage: '-kick {@user} [reason]', aliases: ['طرد'] },
@@ -251,6 +424,7 @@
 
     function renderCommands() {
       const list = document.getElementById('commandsList');
+      if(!list) return;
       list.innerHTML = '';
       commandsData.forEach(cmd => {
         const aliasesHtml = cmd.aliases.map(a => `<span class="alias-badge">${a}</span>`).join(' ');
@@ -284,7 +458,7 @@
       document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
       const selectedTab = document.getElementById('tab-' + tabName);
       if (selectedTab) selectedTab.classList.add('active');
-      element.classList.add('active');
+      if (element) element.classList.add('active');
     }
 
     function openCustomModal(cmdId) {
