@@ -1,243 +1,41 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة تحكم نظام الترحيب الاحترافية</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
-    <style>
-        body { background-color: #0f111a; color: #fff; font-family: system-ui, sans-serif; }
-        .card-custom { background: #1a1d2e; border-radius: 16px; border: 1px solid #2a2e45; padding: 25px; }
-        .form-control, .form-select { background-color: #0f111a; border-color: #2a2e45; color: #fff; }
-        .form-control:focus, .form-select:focus { background-color: #151824; color: #fff; border-color: #5865F2; }
-        .btn-primary { background-color: #5865F2; border: none; padding: 12px 28px; font-weight: bold; border-radius: 10px; }
-        .btn-primary:hover { background-color: #4752c4; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة التحكم</title>
+  <style>
+    body { margin: 0; padding: 20px; background-color: #0b0f19; color: #f8fafc; font-family: system-ui, sans-serif; }
+    .card { background: #131b2e; border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 12px; padding: 20px; max-width: 600px; margin: 0 auto; }
+    h2 { color: #5865F2; margin-top: 0; }
+    .form-group { margin-bottom: 15px; }
+    label { display: block; margin-bottom: 5px; font-weight: bold; }
+    input[type="file"], input[type="range"] { width: 100%; box-sizing: border-box; }
+    .btn { background: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+  </style>
 </head>
-<body class="py-5">
-    <div class="container" style="max-width: 900px;">
-        <h2 class="text-center mb-4 fw-bold">⚙️ لوحة إعدادات نظام الترحيب</h2>
-        
-        <form enctype="multipart/form-data" enctype="multipart/form-data" enctype="multipart/form-data" enctype="multipart/form-data" enctype="multipart/form-data" id="welcomeForm" action="/api/config" method="post" enctype="multipart/form-data">
-            <div class="card-custom mb-4">
-                <div class="form-check form-switch fs-5 mb-4">
-                    <input class="form-check-input" type="checkbox" id="welcomeEnabled" name="welcomeEnabled">
-                    <label class="form-check-label fw-bold" for="welcomeEnabled">تفعيل نظام الترحيب والصورة</label>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label fw-bold">اختر قناة الترحيب:</label>
-                    <select class="form-select" id="welcomeChannelId" name="welcomeChannelId">
-                        <option value="">جاري تحميل القنوات...</option>
-                    </select>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label fw-bold">رسالة الترحيب النصية:</label>
-                    <input type="text" class="form-control" id="welcomeMsg" name="welcomeMsg" placeholder="Welcome {user} to {server}!">
-                </div>
-            </div>
-
-            <div class="card-custom mb-4" id="welcomeCustomization">
-                <h4 class="mb-3 text-primary">🖼️ تخصيص بطاقة الترحيب (Canvas)</h4>
-                <ul class="nav nav-tabs mb-3" role="tablist">
-                    <li class="nav-item" role="presentation"><button class="nav-link active" type="button" data-tab="background">Background</button></li>
-                    <li class="nav-item" role="presentation"><button class="nav-link" type="button" data-tab="avatar">Avatar</button></li>
-                    <li class="nav-item" role="presentation"><button class="nav-link" type="button" data-tab="text">Text</button></li>
-                </ul>
-
-                <div class="tab-pane" data-panel="background">
-                    <label class="form-label fw-bold" for="bgImage">رفع صورة خلفية للكرت:</label>
-                    <input type="file" class="form-control mb-3" id="bgImage" name="bgImage" accept="image/*">
-                    <label class="form-label fw-bold" for="bgUrl">رابط صورة الخلفية:</label>
-                    <input type="url" class="form-control" id="bgUrl" name="bgUrl" placeholder="https://example.com/background.png">
-                </div>
-
-                <div class="tab-pane d-none" data-panel="avatar">
-                    <div class="mb-3"><label class="form-label" for="avatarX">Avatar X: <output id="avatarXValue">400</output></label><input type="range" class="form-range" id="avatarX" name="avatarX" min="0" max="800" value="400"></div>
-                    <div class="mb-3"><label class="form-label" for="avatarY">Avatar Y: <output id="avatarYValue">120</output></label><input type="range" class="form-range" id="avatarY" name="avatarY" min="0" max="360" value="120"></div>
-                    <div><label class="form-label" for="avatarRadius">Avatar Radius: <output id="avatarRadiusValue">60</output></label><input type="range" class="form-range" id="avatarRadius" name="avatarRadius" min="20" max="160" value="60"></div>
-                </div>
-
-                <div class="tab-pane d-none" data-panel="text">
-                    <div class="mb-3"><label class="form-label fw-bold" for="textContent">النص داخل البطاقة:</label><input type="text" class="form-control" id="textContent" name="textContent" placeholder="Welcome to Our Server"></div>
-                    <label class="form-label fw-bold" for="textColor">لون النص:</label>
-                    <input type="color" class="form-control form-control-color w-100" id="textColor" name="textColor" value="#ffffff">
-                </div>
-            </div>
-
-            <button type="submit" class="btn btn-primary w-100 fs-5">💾 حفظ التغييرات وتطبيقها فوراً</button>
-        
-  <div style="background:#18191c; border:2px solid #5865F2; border-radius:8px; padding:15px; margin:20px 0; color:#fff;">
-    <h3 style="margin-top:0; color:#5865F2;">🎨 التحكم بالخلفية والأفاتار (Welcome Settings)</h3>
-    <div style="margin-bottom:12px;">
-      <label style="display:block; font-weight:bold;">📁 رفع صورة الخلفية:</label>
-      <input type="file" name="bgImage" accept="image/*" style="background:#2b2d31; color:#fff; padding:8px; width:100%; border-radius:4px;">
-    </div>
-    <div style="margin-bottom:12px;">
-      <label style="display:block; font-weight:bold;">↔️ موقع الأفاتار X:</label>
-      <input type="range" name="avatarX" min="0" max="800" value="400" style="width:100%;">
-    </div>
-    <div style="margin-bottom:12px;">
-      <label style="display:block; font-weight:bold;">↕️ موقع الأفاتار Y:</label>
-      <input type="range" name="avatarY" min="0" max="360" value="120" style="width:100%;">
-    </div>
-    <div style="margin-bottom:12px;">
-      <label style="display:block; font-weight:bold;">🔍 حجم الأفاتار:</label>
-      <input type="range" name="avatarRadius" min="20" max="150" value="60" style="width:100%;">
-    </div>
+<body>
+  <div class="card">
+    <h2>🎨 إعدادات الترحيب والأفاتار</h2>
+    <form action="/update-welcome" method="POST" enctype="multipart/form-data">
+      <div class="form-group">
+        <label>📁 رفع صورة خلفية جديدة:</label>
+        <input type="file" name="bgImage" accept="image/*">
+      </div>
+      <div class="form-group">
+        <label>↔️ موقع الأفاتار X:</label>
+        <input type="range" name="avatarX" min="0" max="800" value="400">
+      </div>
+      <div class="form-group">
+        <label>↕️ موقع الأفاتار Y:</label>
+        <input type="range" name="avatarY" min="0" max="360" value="120">
+      </div>
+      <div class="form-group">
+        <label>🔍 حجم الأفاتار:</label>
+        <input type="range" name="avatarRadius" min="20" max="150" value="60">
+      </div>
+      <button type="submit" class="btn">حفظ الإعدادات</button>
+    </form>
   </div>
-  
-      <!-- WELCOME_CONTROLS_V2 -->
-      <div style="background:#18191c; border:2px solid #5865F2; border-radius:8px; padding:15px; margin:20px 0; color:#fff;">
-        <h3 style="color:#5865F2; margin-top:0;">🎨 إعدادات الترحب والصورة</h3>
-        <div style="margin-bottom:10px;">
-          <label style="display:block; font-weight:bold;">📁 رفع صورة خلفية جديدة:</label>
-          <input type="file" name="bgImage" accept="image/*" style="background:#2b2d31; color:#fff; padding:6px; width:100%; border-radius:4px;">
-        </div>
-        <div style="margin-bottom:10px;">
-          <label style="display:block; font-weight:bold;">↔️ موقع الأفاتار X:</label>
-          <input type="range" name="avatarX" min="0" max="800" value="400" style="width:100%;">
-        </div>
-        <div style="margin-bottom:10px;">
-          <label style="display:block; font-weight:bold;">↕️ موقع الأفاتار Y:</label>
-          <input type="range" name="avatarY" min="0" max="360" value="120" style="width:100%;">
-        </div>
-        <div style="margin-bottom:10px;">
-          <label style="display:block; font-weight:bold;">🔍 حجم الأفاتار:</label>
-          <input type="range" name="avatarRadius" min="20" max="150" value="60" style="width:100%;">
-        </div>
-      </div>
-      
-
-      <!-- WELCOME_SETTINGS_FINAL_V3 -->
-      <div style="background:#18191c; border:2px solid #5865F2; border-radius:8px; padding:15px; margin:20px 0; color:#fff;">
-        <h3 style="color:#5865F2; margin-top:0;">🎨 إعدادات الترحيب والأفاتار</h3>
-        <div style="margin-bottom:10px;">
-          <label style="display:block; font-weight:bold;">📁 رفع صورة خلفية جديدة:</label>
-          <input type="file" name="bgImage" accept="image/*" style="background:#2b2d31; color:#fff; padding:6px; width:100%; border-radius:4px;">
-        </div>
-        <div style="margin-bottom:10px;">
-          <label style="display:block; font-weight:bold;">↔️ موقع الأفاتار X:</label>
-          <input type="range" name="avatarX" min="0" max="800" value="400" style="width:100%;">
-        </div>
-        <div style="margin-bottom:10px;">
-          <label style="display:block; font-weight:bold;">↕️ موقع الأفاتار Y:</label>
-          <input type="range" name="avatarY" min="0" max="360" value="120" style="width:100%;">
-        </div>
-        <div style="margin-bottom:10px;">
-          <label style="display:block; font-weight:bold;">🔍 حجم الأفاتار:</label>
-          <input type="range" name="avatarRadius" min="20" max="150" value="60" style="width:100%;">
-        </div>
-      </div>
-      
-
-    <!-- FORCE_RENDER_UPDATE_V99 -->
-    <div style="background:#18191c; border:2px solid #5865F2; border-radius:8px; padding:15px; margin:20px 0; color:#fff;">
-      <h3 style="color:#5865F2; margin-top:0;">🎨 إعدادات الترحيب والأفاتار</h3>
-      <div style="margin-bottom:10px;">
-        <label style="display:block; font-weight:bold;">📁 رفع صورة خلفية جديدة:</label>
-        <input type="file" name="bgImage" accept="image/*" style="background:#2b2d31; color:#fff; padding:6px; width:100%; border-radius:4px;">
-      </div>
-      <div style="margin-bottom:10px;">
-        <label style="display:block; font-weight:bold;">↔️ موقع الأفاتار X:</label>
-        <input type="range" name="avatarX" min="0" max="800" value="400" style="width:100%;">
-      </div>
-      <div style="margin-bottom:10px;">
-        <label style="display:block; font-weight:bold;">↕️ موقع الأفاتار Y:</label>
-        <input type="range" name="avatarY" min="0" max="360" value="120" style="width:100%;">
-      </div>
-      <div style="margin-bottom:10px;">
-        <label style="display:block; font-weight:bold;">🔍 حجم الأفاتار:</label>
-        <input type="range" name="avatarRadius" min="20" max="150" value="60" style="width:100%;">
-      </div>
-    </div>
-    
-
-<!-- UI_AVATAR_BG_SECTION -->
-<div style="background:#18191c; border:2px solid #5865F2; border-radius:8px; padding:15px; margin:20px 0; color:#fff;">
-  <h3 style="color:#5865F2; margin-top:0;">🎨 إعدادات الترحيب والأفاتار</h3>
-  <div style="margin-bottom:10px;">
-    <label style="display:block; font-weight:bold;">📁 رفع صورة خلفية جديدة:</label>
-    <input type="file" name="bgImage" accept="image/*" style="background:#2b2d31; color:#fff; padding:6px; width:100%; border-radius:4px;">
-  </div>
-  <div style="margin-bottom:10px;">
-    <label style="display:block; font-weight:bold;">↔️ موقع الأفاتار X:</label>
-    <input type="range" name="avatarX" min="0" max="800" value="400" style="width:100%;">
-  </div>
-  <div style="margin-bottom:10px;">
-    <label style="display:block; font-weight:bold;">↕️ موقع الأفاتار Y:</label>
-    <input type="range" name="avatarY" min="0" max="360" value="120" style="width:100%;">
-  </div>
-  <div style="margin-bottom:10px;">
-    <label style="display:block; font-weight:bold;">🔍 حجم الأفاتار:</label>
-    <input type="range" name="avatarRadius" min="20" max="150" value="60" style="width:100%;">
-  </div>
-</div>
-<!-- END_UI_AVATAR_BG_SECTION -->
-</form>
-    </div>
-
-    <script>
-        async function loadData() {
-            // جلب الإعدادات
-            const resConfig = await fetch('/api/config');
-            const config = await resConfig.json();
-
-            document.getElementById('welcomeEnabled').checked = config.enabled !== false;
-            document.getElementById('welcomeMsg').value = config.message || '';
-            document.getElementById('textContent').value = config.textOverlay || '';
-            document.getElementById('textColor').value = config.textColor || '#ffffff';
-            document.getElementById('bgUrl').value = config.bgUrl || '';
-            ['avatarX', 'avatarY', 'avatarRadius'].forEach((name) => {
-                const input = document.getElementById(name);
-                input.value = config[name] ?? input.value;
-                document.getElementById(`${name}Value`).value = input.value;
-            });
-
-            // جلب القنوات
-            const resChannels = await fetch('/api/channels');
-            const channels = await resChannels.json();
-            const channelSelect = document.getElementById('welcomeChannelId');
-            channelSelect.innerHTML = '<option value="">-- اختر القناة --</option>';
-            
-            channels.forEach(ch => {
-                const opt = document.createElement('option');
-                opt.value = ch.id;
-                opt.textContent = `# ${ch.name}`;
-                if (ch.id === config.channelId) opt.selected = true;
-                channelSelect.appendChild(opt);
-            });
-        }
-
-        document.querySelectorAll('[data-tab]').forEach((tab) => {
-            tab.addEventListener('click', () => {
-                document.querySelectorAll('[data-tab]').forEach((item) => item.classList.toggle('active', item === tab));
-                document.querySelectorAll('[data-panel]').forEach((panel) => panel.classList.toggle('d-none', panel.dataset.panel !== tab.dataset.tab));
-            });
-        });
-        ['avatarX', 'avatarY', 'avatarRadius'].forEach((name) => {
-            document.getElementById(name).addEventListener('input', (event) => {
-                document.getElementById(`${name}Value`).value = event.target.value;
-            });
-        });
-
-        document.getElementById('welcomeForm').onsubmit = async (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            formData.set('welcomeEnabled', document.getElementById('welcomeEnabled').checked);
-
-            const res = await fetch('/api/config', {
-                method: 'POST',
-                body: formData
-            });
-            const data = await res.json();
-            if (data.success) {
-                alert('✅ تم حفظ التغييرات بنجاح ورفع النظام الجديد!');
-            }
-        };
-
-        loadData();
-    </script>
 </body>
 </html>
