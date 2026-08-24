@@ -2,6 +2,10 @@ const express = require('express');
 const { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 
 const app = express();
+const path = require('path');
+app.use(express.static(path.join(__dirname, 'public')));
+app.get('/', (req, res) => { res.sendFile(path.join(__dirname, 'public', 'index.html')); });
+
 const PORT = process.env.PORT || 10000;
 
 app.use(express.json());
