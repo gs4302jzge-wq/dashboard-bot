@@ -883,7 +883,6 @@ app.listen(PORT, () => {
   console.log(`🌐 Dashboard live on port ${PORT}`);
 });
 
-<div style="background:#18191c; border:2px solid #5865F2; border-radius:8px; padding:15px; margin:20px 0; color:#fff;">
   <h3 style="color:#5865F2; margin-top:0;">🎨 إعدادات الترحيب والأفاتار</h3>
   <div style="margin-bottom:10px;">
     <label style="display:block; font-weight:bold;">📁 رفع صورة خلفية جديدة:</label>
