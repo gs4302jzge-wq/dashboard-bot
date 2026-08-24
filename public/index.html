@@ -3,25 +3,29 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OSCORP RP - Dashboard</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <title>OSCORP RP - Ultra Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
     
     body {
-      background: radial-gradient(circle at top right, #1a1c2e, #0b0d17);
+      background: #090d16;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.15) 0px, transparent 50%);
       color: #f1f5f9;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
     }
 
-    /* Navbar Header for Mobile & Desktop */
+    /* Header */
     .header {
-      background: rgba(15, 23, 42, 0.75);
-      backdrop-filter: blur(12px);
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(16px);
       border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      padding: 15px 25px;
+      padding: 16px 30px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -31,251 +35,485 @@
     }
 
     .brand {
-      font-size: 22px;
-      font-weight: 800;
-      background: linear-gradient(135deg, #6366f1, #a855f7);
+      font-size: 24px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 12px;
       letter-spacing: 1px;
     }
+
+    .status-badge {
+      background: rgba(34, 197, 94, 0.15);
+      color: #4ade80;
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      padding: 6px 14px;
+      border-radius: 30px;
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-badge i { font-size: 8px; color: #22c55e; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
     .layout {
       display: flex;
       flex: 1;
-      max-width: 1400px;
+      max-width: 1450px;
       width: 100%;
       margin: 0 auto;
     }
 
     /* Sidebar Navigation */
     .sidebar {
-      width: 260px;
-      background: rgba(15, 23, 42, 0.5);
+      width: 280px;
+      background: rgba(15, 23, 42, 0.4);
       border-left: 1px solid rgba(255, 255, 255, 0.05);
-      padding: 20px 15px;
+      padding: 25px 16px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
     }
 
     .nav-link {
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 12px 18px;
+      gap: 14px;
+      padding: 14px 20px;
       color: #94a3b8;
       text-decoration: none;
-      border-radius: 12px;
-      font-weight: 600;
+      border-radius: 14px;
+      font-weight: 700;
       font-size: 15px;
-      transition: all 0.3s ease;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
     }
 
+    .nav-link i { font-size: 18px; width: 22px; text-align: center; }
+
     .nav-link:hover {
-      background: rgba(255, 255, 255, 0.05);
-      color: #e2e8f0;
-      transform: translateX(-3px);
+      background: rgba(255, 255, 255, 0.06);
+      color: #f8fafc;
+      transform: translateX(-4px);
     }
 
     .nav-link.active {
       background: linear-gradient(135deg, #6366f1, #4f46e5);
       color: #ffffff;
-      box-shadow: 0 8px 20px -4px rgba(99, 102, 241, 0.5);
+      box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.5);
     }
 
-    /* Main Container */
+    /* Main Content */
     .main-content {
       flex: 1;
-      padding: 30px;
+      padding: 35px;
       display: flex;
       justify-content: center;
       align-items: flex-start;
     }
 
+    .tab-content {
+      display: none;
+      width: 100%;
+      max-width: 750px;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .tab-content.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
     /* Glassmorphism Card */
     .card {
-      background: rgba(30, 41, 59, 0.6);
-      backdrop-filter: blur(16px);
+      background: rgba(30, 41, 59, 0.5);
+      backdrop-filter: blur(20px);
       border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 20px;
-      padding: 30px;
-      width: 100%;
-      max-width: 600px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      border-radius: 24px;
+      padding: 35px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .card-header {
+      margin-bottom: 28px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .card-header i {
+      font-size: 24px;
+      color: #818cf8;
+      background: rgba(99, 102, 241, 0.15);
+      padding: 12px;
+      border-radius: 14px;
     }
 
     .card-title {
-      font-size: 20px;
-      font-weight: 700;
+      font-size: 22px;
+      font-weight: 800;
+      color: #f8fafc;
+    }
+
+    .card-subtitle {
+      font-size: 13px;
+      color: #94a3b8;
+      margin-top: 2px;
+    }
+
+    /* Grid for Stats */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
       margin-bottom: 25px;
+    }
+
+    .stat-box {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 20px;
       display: flex;
       align-items: center;
-      gap: 10px;
-      color: #f8fafc;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      padding-bottom: 15px;
+      gap: 16px;
     }
 
-    .form-group {
-      margin-bottom: 22px;
-    }
+    .stat-box i { font-size: 28px; color: #a855f7; }
+    .stat-val { font-size: 22px; font-weight: 800; color: #fff; }
+    .stat-lbl { font-size: 13px; color: #94a3b8; }
 
+    /* Form Elements */
+    .form-group { margin-bottom: 24px; }
     .form-group label {
       display: block;
       font-size: 14px;
-      font-weight: 600;
+      font-weight: 700;
       color: #cbd5e1;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
     }
 
-    /* File Input Styling */
     .file-input-wrapper {
       position: relative;
-      background: rgba(15, 23, 42, 0.6);
+      background: rgba(15, 23, 42, 0.7);
       border: 2px dashed rgba(255, 255, 255, 0.15);
-      border-radius: 12px;
-      padding: 15px;
+      border-radius: 16px;
+      padding: 25px;
       text-align: center;
-      transition: border-color 0.3s ease;
+      transition: all 0.3s ease;
       cursor: pointer;
     }
 
     .file-input-wrapper:hover {
       border-color: #6366f1;
+      background: rgba(99, 102, 241, 0.05);
     }
 
     .file-input-wrapper input[type="file"] {
-      position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
-      opacity: 0;
-      cursor: pointer;
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;
     }
 
-    /* Custom Range Sliders */
+    .range-wrap {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
     input[type="range"] {
       -webkit-appearance: none;
-      width: 100%;
-      height: 8px;
-      background: rgba(15, 23, 42, 0.8);
-      border-radius: 5px;
+      flex: 1;
+      height: 10px;
+      background: rgba(15, 23, 42, 0.9);
+      border-radius: 8px;
       outline: none;
     }
 
     input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
-      width: 22px;
-      height: 22px;
+      width: 24px;
+      height: 24px;
       border-radius: 50%;
-      background: #6366f1;
+      background: linear-gradient(135deg, #6366f1, #a855f7);
       cursor: pointer;
-      box-shadow: 0 0 12px rgba(99, 102, 241, 0.8);
+      box-shadow: 0 0 15px rgba(99, 102, 241, 0.8);
       transition: transform 0.2s ease;
     }
 
-    input[type="range"]::-webkit-slider-thumb:hover {
-      transform: scale(1.2);
+    input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.25); }
+
+    .range-val {
+      background: rgba(99, 102, 241, 0.2);
+      color: #818cf8;
+      padding: 4px 12px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 14px;
+      min-width: 45px;
+      text-align: center;
     }
 
-    /* Save Button */
+    /* Plugin List */
+    .plugin-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.6);
+      padding: 16px 20px;
+      border-radius: 16px;
+      margin-bottom: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .switch {
+      position: relative; display: inline-block; width: 50px; height: 26px;
+    }
+
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #334155; transition: .4s; border-radius: 34px;
+    }
+
+    .slider:before {
+      position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px;
+      background-color: white; transition: .4s; border-radius: 50%;
+    }
+
+    input:checked + .slider { background-color: #6366f1; }
+    input:checked + .slider:before { transform: translateX(24px); }
+
+    /* Buttons */
     .btn-submit {
       width: 100%;
-      padding: 14px;
+      padding: 16px;
       border: none;
-      border-radius: 12px;
-      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border-radius: 14px;
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
       color: white;
       font-size: 16px;
-      font-weight: 700;
+      font-weight: 800;
       cursor: pointer;
-      box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.5);
+      box-shadow: 0 12px 30px -6px rgba(99, 102, 241, 0.6);
       transition: all 0.3s ease;
-      margin-top: 10px;
+      margin-top: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
     }
 
     .btn-submit:hover {
-      opacity: 0.95;
       transform: translateY(-2px);
-      box-shadow: 0 15px 30px -5px rgba(99, 102, 241, 0.7);
+      box-shadow: 0 18px 36px -6px rgba(99, 102, 241, 0.8);
     }
 
-    /* Responsive adjustments for Mobile */
-    @media (max-width: 768px) {
-      .layout {
-        flex-direction: column;
-      }
+    /* Mobile Responsive */
+    @media (max-width: 850px) {
+      .layout { flex-direction: column; }
       .sidebar {
         width: 100%;
         border-left: none;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         flex-direction: row;
         overflow-x: auto;
         padding: 12px;
       }
-      .nav-link {
-        white-space: nowrap;
-        padding: 8px 14px;
-        font-size: 13px;
-      }
-      .main-content {
-        padding: 15px;
-      }
-      .card {
-        padding: 20px;
-      }
+      .nav-link { white-space: nowrap; padding: 10px 16px; font-size: 14px; }
+      .main-content { padding: 16px; }
+      .card { padding: 22px; border-radius: 18px; }
     }
   </style>
 </head>
 <body>
 
   <header class="header">
-    <div class="brand">OSCORP RP</div>
+    <div class="brand">
+      <i class="fa-solid fa-shield-halved"></i> OSCORP RP
+    </div>
+    <div class="status-badge">
+      <i class="fa-solid fa-circle"></i> Bot Active
+    </div>
   </header>
 
   <div class="layout">
+    <!-- Sidebar -->
     <aside class="sidebar">
-      <a href="#" class="nav-link">📊 Dashboard</a>
-      <a href="#" class="nav-link active">👋 Welcome System</a>
-      <a href="#" class="nav-link">🧩 Plugins</a>
-      <a href="#" class="nav-link">🛡️ Guild Support</a>
-      <a href="#" class="nav-link">⚙️ Settings</a>
+      <div class="nav-link active" onclick="switchTab('dashboard', this)">
+        <i class="fa-solid fa-chart-pie"></i> Dashboard
+      </div>
+      <div class="nav-link" onclick="switchTab('welcome', this)">
+        <i class="fa-solid fa-hand-wave"></i> Welcome System
+      </div>
+      <div class="nav-link" onclick="switchTab('plugins', this)">
+        <i class="fa-solid fa-puzzle-piece"></i> Plugins
+      </div>
+      <div class="nav-link" onclick="switchTab('guild', this)">
+        <i class="fa-solid fa-server"></i> Guild Support
+      </div>
+      <div class="nav-link" onclick="switchTab('settings', this)">
+        <i class="fa-solid fa-sliders"></i> Settings
+      </div>
     </aside>
 
+    <!-- Main Section -->
     <main class="main-content">
-      <div class="card">
-        <div class="card-title">
-          <span>🎨</span> إعدادات الترحيب والأفاتار
-        </div>
 
-        <form action="/update-welcome" method="POST" enctype="multipart/form-data">
-          
-          <div class="form-group">
-            <label>📁 رفع صورة خلفية جديدة:</label>
-            <div class="file-input-wrapper">
-              <span style="color: #94a3b8; font-size: 14px;">اضغط هنا لاختيار صورة الخلفية</span>
-              <input type="file" name="bgImage" accept="image/*">
+      <!-- 1. Dashboard Tab -->
+      <div id="tab-dashboard" class="tab-content active">
+        <div class="card">
+          <div class="card-header">
+            <i class="fa-solid fa-chart-pie"></i>
+            <div>
+              <div class="card-title">لوحة الإحصائيات العامة</div>
+              <div class="card-subtitle">مراقبة أداء البوت والسيرفر المباشر</div>
+            </div>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-box">
+              <i class="fa-solid fa-users"></i>
+              <div>
+                <div class="stat-val">12,450</div>
+                <div class="stat-lbl">إجمالي الأعضاء</div>
+              </div>
+            </div>
+            <div class="stat-box">
+              <i class="fa-solid fa-bolt"></i>
+              <div>
+                <div class="stat-val">24 ms</div>
+                <div class="stat-lbl">سرعة الاستجابة</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Welcome System Tab -->
+      <div id="tab-welcome" class="tab-content">
+        <div class="card">
+          <div class="card-header">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <div>
+              <div class="card-title">إعدادات الترحيب والأفاتار</div>
+              <div class="card-subtitle">خصص بطاقة الترحيب الخاصة بالسيرفر</div>
             </div>
           </div>
 
-          <div class="form-group">
-            <label>↔️ موقع الأفاتار (الأفقي X):</label>
-            <input type="range" name="avatarX" min="0" max="800" value="400">
-          </div>
+          <form action="/update-welcome" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+              <label><i class="fa-solid fa-image"></i> رفع صورة خلفية جديدة:</label>
+              <div class="file-input-wrapper">
+                <i class="fa-solid fa-cloud-arrow-up" style="font-size: 32px; color: #818cf8; margin-bottom: 8px;"></i>
+                <div style="color: #cbd5e1; font-weight: 700;">اضغط هنا لاختيار صورة الخلفية</div>
+                <input type="file" name="bgImage" accept="image/*">
+              </div>
+            </div>
 
-          <div class="form-group">
-            <label>↕️ موقع الأفاتار (العمودي Y):</label>
-            <input type="range" name="avatarY" min="0" max="360" value="120">
-          </div>
+            <div class="form-group">
+              <label><i class="fa-solid fa-arrows-left-right"></i> موقع الأفاتار (الأفقي X):</label>
+              <div class="range-wrap">
+                <input type="range" name="avatarX" min="0" max="800" value="400" oninput="this.nextElementSibling.innerText = this.value">
+                <span class="range-val">400</span>
+              </div>
+            </div>
 
-          <div class="form-group">
-            <label>🔍 حجم الأفاتار:</label>
-            <input type="range" name="avatarRadius" min="20" max="150" value="60">
-          </div>
+            <div class="form-group">
+              <label><i class="fa-solid fa-arrows-up-down"></i> موقع الأفاتار (العمودي Y):</label>
+              <div class="range-wrap">
+                <input type="range" name="avatarY" min="0" max="360" value="120" oninput="this.nextElementSibling.innerText = this.value">
+                <span class="range-val">120</span>
+              </div>
+            </div>
 
-          <button type="submit" class="btn-submit">حفظ الإعدادات</button>
-        </form>
+            <div class="form-group">
+              <label><i class="fa-solid fa-maximize"></i> حجم الأفاتار:</label>
+              <div class="range-wrap">
+                <input type="range" name="avatarRadius" min="20" max="150" value="60" oninput="this.nextElementSibling.innerText = this.value">
+                <span class="range-val">60</span>
+              </div>
+            </div>
+
+            <button type="submit" class="btn-submit">
+              <i class="fa-solid fa-floppy-disk"></i> حفظ الإعدادات
+            </button>
+          </form>
+        </div>
       </div>
+
+      <!-- 3. Plugins Tab -->
+      <div id="tab-plugins" class="tab-content">
+        <div class="card">
+          <div class="card-header">
+            <i class="fa-solid fa-puzzle-piece"></i>
+            <div>
+              <div class="card-title">إدارة الإضافات (Plugins)</div>
+              <div class="card-subtitle">تفعيل وتعطيل ميزات البوت تلقائياً</div>
+            </div>
+          </div>
+          <div class="plugin-item">
+            <div>
+              <div style="font-weight: 700;">Auto Moderation</div>
+              <div style="font-size: 12px; color: #94a3b8;">الحماية التلقائية من السخام والروابط</div>
+            </div>
+            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+          </div>
+          <div class="plugin-item">
+            <div>
+              <div style="font-weight: 700;">Leveling System</div>
+              <div style="font-size: 12px; color: #94a3b8;">نظام المستويات والخبرة للأعضاء</div>
+            </div>
+            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Guild Support Tab -->
+      <div id="tab-guild" class="tab-content">
+        <div class="card">
+          <div class="card-header">
+            <i class="fa-solid fa-headset"></i>
+            <div>
+              <div class="card-title">الدعم الفني والخيارات</div>
+              <div class="card-subtitle">مساعدة وإعدادات سيرفرات الدعم</div>
+            </div>
+          </div>
+          <p style="color: #94a3b8; font-size: 14px;">إذا كنت تواجِه أي مشكلة في تشغيل البوت داخل السيرفر، تواصل معنا عبر تذاكر الدعم المباشرة.</p>
+        </div>
+      </div>
+
+      <!-- 5. Settings Tab -->
+      <div id="tab-settings" class="tab-content">
+        <div class="card">
+          <div class="card-header">
+            <i class="fa-solid fa-gear"></i>
+            <div>
+              <div class="card-title">إعدادات النظام العامة</div>
+              <div class="card-subtitle">التحكم في بادئة الأوامر (Prefix) واللغة</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Prefix البوت:</label>
+            <input type="text" value="!" style="width:100%; padding: 12px; border-radius: 10px; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.1); color: #fff;">
+          </div>
+        </div>
+      </div>
+
     </main>
   </div>
 
+  <script>
+    function switchTab(tabName, element) {
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+      
+      document.getElementById('tab-' + tabName).classList.add('active');
+      element.classList.add('active');
+    }
+  </script>
 </body>
 </html>
