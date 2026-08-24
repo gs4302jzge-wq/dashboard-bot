@@ -1,3 +1,4 @@
+const { handleWelcome } = require("./welcomeService");
 const { Client, GatewayIntentBits, AttachmentBuilder } = require('discord.js');
 const { createCanvas, loadImage } = require('@napi-rs/canvas');
 const express = require('express');
@@ -168,3 +169,5 @@ client.on('guildMemberAdd', async (member) => {
 
 app.listen(PORT, () => console.log(`🚀 New Dashboard active on port ${PORT}`));
 client.login(process.env.DISCORD_TOKEN);
+
+client.on("guildMemberAdd", async (member) => { await handleWelcome(member); });
