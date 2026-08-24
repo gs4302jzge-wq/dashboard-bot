@@ -9,7 +9,7 @@
     "build": "echo 'Build step completed'"
   },
   "dependencies": {
-    "@napi-rs/canvas": "^1.0.7",
+    "@napi-rs/canvas": "^1.0.8",
     "body-parser": "^1.20.3",
     "connect-mongo": "^5.1.0",
     "discord.js": "^14.16.3",
