@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>OSCORP RP - Ultra Dashboard</title>
+  <title>OSCORP RP - Pro Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
@@ -12,7 +12,6 @@
     :root {
       --primary: #6366f1;
       --primary-glow: rgba(99, 102, 241, 0.4);
-      --accent: #a855f7;
       --bg-dark: #090c15;
       --card-bg: rgba(15, 22, 38, 0.85);
       --border: rgba(255, 255, 255, 0.08);
@@ -30,7 +29,6 @@
       flex-direction: column;
     }
 
-    /* Top Ticker */
     .ticker-bar {
       background: rgba(13, 17, 30, 0.9);
       text-align: center;
@@ -44,9 +42,7 @@
       justify-content: center;
       gap: 8px;
     }
-    .ticker-bar i { color: #f59e0b; }
 
-    /* Header */
     .header {
       background: rgba(11, 15, 25, 0.9);
       backdrop-filter: blur(16px);
@@ -80,27 +76,9 @@
       font-size: 13px;
       font-weight: 700;
     }
-    .user-avatar {
-      width: 26px;
-      height: 26px;
-      border-radius: 50%;
-      background: #6366f1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-    }
 
-    /* Layout */
-    .layout {
-      display: flex;
-      flex: 1;
-      max-width: 1200px;
-      width: 100%;
-      margin: 0 auto;
-    }
+    .layout { display: flex; flex: 1; max-width: 1200px; width: 100%; margin: 0 auto; }
 
-    /* Sidebar Navigation */
     .sidebar {
       width: 260px;
       background: rgba(11, 15, 25, 0.5);
@@ -111,171 +89,69 @@
       gap: 6px;
     }
     .nav-link {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 11px 16px;
-      color: #94a3b8;
-      border-radius: 12px;
-      font-weight: 700;
-      font-size: 14px;
-      transition: all 0.25s ease;
-      cursor: pointer;
+      display: flex; align-items: center; gap: 12px; padding: 11px 16px; color: #94a3b8; border-radius: 12px; font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.2s;
     }
-    .nav-link i { font-size: 17px; width: 22px; text-align: center; }
-    .nav-link:hover { background: rgba(255, 255, 255, 0.04); color: #f1f5f9; }
     .nav-link.active {
-      background: linear-gradient(135deg, #6366f1, #4f46e5);
-      color: #ffffff;
-      box-shadow: 0 6px 18px -3px var(--primary-glow);
+      background: linear-gradient(135deg, #6366f1, #4f46e5); color: #ffffff; box-shadow: 0 6px 18px -3px var(--primary-glow);
     }
 
-    /* Main Content */
-    .main-content {
-      flex: 1;
-      padding: 20px;
-      display: flex;
-      justify-content: center;
-    }
-    .tab-content {
-      display: none;
-      width: 100%;
-      max-width: 760px;
-      animation: tabFadeIn 0.3s ease;
-    }
+    .main-content { flex: 1; padding: 20px; display: flex; justify-content: center; }
+    .tab-content { display: none; width: 100%; max-width: 760px; }
     .tab-content.active { display: block; }
-    @keyframes tabFadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* Stats Banner Header */
     .stats-banner {
-      background: rgba(99, 102, 241, 0.1);
-      border: 1px solid rgba(99, 102, 241, 0.25);
-      color: #818cf8;
-      padding: 14px 20px;
-      border-radius: 16px;
-      font-size: 14px;
-      font-weight: 800;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 20px;
-      backdrop-filter: blur(10px);
+      background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.25); color: #818cf8; padding: 14px 20px; border-radius: 16px; font-size: 14px; font-weight: 800; display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;
     }
-    .stats-banner span { display: flex; align-items: center; gap: 10px; }
 
-    /* Command Card UI */
     .cmd-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 20px;
-      margin-bottom: 16px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-      backdrop-filter: blur(20px);
-      transition: transform 0.2s ease, border-color 0.2s ease;
+      background: var(--card-bg); border: 1px solid var(--border); border-radius: 18px; padding: 20px; margin-bottom: 16px; backdrop-filter: blur(20px);
     }
-    .cmd-card:hover {
-      border-color: rgba(99, 102, 241, 0.4);
-      transform: translateY(-2px);
-    }
-    .cmd-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 14px;
-    }
-    .cmd-title-group {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .cmd-icon-box {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      color: #fff;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    }
+    .cmd-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+    .cmd-title-group { display: flex; align-items: center; gap: 12px; }
+    .cmd-icon-box { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #fff; background: linear-gradient(135deg, #ef4444, #991b1b); }
+    .cmd-name { font-size: 18px; font-weight: 800; color: #f8fafc; }
 
-    /* Icon Gradients */
-    .c-red { background: linear-gradient(135deg, #ef4444, #991b1b); }
-    .c-teal { background: linear-gradient(135deg, #14b8a6, #0f766e); }
-    .c-amber { background: linear-gradient(135deg, #f59e0b, #b45309); }
-    .c-orange { background: linear-gradient(135deg, #f97316, #c2410c); }
-    .c-indigo { background: linear-gradient(135deg, #6366f1, #3730a3); }
-    .c-purple { background: linear-gradient(135deg, #a855f7, #6b21a8); }
-    .c-emerald { background: linear-gradient(135deg, #10b981, #047857); }
-    .c-pink { background: linear-gradient(135deg, #ec4899, #be185d); }
-    .c-blue { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
-
-    .cmd-name {
-      font-size: 18px;
-      font-weight: 800;
-      color: #f8fafc;
-      letter-spacing: 0.3px;
-    }
-
-    /* Toggle Switch */
     .switch { position: relative; display: inline-block; width: 46px; height: 24px; }
     .switch input { opacity: 0; width: 0; height: 0; }
-    .slider {
-      position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
-      background-color: #334155; transition: .3s; border-radius: 30px;
-    }
-    .slider:before {
-      position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px;
-      background-color: white; transition: .3s; border-radius: 50%;
-    }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #334155; transition: .3s; border-radius: 30px; }
+    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
     input:checked + .slider { background-color: #3b82f6; }
     input:checked + .slider:before { transform: translateX(22px); }
 
-    /* Details */
-    .cmd-details {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      font-size: 13px;
-      margin-bottom: 16px;
-    }
+    .cmd-details { display: flex; flex-direction: column; gap: 6px; font-size: 13px; margin-bottom: 16px; }
     .detail-row { display: flex; align-items: center; gap: 6px; }
     .detail-label { color: var(--text-muted); font-weight: 700; }
     .detail-val { color: #e2e8f0; font-weight: 600; }
-
-    .usage-badge {
-      background: rgba(15, 23, 42, 0.9);
-      border: 1px solid rgba(56, 189, 248, 0.2);
-      color: #38bdf8;
-      padding: 4px 10px;
-      border-radius: 8px;
-      font-family: monospace;
-      font-weight: 700;
-      font-size: 12px;
-      display: inline-block;
-    }
+    .usage-badge { background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(56, 189, 248, 0.2); color: #38bdf8; padding: 4px 10px; border-radius: 8px; font-family: monospace; font-weight: 700; font-size: 12px; }
     .alias-badge { color: #38bdf8; font-weight: 700; }
 
-    /* Buttons */
     .cmd-actions { display: flex; gap: 10px; }
-    .btn-action {
-      padding: 7px 16px; border-radius: 10px; border: none; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.2s;
-    }
+    .btn-action { padding: 8px 18px; border-radius: 10px; border: none; font-size: 13px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
     .btn-edit { background: #2563eb; color: #ffffff; }
     .btn-edit:hover { background: #1d4ed8; }
     .btn-remove { background: #dc2626; color: #ffffff; }
     .btn-remove:hover { background: #b91c1c; }
 
-    .card { background: var(--card-bg); backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: 20px; padding: 24px; }
+    /* Custom Modern Modal */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 1000;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-box {
+      background: #0f172a; border: 1px solid rgba(255,255,255,0.15); border-radius: 20px; width: 90%; max-width: 440px; padding: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
+    .modal-title { font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .modal-input { width: 100%; background: #1e293b; border: 1px solid #334155; padding: 12px 14px; border-radius: 12px; color: #fff; font-size: 14px; margin-bottom: 20px; outline: none; }
+    .modal-input:focus { border-color: #6366f1; }
+    .modal-btns { display: flex; justify-content: flex-end; gap: 10px; }
+    .btn-modal-cancel { background: #334155; color: #fff; padding: 8px 18px; border-radius: 10px; border: none; font-weight: 700; cursor: pointer; }
+    .btn-modal-save { background: #6366f1; color: #fff; padding: 8px 20px; border-radius: 10px; border: none; font-weight: 700; cursor: pointer; }
 
     @media (max-width: 820px) {
       .layout { flex-direction: column; }
       .sidebar { width: 100%; border-left: none; border-bottom: 1px solid var(--border); flex-direction: row; overflow-x: auto; padding: 8px; }
       .nav-link { white-space: nowrap; padding: 8px 12px; font-size: 12px; }
       .main-content { padding: 12px; }
-      .cmd-card { padding: 16px; }
     }
   </style>
 </head>
@@ -287,13 +163,8 @@
   </div>
 
   <header class="header">
-    <div class="brand">
-      <i class="fa-solid fa-shield-cat"></i> OSCORP RP
-    </div>
-    <div class="user-profile">
-      <div class="user-avatar"><i class="fa-solid fa-user"></i></div>
-      <span>nfyp_ Admin</span>
-    </div>
+    <div class="brand"><i class="fa-solid fa-shield-cat"></i> OSCORP RP</div>
+    <div class="user-profile"><i class="fa-solid fa-user"></i> <span>nfyp_ Admin</span></div>
   </header>
 
   <div class="layout">
@@ -309,18 +180,15 @@
       <div id="tab-commands" class="tab-content active">
         
         <div class="stats-banner">
-          <span>
-            <i class="fa-solid fa-terminal"></i>
-            قائمة أوامر البوت المتاحة (Bot Commands & Aliases)
-          </span>
+          <span><i class="fa-solid fa-terminal"></i> قائمة أوامر البوت المتاحة (Bot Commands & Aliases)</span>
           <span style="font-size: 12px; background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 20px; color: #fff;">24 Active Commands</span>
         </div>
 
-        <!-- 1. Ban -->
+        <!-- Ban Card -->
         <div class="cmd-card" id="card-ban">
           <div class="cmd-header">
             <div class="cmd-title-group">
-              <div class="cmd-icon-box c-red"><i class="fa-solid fa-hammer"></i></div>
+              <div class="cmd-icon-box"><i class="fa-solid fa-hammer"></i></div>
               <div class="cmd-name">Ban</div>
             </div>
             <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
@@ -332,531 +200,60 @@
             <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-ban">م, حظر</span></div>
           </div>
           <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="editAliases('Ban', 'alias-ban')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
+            <button class="btn-action btn-edit" onclick="openCustomModal('Ban', 'alias-ban')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
             <button class="btn-action btn-remove" onclick="removeCard('card-ban')"><i class="fa-solid fa-trash-can"></i> Remove</button>
           </div>
         </div>
 
-        <!-- 2. Kick -->
-        <div class="cmd-card" id="card-kick">
-          <div class="cmd-header">
-            <div class="cmd-title-group">
-              <div class="cmd-icon-box c-orange"><i class="fa-solid fa-user-minus"></i></div>
-              <div class="cmd-name">Kick</div>
-            </div>
-            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
-          </div>
-          <div class="cmd-details">
-            <div class="detail-row"><span class="detail-label">Developer:</span><span class="detail-val">Mohammed Alhajri</span></div>
-            <div class="detail-row"><span class="detail-label">Description:</span><span class="detail-val">Kicks a member from the server.</span></div>
-            <div class="detail-row" style="margin-top:4px;"><span class="detail-label">Usage:</span><span class="usage-badge">-kick {@user} [reason]</span></div>
-            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-kick">طرد</span></div>
-          </div>
-          <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="editAliases('Kick', 'alias-kick')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
-            <button class="btn-action btn-remove" onclick="removeCard('card-kick')"><i class="fa-solid fa-trash-can"></i> Remove</button>
-          </div>
-        </div>
-
-        <!-- 3. Clear -->
-        <div class="cmd-card" id="card-clear">
-          <div class="cmd-header">
-            <div class="cmd-title-group">
-              <div class="cmd-icon-box c-teal"><i class="fa-solid fa-broom"></i></div>
-              <div class="cmd-name">Clear</div>
-            </div>
-            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
-          </div>
-          <div class="cmd-details">
-            <div class="detail-row"><span class="detail-label">Developer:</span><span class="detail-val">Mohammed Alhajri</span></div>
-            <div class="detail-row"><span class="detail-label">Description:</span><span class="detail-val">Clears messages from a channel.</span></div>
-            <div class="detail-row" style="margin-top:4px;"><span class="detail-label">Usage:</span><span class="usage-badge">-clear {amount}</span></div>
-            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-clear">مسح, purge</span></div>
-          </div>
-          <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="editAliases('Clear', 'alias-clear')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
-            <button class="btn-action btn-remove" onclick="removeCard('card-clear')"><i class="fa-solid fa-trash-can"></i> Remove</button>
-          </div>
-        </div>
-
-        <!-- 4. Mute -->
-        <div class="cmd-card" id="card-mute">
-          <div class="cmd-header">
-            <div class="cmd-title-group">
-              <div class="cmd-icon-box c-red"><i class="fa-solid fa-volume-xmark"></i></div>
-              <div class="cmd-name">Mute</div>
-            </div>
-            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
-          </div>
-          <div class="cmd-details">
-            <div class="detail-row"><span class="detail-label">Developer:</span><span class="detail-val">Mohammed Alhajri</span></div>
-            <div class="detail-row"><span class="detail-label">Description:</span><span class="detail-val">Mutes a member in text and voice channels.</span></div>
-            <div class="detail-row" style="margin-top:4px;"><span class="detail-label">Usage:</span><span class="usage-badge">-mute {@user} [time]</span></div>
-            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-mute">اسكات, ميوت</span></div>
-          </div>
-          <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="editAliases('Mute', 'alias-mute')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
-            <button class="btn-action btn-remove" onclick="removeCard('card-mute')"><i class="fa-solid fa-trash-can"></i> Remove</button>
-          </div>
-        </div>
-
-        <!-- 5. Unmute -->
-        <div class="cmd-card" id="card-unmute">
-          <div class="cmd-header">
-            <div class="cmd-title-group">
-              <div class="cmd-icon-box c-emerald"><i class="fa-solid fa-volume-high"></i></div>
-              <div class="cmd-name">Unmute</div>
-            </div>
-            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
-          </div>
-          <div class="cmd-details">
-            <div class="detail-row"><span class="detail-label">Developer:</span><span class="detail-val">Mohammed Alhajri</span></div>
-            <div class="detail-row"><span class="detail-label">Description:</span><span class="detail-val">Unmutes a muted member.</span></div>
-            <div class="detail-row" style="margin-top:4px;"><span class="detail-label">Usage:</span><span class="usage-badge">-unmute {@user}</span></div>
-            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-unmute">فك_الميوت</span></div>
-          </div>
-          <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="editAliases('Unmute', 'alias-unmute')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
-            <button class="btn-action btn-remove" onclick="removeCard('card-unmute')"><i class="fa-solid fa-trash-can"></i> Remove</button>
-          </div>
-        </div>
-
-        <!-- 6. Role -->
-        <div class="cmd-card" id="card-role">
-          <div class="cmd-header">
-            <div class="cmd-title-group">
-              <div class="cmd-icon-box c-purple"><i class="fa-solid fa-user-shield"></i></div>
-              <div class="cmd-name">Role</div>
-            </div>
-            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
-          </div>
-          <div class="cmd-details">
-            <div class="detail-row"><span class="detail-label">Developer:</span><span class="detail-val">Mohammed Alhajri</span></div>
-            <div class="detail-row"><span class="detail-label">Description:</span><span class="detail-val">Gives or removes a role from a member.</span></div>
-            <div class="detail-row" style="margin-top:4px;"><span class="detail-label">Usage:</span><span class="usage-badge">-role {@user} {@role}</span></div>
-            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-role">رتبة, رتب</span></div>
-          </div>
-          <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="editAliases('Role', 'alias-role')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
-            <button class="btn-action btn-remove" onclick="removeCard('card-role')"><i class="fa-solid fa-trash-can"></i> Remove</button>
-          </div>
-        </div>
-
-        <!-- 7. Welcome -->
-        <div class="cmd-card" id="card-welcome">
-          <div class="cmd-header">
-            <div class="cmd-title-group">
-              <div class="cmd-icon-box c-blue"><i class="fa-solid fa-door-open"></i></div>
-              <div class="cmd-name">Welcome</div>
-            </div>
-            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
-          </div>
-          <div class="cmd-details">
-            <div class="detail-row"><span class="detail-label">Developer:</span><span class="detail-val">Mohammed Alhajri</span></div>
-            <div class="detail-row"><span class="detail-label">Description:</span><span class="detail-val">Sends welcome card and message for new members.</span></div>
-            <div class="detail-row" style="margin-top:4px;"><span class="detail-label">Usage:</span><span class="usage-badge">-welcome set [#channel]</span></div>
-            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-welcome">ترحيب</span></div>
-          </div>
-          <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="editAliases('Welcome', 'alias-welcome')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
-            <button class="btn-action btn-remove" onclick="removeCard('card-welcome')"><i class="fa-solid fa-trash-can"></i> Remove</button>
-          </div>
-        </div>
-
-        <!-- 8. Warn -->
-        <div class="cmd-card" id="card-warn">
-          <div class="cmd-header">
-            <div class="cmd-title-group">
-              <div class="cmd-icon-box c-amber"><i class="fa-solid fa-triangle-exclamation"></i></div>
-              <div class="cmd-name">Warn</div>
-            </div>
-            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
-          </div>
-          <div class="cmd-details">
-            <div class="detail-row"><span class="detail-label">Developer:</span><span class="detail-val">Mohammed Alhajri</span></div>
-            <div class="detail-row"><span class="detail-label">Description:</span><span class="detail-val">Issues a warning to a specific member.</span></div>
-            <div class="detail-row" style="margin-top:4px;"><span class="detail-label">Usage:</span><span class="usage-badge">-warn {@user} [reason]</span></div>
-            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-warn">تحذير, انذار</span></div>
-          </div>
-          <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="editAliases('Warn', 'alias-warn')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
-            <button class="btn-action btn-remove" onclick="removeCard('card-warn')"><i class="fa-solid fa-trash-can"></i> Remove</button>
-          </div>
-        </div>
-
-        <!-- 9. Warnings -->
-        <div class="cmd-card" id="card-warnings">
-          <div class="cmd-header">
-            <div class="cmd-title-group">
-              <div class="cmd-icon-box c-amber"><i class="fa-solid fa-list-check"></i></div>
-              <div class="cmd-name">Warnings</div>
-            </div>
-            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
-          </div>
-          <div class="cmd-details">
-            <div class="detail-row"><span class="detail-label">Developer:</span><span class="detail-val">Mohammed Alhajri</span></div>
-            <div class="detail-row"><span class="detail-label">Description:</span><span class="detail-val">Displays warning history for a user.</span></div>
-            <div class="detail-row" style="margin-top:4px;"><span class="detail-label">Usage:</span><span class="usage-badge">-warnings {@user}</span></div>
-            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-warnings">انذارات</span></div>
-          </div>
-          <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="editAliases('Warnings', 'alias-warnings')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
-            <button class="btn-action btn-remove" onclick="removeCard('card-warnings')"><i class="fa-solid fa-trash-can"></i> Remove</button>
-          </div>
-        </div>
-
-        <!-- 10. Coin -->
-        <div class="cmd-card" id="card-coin">
-          <div class="cmd-header">
-            <div class="cmd-title-group">
-              <div class="cmd-icon-box c-amber"><i class="fa-solid fa-coins"></i></div>
-              <div class="cmd-name">Coin</div>
-            </div>
-            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
-          </div>
-          <div class="cmd-details">
-            <div class="detail-row"><span class="detail-label">Developer:</span><span class="detail-val">Mohammed Alhajri</span></div>
-            <div class="detail-row"><span class="detail-label">Description:</span><span class="detail-val">Simple coin flip command (Heads or Tails).</span></div>
-            <div class="detail-row" style="margin-top:4px;"><span class="detail-label">Usage:</span><span class="usage-badge">-coin</span></div>
-            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-coin">عملة, قرعة</span></div>
-          </div>
-          <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="editAliases('Coin', 'alias-coin')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
-            <button class="btn-action btn-remove" onclick="removeCard('card-coin')"><i class="fa-solid fa-trash-can"></i> Remove</button>
-          </div>
-        </div>
-
-        <!-- 11. Balance -->
-        <div class="cmd-card" id="card-balance">
-          <div class="cmd-header">
-            <div class="cmd-title-group">
-              <div class="cmd-icon-box c-emerald"><i class="fa-solid fa-wallet"></i></div>
-              <div class="cmd-name">Balance</div>
-            </div>
-            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
-          </div>
-          <div class="cmd-details">
-            <div class="detail-row"><span class="detail-label">Developer:</span><span class="detail-val">Mohammed Alhajri</span></div>
-            <div class="detail-row"><span class="detail-label">Description:</span><span class="detail-val">Shows your current economy balance.</span></div>
-            <div class="detail-row" style="margin-top:4px;"><span class="detail-label">Usage:</span><span class="usage-badge">-bal [@user]</span></div>
-            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-balance">رصيد, فلوس</span></div>
-          </div>
-          <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="editAliases('Balance', 'alias-balance')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
-            <button class="btn-action btn-remove" onclick="removeCard('card-balance')"><i class="fa-solid fa-trash-can"></i> Remove</button>
-          </div>
-        </div>
-
-        <!-- 12. Daily -->
-        <div class="cmd-card" id="card-daily">
-          <div class="cmd-header">
-            <div class="cmd-title-group">
-              <div class="cmd-icon-box c-emerald"><i class="fa-solid fa-calendar-check"></i></div>
-              <div class="cmd-name">Daily</div>
-            </div>
-            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
-          </div>
-          <div class="cmd-details">
-            <div class="detail-row"><span class="detail-label">Developer:</span><span class="detail-val">Mohammed Alhajri</span></div>
-            <div class="detail-row"><span class="detail-label">Description:</span><span class="detail-val">Claims daily economy reward.</span></div>
-            <div class="detail-row" style="margin-top:4px;"><span class="detail-label">Usage:</span><span class="usage-badge">-daily</span></div>
-            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-daily">راتب, يومية</span></div>
-          </div>
-          <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="editAliases('Daily', 'alias-daily')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
-            <button class="btn-action btn-remove" onclick="removeCard('card-daily')"><i class="fa-solid fa-trash-can"></i> Remove</button>
-          </div>
-        </div>
-
-        <!-- 13. Avatar -->
-        <div class="cmd-card" id="card-avatar">
-          <div class="cmd-header">
-            <div class="cmd-title-group">
-              <div class="cmd-icon-box c-pink"><i class="fa-solid fa-image"></i></div>
-              <div class="cmd-name">Avatar</div>
-            </div>
-            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
-          </div>
-          <div class="cmd-details">
-            <div class="detail-row"><span class="detail-label">Developer:</span><span class="detail-val">Mohammed Alhajri</span></div>
-            <div class="detail-row"><span class="detail-label">Description:</span><span class="detail-val">Displays full resolution avatar image.</span></div>
-            <div class="detail-row" style="margin-top:4px;"><span class="detail-label">Usage:</span><span class="usage-badge">-avatar [@user]</span></div>
-            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-avatar">افتار, صورة</span></div>
-          </div>
-          <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="editAliases('Avatar', 'alias-avatar')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
-            <button class="btn-action btn-remove" onclick="removeCard('card-avatar')"><i class="fa-solid fa-trash-can"></i> Remove</button>
-          </div>
-        </div>
-
-        <!-- 14. User -->
-        <div class="cmd-card" id="card-user">
-          <div class="cmd-header">
-            <div class="cmd-title-group">
-              <div class="cmd-icon-box c-indigo"><i class="fa-solid fa-id-card"></i></div>
-              <div class="cmd-name">User Info</div>
-            </div>
-            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
-          </div>
-          <div class="cmd-details">
-            <div class="detail-row"><span class="detail-label">Developer:</span><span class="detail-val">Mohammed Alhajri</span></div>
-            <div class="detail-row"><span class="detail-label">Description:</span><span class="detail-val">Shows full profile info and join dates.</span></div>
-            <div class="detail-row" style="margin-top:4px;"><span class="detail-label">Usage:</span><span class="usage-badge">-user [@user]</span></div>
-            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-user">معلومات, هوية</span></div>
-          </div>
-          <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="editAliases('User Info', 'alias-user')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
-            <button class="btn-action btn-remove" onclick="removeCard('card-user')"><i class="fa-solid fa-trash-can"></i> Remove</button>
-          </div>
-        </div>
-
-        <!-- 15. Server -->
-        <div class="cmd-card" id="card-server">
-          <div class="cmd-header">
-            <div class="cmd-title-group">
-              <div class="cmd-icon-box c-blue"><i class="fa-solid fa-server"></i></div>
-              <div class="cmd-name">Server Info</div>
-            </div>
-            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
-          </div>
-          <div class="cmd-details">
-            <div class="detail-row"><span class="detail-label">Developer:</span><span class="detail-val">Mohammed Alhajri</span></div>
-            <div class="detail-row"><span class="detail-label">Description:</span><span class="detail-val">Displays statistics about current server.</span></div>
-            <div class="detail-row" style="margin-top:4px;"><span class="detail-label">Usage:</span><span class="usage-badge">-server</span></div>
-            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-server">سيرفر</span></div>
-          </div>
-          <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="editAliases('Server Info', 'alias-server')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
-            <button class="btn-action btn-remove" onclick="removeCard('card-server')"><i class="fa-solid fa-trash-can"></i> Remove</button>
-          </div>
-        </div>
-
-        <!-- 16. Lock -->
-        <div class="cmd-card" id="card-lock">
-          <div class="cmd-header">
-            <div class="cmd-title-group">
-              <div class="cmd-icon-box c-red"><i class="fa-solid fa-lock"></i></div>
-              <div class="cmd-name">Lock</div>
-            </div>
-            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
-          </div>
-          <div class="cmd-details">
-            <div class="detail-row"><span class="detail-label">Developer:</span><span class="detail-val">Mohammed Alhajri</span></div>
-            <div class="detail-row"><span class="detail-label">Description:</span><span class="detail-val">Locks text channel to prevent messages.</span></div>
-            <div class="detail-row" style="margin-top:4px;"><span class="detail-label">Usage:</span><span class="usage-badge">-lock [#channel]</span></div>
-            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-lock">قفل</span></div>
-          </div>
-          <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="editAliases('Lock', 'alias-lock')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
-            <button class="btn-action btn-remove" onclick="removeCard('card-lock')"><i class="fa-solid fa-trash-can"></i> Remove</button>
-          </div>
-        </div>
-
-        <!-- 17. Unlock -->
-        <div class="cmd-card" id="card-unlock">
-          <div class="cmd-header">
-            <div class="cmd-title-group">
-              <div class="cmd-icon-box c-emerald"><i class="fa-solid fa-lock-open"></i></div>
-              <div class="cmd-name">Unlock</div>
-            </div>
-            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
-          </div>
-          <div class="cmd-details">
-            <div class="detail-row"><span class="detail-label">Developer:</span><span class="detail-val">Mohammed Alhajri</span></div>
-            <div class="detail-row"><span class="detail-label">Description:</span><span class="detail-val">Unlocks locked text channel.</span></div>
-            <div class="detail-row" style="margin-top:4px;"><span class="detail-label">Usage:</span><span class="usage-badge">-unlock [#channel]</span></div>
-            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-unlock">فتح</span></div>
-          </div>
-          <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="editAliases('Unlock', 'alias-unlock')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
-            <button class="btn-action btn-remove" onclick="removeCard('card-unlock')"><i class="fa-solid fa-trash-can"></i> Remove</button>
-          </div>
-        </div>
-
-        <!-- 18. Say -->
-        <div class="cmd-card" id="card-say">
-          <div class="cmd-header">
-            <div class="cmd-title-group">
-              <div class="cmd-icon-box c-blue"><i class="fa-solid fa-comment-dots"></i></div>
-              <div class="cmd-name">Say</div>
-            </div>
-            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
-          </div>
-          <div class="cmd-details">
-            <div class="detail-row"><span class="detail-label">Developer:</span><span class="detail-val">Mohammed Alhajri</span></div>
-            <div class="detail-row"><span class="detail-label">Description:</span><span class="detail-val">Makes the bot repeat your text message.</span></div>
-            <div class="detail-row" style="margin-top:4px;"><span class="detail-label">Usage:</span><span class="usage-badge">-say {message}</span></div>
-            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-say">قول, تكلم</span></div>
-          </div>
-          <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="editAliases('Say', 'alias-say')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
-            <button class="btn-action btn-remove" onclick="removeCard('card-say')"><i class="fa-solid fa-trash-can"></i> Remove</button>
-          </div>
-        </div>
-
-        <!-- 19. Embed -->
-        <div class="cmd-card" id="card-embed">
-          <div class="cmd-header">
-            <div class="cmd-title-group">
-              <div class="cmd-icon-box c-purple"><i class="fa-solid fa-layer-group"></i></div>
-              <div class="cmd-name">Embed</div>
-            </div>
-            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
-          </div>
-          <div class="cmd-details">
-            <div class="detail-row"><span class="detail-label">Developer:</span><span class="detail-val">Mohammed Alhajri</span></div>
-            <div class="detail-row"><span class="detail-label">Description:</span><span class="detail-val">Sends customizable styled embed frame.</span></div>
-            <div class="detail-row" style="margin-top:4px;"><span class="detail-label">Usage:</span><span class="usage-badge">-embed {text}</span></div>
-            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-embed">امبد</span></div>
-          </div>
-          <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="editAliases('Embed', 'alias-embed')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
-            <button class="btn-action btn-remove" onclick="removeCard('card-embed')"><i class="fa-solid fa-trash-can"></i> Remove</button>
-          </div>
-        </div>
-
-        <!-- 20. Slowmode -->
-        <div class="cmd-card" id="card-slowmode">
-          <div class="cmd-header">
-            <div class="cmd-title-group">
-              <div class="cmd-icon-box c-teal"><i class="fa-solid fa-gauge-simple-high"></i></div>
-              <div class="cmd-name">Slowmode</div>
-            </div>
-            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
-          </div>
-          <div class="cmd-details">
-            <div class="detail-row"><span class="detail-label">Developer:</span><span class="detail-val">Mohammed Alhajri</span></div>
-            <div class="detail-row"><span class="detail-label">Description:</span><span class="detail-val">Sets slowmode delay on current channel.</span></div>
-            <div class="detail-row" style="margin-top:4px;"><span class="detail-label">Usage:</span><span class="usage-badge">-slowmode {seconds}</span></div>
-            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-slowmode">بطء</span></div>
-          </div>
-          <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="editAliases('Slowmode', 'alias-slowmode')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
-            <button class="btn-action btn-remove" onclick="removeCard('card-slowmode')"><i class="fa-solid fa-trash-can"></i> Remove</button>
-          </div>
-        </div>
-
-        <!-- 21. Ticket -->
-        <div class="cmd-card" id="card-ticket">
-          <div class="cmd-header">
-            <div class="cmd-title-group">
-              <div class="cmd-icon-box c-indigo"><i class="fa-solid fa-ticket"></i></div>
-              <div class="cmd-name">Ticket</div>
-            </div>
-            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
-          </div>
-          <div class="cmd-details">
-            <div class="detail-row"><span class="detail-label">Developer:</span><span class="detail-val">Mohammed Alhajri</span></div>
-            <div class="detail-row"><span class="detail-label">Description:</span><span class="detail-val">Creates support ticket channel for players.</span></div>
-            <div class="detail-row" style="margin-top:4px;"><span class="detail-label">Usage:</span><span class="usage-badge">-ticket setup</span></div>
-            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-ticket">تذكرة, الدعم</span></div>
-          </div>
-          <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="editAliases('Ticket', 'alias-ticket')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
-            <button class="btn-action btn-remove" onclick="removeCard('card-ticket')"><i class="fa-solid fa-trash-can"></i> Remove</button>
-          </div>
-        </div>
-
-        <!-- 22. Ping -->
-        <div class="cmd-card" id="card-ping">
-          <div class="cmd-header">
-            <div class="cmd-title-group">
-              <div class="cmd-icon-box c-emerald"><i class="fa-solid fa-signal"></i></div>
-              <div class="cmd-name">Ping</div>
-            </div>
-            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
-          </div>
-          <div class="cmd-details">
-            <div class="detail-row"><span class="detail-label">Developer:</span><span class="detail-val">Mohammed Alhajri</span></div>
-            <div class="detail-row"><span class="detail-label">Description:</span><span class="detail-val">Checks bot response time and API latency.</span></div>
-            <div class="detail-row" style="margin-top:4px;"><span class="detail-label">Usage:</span><span class="usage-badge">-ping</span></div>
-            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-ping">سرعة, بنج</span></div>
-          </div>
-          <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="editAliases('Ping', 'alias-ping')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
-            <button class="btn-action btn-remove" onclick="removeCard('card-ping')"><i class="fa-solid fa-trash-can"></i> Remove</button>
-          </div>
-        </div>
-
-        <!-- 23. Bot Info -->
-        <div class="cmd-card" id="card-botinfo">
-          <div class="cmd-header">
-            <div class="cmd-title-group">
-              <div class="cmd-icon-box c-purple"><i class="fa-solid fa-robot"></i></div>
-              <div class="cmd-name">Bot Info</div>
-            </div>
-            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
-          </div>
-          <div class="cmd-details">
-            <div class="detail-row"><span class="detail-label">Developer:</span><span class="detail-val">Mohammed Alhajri</span></div>
-            <div class="detail-row"><span class="detail-label">Description:</span><span class="detail-val">Displays bot statistics and system uptime.</span></div>
-            <div class="detail-row" style="margin-top:4px;"><span class="detail-label">Usage:</span><span class="usage-badge">-botinfo</span></div>
-            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-botinfo">البوت</span></div>
-          </div>
-          <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="editAliases('Bot Info', 'alias-botinfo')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
-            <button class="btn-action btn-remove" onclick="removeCard('card-botinfo')"><i class="fa-solid fa-trash-can"></i> Remove</button>
-          </div>
-        </div>
-
-        <!-- 24. Help -->
-        <div class="cmd-card" id="card-help">
-          <div class="cmd-header">
-            <div class="cmd-title-group">
-              <div class="cmd-icon-box c-indigo"><i class="fa-solid fa-circle-question"></i></div>
-              <div class="cmd-name">Help</div>
-            </div>
-            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
-          </div>
-          <div class="cmd-details">
-            <div class="detail-row"><span class="detail-label">Developer:</span><span class="detail-val">Mohammed Alhajri</span></div>
-            <div class="detail-row"><span class="detail-label">Description:</span><span class="detail-val">Displays list of available commands menu.</span></div>
-            <div class="detail-row" style="margin-top:4px;"><span class="detail-label">Usage:</span><span class="usage-badge">-help</span></div>
-            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-help">مساعدة, اوامر</span></div>
-          </div>
-          <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="editAliases('Help', 'alias-help')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
-            <button class="btn-action btn-remove" onclick="removeCard('card-help')"><i class="fa-solid fa-trash-can"></i> Remove</button>
-          </div>
-        </div>
-
       </div>
-
-      <!-- Other Tabs Placeholder -->
-      <div id="tab-dashboard" class="tab-content"><div class="card"><h2>Dashboard Overview</h2></div></div>
-      <div id="tab-welcome" class="tab-content"><div class="card"><h2>Welcome Settings</h2></div></div>
-      <div id="tab-guild" class="tab-content"><div class="card"><h2>Guild Support</h2></div></div>
-      <div id="tab-settings" class="tab-content"><div class="card"><h2>Bot Settings</h2></div></div>
-
     </main>
   </div>
 
+  <!-- Custom Pro Modal for Editing Aliases -->
+  <div class="modal-overlay" id="editModal">
+    <div class="modal-box">
+      <div class="modal-title"><i class="fa-solid fa-sliders" style="color:#6366f1;"></i> تعديل اختصارات الأمر (<span id="modalCmdName">Ban</span>)</div>
+      <input type="text" class="modal-input" id="modalInput" placeholder="أدخل الاختصارات تفصل بينها فاصلة">
+      <div class="modal-btns">
+        <button class="btn-modal-cancel" onclick="closeCustomModal()">إلغاء</button>
+        <button class="btn-modal-save" onclick="saveCustomModal()">حفظ التغيرات</button>
+      </div>
+    </div>
+  </div>
+
   <script>
+    let currentTargetId = '';
+
     function switchTab(tabName, element) {
       document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
       document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
-      
       const selectedTab = document.getElementById('tab-' + tabName);
-      if (selectedTab) {
-        selectedTab.classList.add('active');
-      }
+      if (selectedTab) selectedTab.classList.add('active');
       element.classList.add('active');
     }
 
-    function editAliases(commandName, elementId) {
-      const aliasElement = document.getElementById(elementId);
-      const currentVal = aliasElement.innerText;
-      const newVal = prompt(`تعديل اختصارات (Aliases) الأمر (${commandName}):`, currentVal);
-      if (newVal !== null && newVal.trim() !== "") {
-        aliasElement.innerText = newVal;
+    function openCustomModal(cmdName, elementId) {
+      currentTargetId = elementId;
+      document.getElementById('modalCmdName').innerText = cmdName;
+      document.getElementById('modalInput').value = document.getElementById(elementId).innerText;
+      document.getElementById('editModal').classList.add('active');
+    }
+
+    function closeCustomModal() {
+      document.getElementById('editModal').classList.remove('active');
+    }
+
+    function saveCustomModal() {
+      const val = document.getElementById('modalInput').value.trim();
+      if (val !== '' && currentTargetId !== '') {
+        document.getElementById(currentTargetId).innerText = val;
       }
+      closeCustomModal();
     }
 
     function removeCard(cardId) {
-      if (confirm("هل أنت تأكد من إزالة هذا الأمر من الواجهة؟")) {
-        const card = document.getElementById(cardId);
-        if (card) card.remove();
-      }
+      const card = document.getElementById(cardId);
+      if (card) card.remove();
     }
   </script>
 </body>
