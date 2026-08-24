@@ -190,7 +190,7 @@
         
         <div class="stats-banner">
           <span><i class="fa-solid fa-terminal"></i> قائمة أوامر البوت المتاحة (Bot Commands & Aliases)</span>
-          <span style="font-size: 12px; background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 20px; color: #fff;" id="cmdCount">6 Active Commands</span>
+          <span style="font-size: 12px; background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 20px; color: #fff;" id="cmdCount">Active Commands 24</span>
         </div>
 
         <div id="commandsList"></div>
@@ -199,7 +199,7 @@
     </main>
   </div>
 
-  <!-- Custom Alias Modal with Dynamic Add Bars (Max 5) -->
+  <!-- Custom Alias Modal -->
   <div class="modal-overlay" id="editModal">
     <div class="modal-box">
       <div class="modal-title">
@@ -207,9 +207,7 @@
         <span style="font-size: 12px; color: #94a3b8;" id="barCounter">(0/5)</span>
       </div>
 
-      <div class="alias-bars-container" id="barsContainer">
-        <!-- Input Bars Dynamically Inserted Here -->
-      </div>
+      <div class="alias-bars-container" id="barsContainer"></div>
 
       <button class="btn-add-bar" id="btnAddBar" onclick="addAliasBar()"><i class="fa-solid fa-plus"></i> إضافة اختصار جديد</button>
 
@@ -221,14 +219,32 @@
   </div>
 
   <script>
-    // قائمة الأوامر الكاملة
-    const commandsData = [
+    // 24 أمراً كاملاً ومفصلاً
+    let commandsData = [
       { id: 'ban', name: 'Ban', icon: 'fa-hammer', color: 'linear-gradient(135deg, #ef4444, #991b1b)', dev: 'Mohammed Alhajri', desc: 'Bans a user permanently from the server.', usage: '-ban {@user} [reason]', aliases: ['م', 'حظر'] },
       { id: 'kick', name: 'Kick', icon: 'fa-user-slash', color: 'linear-gradient(135deg, #f59e0b, #b45309)', dev: 'Mohammed Alhajri', desc: 'Kicks a user from the server.', usage: '-kick {@user} [reason]', aliases: ['طرد'] },
       { id: 'clear', name: 'Clear', icon: 'fa-broom', color: 'linear-gradient(135deg, #10b981, #047857)', dev: 'Mohammed Alhajri', desc: 'Clears messages from a channel.', usage: '-clear {amount}', aliases: ['مسح', 'purge'] },
       { id: 'mute', name: 'Mute', icon: 'fa-volume-xmark', color: 'linear-gradient(135deg, #6366f1, #4338ca)', dev: 'Mohammed Alhajri', desc: 'Mutes a member in the server.', usage: '-mute {@user} [time]', aliases: ['اسكات', 'ميوت'] },
+      { id: 'unmute', name: 'Unmute', icon: 'fa-volume-high', color: 'linear-gradient(135deg, #3b82f6, #1d4ed8)', dev: 'Mohammed Alhajri', desc: 'Unmutes a muted member.', usage: '-unmute {@user}', aliases: ['فك_الميوت'] },
       { id: 'ticket', name: 'Ticket', icon: 'fa-ticket', color: 'linear-gradient(135deg, #8b5cf6, #6d28d9)', dev: 'Mohammed Alhajri', desc: 'Opens a support ticket.', usage: '-ticket', aliases: ['تذكرة', 'الدعم'] },
-      { id: 'ping', name: 'Ping', icon: 'fa-wifi', color: 'linear-gradient(135deg, #06b6d4, #0e7490)', dev: 'Mohammed Alhajri', desc: 'Checks bot latency.', usage: '-ping', aliases: ['بنج', 'سرعة'] }
+      { id: 'ping', name: 'Ping', icon: 'fa-wifi', color: 'linear-gradient(135deg, #06b6d4, #0e7490)', dev: 'Mohammed Alhajri', desc: 'Checks bot latency.', usage: '-ping', aliases: ['بنج', 'سرعة'] },
+      { id: 'warn', name: 'Warn', icon: 'fa-triangle-exclamation', color: 'linear-gradient(135deg, #eab308, #a16207)', dev: 'Mohammed Alhajri', desc: 'Issues a warning to a member.', usage: '-warn {@user} [reason]', aliases: ['إنذار', 'تحذير'] },
+      { id: 'unban', name: 'Unban', icon: 'fa-unlock', color: 'linear-gradient(135deg, #22c55e, #15803d)', dev: 'Mohammed Alhajri', desc: 'Unbans a user using ID.', usage: '-unban {id}', aliases: ['فك_الحظر'] },
+      { id: 'lock', name: 'Lock', icon: 'fa-lock', color: 'linear-gradient(135deg, #64748b, #334155)', dev: 'Mohammed Alhajri', desc: 'Locks current text channel.', usage: '-lock', aliases: ['قفل'] },
+      { id: 'unlock', name: 'Unlock', icon: 'fa-lock-open', color: 'linear-gradient(135deg, #38bdf8, #0284c7)', dev: 'Mohammed Alhajri', desc: 'Unlocks current text channel.', usage: '-unlock', aliases: ['فتح'] },
+      { id: 'user', name: 'User Info', icon: 'fa-user-gear', color: 'linear-gradient(135deg, #ec4899, #be185d)', dev: 'Mohammed Alhajri', desc: 'Displays detailed user information.', usage: '-user [@user]', aliases: ['يوزر', 'معلومات'] },
+      { id: 'server', name: 'Server Info', icon: 'fa-server', color: 'linear-gradient(135deg, #a855f7, #7e22ce)', dev: 'Mohammed Alhajri', desc: 'Displays server status and stats.', usage: '-server', aliases: ['سيرفر'] },
+      { id: 'botinfo', name: 'Bot Info', icon: 'fa-robot', color: 'linear-gradient(135deg, #06b6d4, #0891b2)', dev: 'Mohammed Alhajri', desc: 'Displays system specifications.', usage: '-botinfo', aliases: ['البوت'] },
+      { id: 'role', name: 'Role Manage', icon: 'fa-user-shield', color: 'linear-gradient(135deg, #f43f5e, #be123c)', dev: 'Mohammed Alhajri', desc: 'Gives or removes role from user.', usage: '-role {@user} {role}', aliases: ['رتبة'] },
+      { id: 'avatar', name: 'Avatar', icon: 'fa-image', color: 'linear-gradient(135deg, #14b8a6, #0f766e)', dev: 'Mohammed Alhajri', desc: 'Fetches profile avatar.', usage: '-avatar [@user]', aliases: ['افتار', 'صورة'] },
+      { id: 'say', name: 'Say', icon: 'fa-comment-dots', color: 'linear-gradient(135deg, #6366f1, #4f46e5)', dev: 'Mohammed Alhajri', desc: 'Bot repeats text in embed.', usage: '-say {text}', aliases: ['قول'] },
+      { id: 'slowmode', name: 'Slowmode', icon: 'fa-gauge-high', color: 'linear-gradient(135deg, #f97316, #c2410c)', dev: 'Mohammed Alhajri', desc: 'Sets channel message cooldown.', usage: '-slowmode {time}', aliases: ['بطء'] },
+      { id: 'embed', name: 'Embed Creator', icon: 'fa-file-lines', color: 'linear-gradient(135deg, #8b5cf6, #5b21b6)', dev: 'Mohammed Alhajri', desc: 'Generates customized embed message.', usage: '-embed {json/text}', aliases: ['امبد'] },
+      { id: 'poll', name: 'Poll System', icon: 'fa-square-poll-vertical', color: 'linear-gradient(135deg, #10b981, #065f46)', dev: 'Mohammed Alhajri', desc: 'Creates voting poll in channel.', usage: '-poll {question}', aliases: ['تصويت'] },
+      { id: 'jail', name: 'Jail', icon: 'fa-bars-staggered', color: 'linear-gradient(135deg, #475569, #1e293b)', dev: 'Mohammed Alhajri', desc: 'Jails member in RP prison.', usage: '-jail {@user} [time]', aliases: ['سجن'] },
+      { id: 'unjail', name: 'Unjail', icon: 'fa-key', color: 'linear-gradient(135deg, #22c55e, #166534)', dev: 'Mohammed Alhajri', desc: 'Releases member from jail.', usage: '-unjail {@user}', aliases: ['إفراج'] },
+      { id: 'revive', name: 'Revive RP', icon: 'fa-heart-pulse', color: 'linear-gradient(135deg, #ef4444, #b91c1c)', dev: 'Mohammed Alhajri', desc: 'Sends RP server revival notice.', usage: '-revive', aliases: ['إحياء'] },
+      { id: 'setup', name: 'System Setup', icon: 'fa-gears', color: 'linear-gradient(135deg, #3b82f6, #1e40af)', dev: 'Mohammed Alhajri', desc: 'Configures bot modules.', usage: '-setup', aliases: ['تثبيت'] }
     ];
 
     let currentCmdId = '';
@@ -255,12 +271,12 @@
             </div>
             <div class="cmd-actions">
               <button class="btn-action btn-edit" onclick="openCustomModal('${cmd.id}')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
-              <button class="btn-action btn-remove" onclick="removeCard('card-${cmd.id}')"><i class="fa-solid fa-trash-can"></i> Remove</button>
+              <button class="btn-action btn-remove" onclick="removeCard('${cmd.id}')"><i class="fa-solid fa-trash-can"></i> Remove</button>
             </div>
           </div>
         `;
       });
-      document.getElementById('cmdCount').innerText = `${commandsData.length} Active Commands`;
+      document.getElementById('cmdCount').innerText = `Active Commands ${commandsData.length}`;
     }
 
     function switchTab(tabName, element) {
@@ -297,7 +313,7 @@
       const row = document.createElement('div');
       row.className = 'alias-input-row';
       row.innerHTML = `
-        <input type="text" class="alias-input" value="${val}" placeholder="أدخل اختصار (مثال: حظر)">
+        <input type="text" class="alias-input" value="${val}" placeholder="أدخل اختصار">
         <button class="btn-del-bar" onclick="removeBar(this)"><i class="fa-solid fa-xmark"></i></button>
       `;
       container.appendChild(row);
@@ -344,12 +360,11 @@
       closeCustomModal();
     }
 
-    function removeCard(cardId) {
-      const card = document.getElementById(cardId);
-      if (card) card.remove();
+    function removeCard(cmdId) {
+      commandsData = commandsData.filter(c => c.id !== cmdId);
+      renderCommands();
     }
 
-    // التشغيل عند تحميل الصفحة
     renderCommands();
   </script>
 </body>
