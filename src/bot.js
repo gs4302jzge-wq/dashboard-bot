@@ -1,7 +1,52 @@
 const { Client, GatewayIntentBits, AttachmentBuilder } = require('discord.js');
 const { createCanvas, loadImage } = require('@napi-rs/canvas');
+const express = require('express');
+const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
+
+const app = express();
+
+// إعداد خادم الرفع للصورة
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => cb(null, 'uploads/'),
+    filename: (req, file, cb) => cb(null, `bg-${Date.now()}${path.extname(file.originalname)}`)
+});
+const upload = multer({ storage });
+
+app.use(express.json());
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
+const CONFIG_PATH = path.join(__dirname, 'welcomeConfig.json');
+
+function getWelcomeConfig() {
+    try {
+        if (fs.existsSync(CONFIG_PATH)) {
+            return JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
+        }
+    } catch (e) {}
+    return global.welcomeConfig || {};
+}
+
+function saveWelcomeConfig(data) {
+    try {
+        fs.writeFileSync(CONFIG_PATH, JSON.stringify(data, null, 2));
+        global.welcomeConfig = data;
+    } catch (e) {}
+}
+
+// Endpoint لاستقبال رفع صورة الخلفية من اللوحة
+app.post('/api/welcome/upload-bg', upload.single('bgImage'), (req, res) => {
+    if (!req.file) return res.status(400).json({ error: 'لم يتم رفع صورة' });
+
+    const currentConfig = getWelcomeConfig();
+    const bgPath = path.join(__dirname, '../uploads', req.file.filename);
+    
+    currentConfig.uploadedBgPath = bgPath;
+    saveWelcomeConfig(currentConfig);
+
+    res.json({ success: true, bgPath: `/uploads/${req.file.filename}` });
+});
 
 const client = new Client({
     intents: [
@@ -12,16 +57,6 @@ const client = new Client({
     ]
 });
 
-function getWelcomeConfig() {
-    try {
-        const configPath = path.join(__dirname, 'welcomeConfig.json');
-        if (fs.existsSync(configPath)) {
-            return JSON.parse(fs.readFileSync(configPath, 'utf8'));
-        }
-    } catch (e) {}
-    return global.welcomeConfig || {};
-}
-
 client.on('ready', () => {
     console.log(`✅ Bot ready & live as: ${client.user.tag}`);
 });
@@ -30,16 +65,14 @@ client.on('guildMemberAdd', async (member) => {
     try {
         const config = getWelcomeConfig();
 
-        // 1. البحث عن القناة الذكية (تتجاهل الرموز الغريبة مثل ⍞)
+        // 1. تحديد القناة
         let channel = null;
         const savedId = config.welcomeChannelId || config.channelId || config.channel;
 
-        // التحقق مما إذا كان الآيدي المنسوق عبارة عن أرقام فقط (آيدي ديسكورد حقيقي)
         if (savedId && /^\d+$/.test(savedId)) {
             channel = member.guild.channels.cache.get(savedId);
         }
 
-        // إذا لم يجد القناة أو كان الرمز في الموقع خربان، يختار روم الترحيب تلقائياً من اسمها
         if (!channel) {
             channel = member.guild.channels.cache.find(c => 
                 c.isTextBased() && 
@@ -48,7 +81,6 @@ client.on('guildMemberAdd', async (member) => {
             );
         }
 
-        // خيار احتياطي أخير: أول قناة كتابية يمتلك فيها البوت صلاحيات
         if (!channel) {
             channel = member.guild.systemChannel || member.guild.channels.cache.find(c => 
                 c.isTextBased() && c.permissionsFor(member.guild.members.me).has(['SendMessages', 'AttachFiles'])
@@ -57,7 +89,7 @@ client.on('guildMemberAdd', async (member) => {
 
         if (!channel) return;
 
-        // 2. نص الترحيب
+        // 2. تجهيز النص
         const rawText = config.welcomeMsg || config.text || 'Welcome {user} to {server}!';
         const messageContent = rawText
             .replace('{user}', `<@${member.id}>`)
@@ -65,17 +97,34 @@ client.on('guildMemberAdd', async (member) => {
             .replace('{memberCount}', member.guild.memberCount)
             .replace('{server}', member.guild.name);
 
-        // 3. رسم كرت الترحيب بالـ Canvas مباشرة
+        // 3. رسم الكرت والخلفية
         const canvas = createCanvas(1024, 500);
         const ctx = canvas.getContext('2d');
 
-        ctx.fillStyle = config.bgColor || '#1e2238';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // محاولة رسم الصورة المرفوعة أولاً
+        let bgLoaded = false;
+        if (config.uploadedBgPath && fs.existsSync(config.uploadedBgPath)) {
+            try {
+                const customBg = await loadImage(config.uploadedBgPath);
+                ctx.drawImage(customBg, 0, 0, canvas.width, canvas.height);
+                bgLoaded = true;
+            } catch (err) {
+                console.error('خطأ في تحميل خلفية الصورة المرفوعة:', err);
+            }
+        }
 
+        // في حال عدم وجود صورة مرفوعة يتم اختيار اللون الافتراضي
+        if (!bgLoaded) {
+            ctx.fillStyle = config.bgColor || '#1e2238';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // إطار الكرت
         ctx.strokeStyle = '#2b2f4a';
         ctx.lineWidth = 8;
         ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
 
+        // النص واسم العضو
         ctx.font = 'bold 42px sans-serif';
         ctx.fillStyle = config.textColor || '#ffffff';
         ctx.textAlign = 'center';
@@ -85,6 +134,7 @@ client.on('guildMemberAdd', async (member) => {
         ctx.fillStyle = config.usernameColor || '#a0a5cc';
         ctx.fillText(`${member.user.username}`, canvas.width / 2, 430);
 
+        // أفتار العضو
         const avatarURL = member.user.displayAvatarURL({ extension: 'png', size: 512 });
         const avatarImage = await loadImage(avatarURL);
 
@@ -115,7 +165,6 @@ client.on('guildMemberAdd', async (member) => {
 
         const attachment = new AttachmentBuilder(await canvas.encode('png'), { name: 'welcome-image.png' });
 
-        // 4. إرسال النص والصورة معاً دائماً
         await channel.send({
             content: messageContent,
             files: [attachment]
@@ -125,5 +174,8 @@ client.on('guildMemberAdd', async (member) => {
         console.error('Error sending welcome image:', error);
     }
 });
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server & Dashboard running on port ${PORT}`));
 
 client.login(process.env.DISCORD_TOKEN);
