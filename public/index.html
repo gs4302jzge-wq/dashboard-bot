@@ -308,7 +308,6 @@
     <main class="main-content">
       <div id="tab-commands" class="tab-content active">
         
-        <!-- Header Info Banner -->
         <div class="stats-banner">
           <span>
             <i class="fa-solid fa-terminal"></i>
@@ -318,7 +317,7 @@
         </div>
 
         <!-- 1. Ban -->
-        <div class="cmd-card">
+        <div class="cmd-card" id="card-ban">
           <div class="cmd-header">
             <div class="cmd-title-group">
               <div class="cmd-icon-box c-red"><i class="fa-solid fa-hammer"></i></div>
@@ -330,16 +329,16 @@
             <div class="detail-row"><span class="detail-label">Developer:</span><span class="detail-val">Mohammed Alhajri</span></div>
             <div class="detail-row"><span class="detail-label">Description:</span><span class="detail-val">Bans a user permanently from the server.</span></div>
             <div class="detail-row" style="margin-top:4px;"><span class="detail-label">Usage:</span><span class="usage-badge">-ban {@user} [reason]</span></div>
-            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge">م, حظر</span></div>
+            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-ban">م, حظر</span></div>
           </div>
           <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="alert('Edit Ban')"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-            <button class="btn-action btn-remove" onclick="alert('Remove Ban')"><i class="fa-solid fa-trash-can"></i> Remove</button>
+            <button class="btn-action btn-edit" onclick="editAliases('Ban', 'alias-ban')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
+            <button class="btn-action btn-remove" onclick="removeCard('card-ban')"><i class="fa-solid fa-trash-can"></i> Remove</button>
           </div>
         </div>
 
         <!-- 2. Kick -->
-        <div class="cmd-card">
+        <div class="cmd-card" id="card-kick">
           <div class="cmd-header">
             <div class="cmd-title-group">
               <div class="cmd-icon-box c-orange"><i class="fa-solid fa-user-minus"></i></div>
@@ -351,16 +350,16 @@
             <div class="detail-row"><span class="detail-label">Developer:</span><span class="detail-val">Mohammed Alhajri</span></div>
             <div class="detail-row"><span class="detail-label">Description:</span><span class="detail-val">Kicks a member from the server.</span></div>
             <div class="detail-row" style="margin-top:4px;"><span class="detail-label">Usage:</span><span class="usage-badge">-kick {@user} [reason]</span></div>
-            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge">طرد</span></div>
+            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-kick">طرد</span></div>
           </div>
           <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="alert('Edit Kick')"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-            <button class="btn-action btn-remove" onclick="alert('Remove Kick')"><i class="fa-solid fa-trash-can"></i> Remove</button>
+            <button class="btn-action btn-edit" onclick="editAliases('Kick', 'alias-kick')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
+            <button class="btn-action btn-remove" onclick="removeCard('card-kick')"><i class="fa-solid fa-trash-can"></i> Remove</button>
           </div>
         </div>
 
         <!-- 3. Clear -->
-        <div class="cmd-card">
+        <div class="cmd-card" id="card-clear">
           <div class="cmd-header">
             <div class="cmd-title-group">
               <div class="cmd-icon-box c-teal"><i class="fa-solid fa-broom"></i></div>
@@ -372,16 +371,16 @@
             <div class="detail-row"><span class="detail-label">Developer:</span><span class="detail-val">Mohammed Alhajri</span></div>
             <div class="detail-row"><span class="detail-label">Description:</span><span class="detail-val">Clears messages from a channel.</span></div>
             <div class="detail-row" style="margin-top:4px;"><span class="detail-label">Usage:</span><span class="usage-badge">-clear {amount}</span></div>
-            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge">مسح, purge</span></div>
+            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-clear">مسح, purge</span></div>
           </div>
           <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="alert('Edit Clear')"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-            <button class="btn-action btn-remove" onclick="alert('Remove Clear')"><i class="fa-solid fa-trash-can"></i> Remove</button>
+            <button class="btn-action btn-edit" onclick="editAliases('Clear', 'alias-clear')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
+            <button class="btn-action btn-remove" onclick="removeCard('card-clear')"><i class="fa-solid fa-trash-can"></i> Remove</button>
           </div>
         </div>
 
         <!-- 4. Mute -->
-        <div class="cmd-card">
+        <div class="cmd-card" id="card-mute">
           <div class="cmd-header">
             <div class="cmd-title-group">
               <div class="cmd-icon-box c-red"><i class="fa-solid fa-volume-xmark"></i></div>
@@ -393,16 +392,16 @@
             <div class="detail-row"><span class="detail-label">Developer:</span><span class="detail-val">Mohammed Alhajri</span></div>
             <div class="detail-row"><span class="detail-label">Description:</span><span class="detail-val">Mutes a member in text and voice channels.</span></div>
             <div class="detail-row" style="margin-top:4px;"><span class="detail-label">Usage:</span><span class="usage-badge">-mute {@user} [time]</span></div>
-            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge">اسكات, ميوت</span></div>
+            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-mute">اسكات, ميوت</span></div>
           </div>
           <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="alert('Edit Mute')"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-            <button class="btn-action btn-remove" onclick="alert('Remove Mute')"><i class="fa-solid fa-trash-can"></i> Remove</button>
+            <button class="btn-action btn-edit" onclick="editAliases('Mute', 'alias-mute')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
+            <button class="btn-action btn-remove" onclick="removeCard('card-mute')"><i class="fa-solid fa-trash-can"></i> Remove</button>
           </div>
         </div>
 
         <!-- 5. Unmute -->
-        <div class="cmd-card">
+        <div class="cmd-card" id="card-unmute">
           <div class="cmd-header">
             <div class="cmd-title-group">
               <div class="cmd-icon-box c-emerald"><i class="fa-solid fa-volume-high"></i></div>
@@ -414,16 +413,16 @@
             <div class="detail-row"><span class="detail-label">Developer:</span><span class="detail-val">Mohammed Alhajri</span></div>
             <div class="detail-row"><span class="detail-label">Description:</span><span class="detail-val">Unmutes a muted member.</span></div>
             <div class="detail-row" style="margin-top:4px;"><span class="detail-label">Usage:</span><span class="usage-badge">-unmute {@user}</span></div>
-            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge">فك_الميوت</span></div>
+            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-unmute">فك_الميوت</span></div>
           </div>
           <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="alert('Edit Unmute')"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-            <button class="btn-action btn-remove" onclick="alert('Remove Unmute')"><i class="fa-solid fa-trash-can"></i> Remove</button>
+            <button class="btn-action btn-edit" onclick="editAliases('Unmute', 'alias-unmute')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
+            <button class="btn-action btn-remove" onclick="removeCard('card-unmute')"><i class="fa-solid fa-trash-can"></i> Remove</button>
           </div>
         </div>
 
         <!-- 6. Role -->
-        <div class="cmd-card">
+        <div class="cmd-card" id="card-role">
           <div class="cmd-header">
             <div class="cmd-title-group">
               <div class="cmd-icon-box c-purple"><i class="fa-solid fa-user-shield"></i></div>
@@ -435,16 +434,16 @@
             <div class="detail-row"><span class="detail-label">Developer:</span><span class="detail-val">Mohammed Alhajri</span></div>
             <div class="detail-row"><span class="detail-label">Description:</span><span class="detail-val">Gives or removes a role from a member.</span></div>
             <div class="detail-row" style="margin-top:4px;"><span class="detail-label">Usage:</span><span class="usage-badge">-role {@user} {@role}</span></div>
-            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge">رتبة, رتب</span></div>
+            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-role">رتبة, رتب</span></div>
           </div>
           <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="alert('Edit Role')"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-            <button class="btn-action btn-remove" onclick="alert('Remove Role')"><i class="fa-solid fa-trash-can"></i> Remove</button>
+            <button class="btn-action btn-edit" onclick="editAliases('Role', 'alias-role')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
+            <button class="btn-action btn-remove" onclick="removeCard('card-role')"><i class="fa-solid fa-trash-can"></i> Remove</button>
           </div>
         </div>
 
         <!-- 7. Welcome -->
-        <div class="cmd-card">
+        <div class="cmd-card" id="card-welcome">
           <div class="cmd-header">
             <div class="cmd-title-group">
               <div class="cmd-icon-box c-blue"><i class="fa-solid fa-door-open"></i></div>
@@ -456,16 +455,16 @@
             <div class="detail-row"><span class="detail-label">Developer:</span><span class="detail-val">Mohammed Alhajri</span></div>
             <div class="detail-row"><span class="detail-label">Description:</span><span class="detail-val">Sends welcome card and message for new members.</span></div>
             <div class="detail-row" style="margin-top:4px;"><span class="detail-label">Usage:</span><span class="usage-badge">-welcome set [#channel]</span></div>
-            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge">ترحيب</span></div>
+            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-welcome">ترحيب</span></div>
           </div>
           <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="alert('Edit Welcome')"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-            <button class="btn-action btn-remove" onclick="alert('Remove Welcome')"><i class="fa-solid fa-trash-can"></i> Remove</button>
+            <button class="btn-action btn-edit" onclick="editAliases('Welcome', 'alias-welcome')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
+            <button class="btn-action btn-remove" onclick="removeCard('card-welcome')"><i class="fa-solid fa-trash-can"></i> Remove</button>
           </div>
         </div>
 
         <!-- 8. Warn -->
-        <div class="cmd-card">
+        <div class="cmd-card" id="card-warn">
           <div class="cmd-header">
             <div class="cmd-title-group">
               <div class="cmd-icon-box c-amber"><i class="fa-solid fa-triangle-exclamation"></i></div>
@@ -477,16 +476,16 @@
             <div class="detail-row"><span class="detail-label">Developer:</span><span class="detail-val">Mohammed Alhajri</span></div>
             <div class="detail-row"><span class="detail-label">Description:</span><span class="detail-val">Issues a warning to a specific member.</span></div>
             <div class="detail-row" style="margin-top:4px;"><span class="detail-label">Usage:</span><span class="usage-badge">-warn {@user} [reason]</span></div>
-            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge">تحذير, انذار</span></div>
+            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-warn">تحذير, انذار</span></div>
           </div>
           <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="alert('Edit Warn')"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-            <button class="btn-action btn-remove" onclick="alert('Remove Warn')"><i class="fa-solid fa-trash-can"></i> Remove</button>
+            <button class="btn-action btn-edit" onclick="editAliases('Warn', 'alias-warn')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
+            <button class="btn-action btn-remove" onclick="removeCard('card-warn')"><i class="fa-solid fa-trash-can"></i> Remove</button>
           </div>
         </div>
 
         <!-- 9. Warnings -->
-        <div class="cmd-card">
+        <div class="cmd-card" id="card-warnings">
           <div class="cmd-header">
             <div class="cmd-title-group">
               <div class="cmd-icon-box c-amber"><i class="fa-solid fa-list-check"></i></div>
@@ -498,16 +497,16 @@
             <div class="detail-row"><span class="detail-label">Developer:</span><span class="detail-val">Mohammed Alhajri</span></div>
             <div class="detail-row"><span class="detail-label">Description:</span><span class="detail-val">Displays warning history for a user.</span></div>
             <div class="detail-row" style="margin-top:4px;"><span class="detail-label">Usage:</span><span class="usage-badge">-warnings {@user}</span></div>
-            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge">انذارات</span></div>
+            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-warnings">انذارات</span></div>
           </div>
           <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="alert('Edit Warnings')"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-            <button class="btn-action btn-remove" onclick="alert('Remove Warnings')"><i class="fa-solid fa-trash-can"></i> Remove</button>
+            <button class="btn-action btn-edit" onclick="editAliases('Warnings', 'alias-warnings')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
+            <button class="btn-action btn-remove" onclick="removeCard('card-warnings')"><i class="fa-solid fa-trash-can"></i> Remove</button>
           </div>
         </div>
 
         <!-- 10. Coin -->
-        <div class="cmd-card">
+        <div class="cmd-card" id="card-coin">
           <div class="cmd-header">
             <div class="cmd-title-group">
               <div class="cmd-icon-box c-amber"><i class="fa-solid fa-coins"></i></div>
@@ -519,16 +518,16 @@
             <div class="detail-row"><span class="detail-label">Developer:</span><span class="detail-val">Mohammed Alhajri</span></div>
             <div class="detail-row"><span class="detail-label">Description:</span><span class="detail-val">Simple coin flip command (Heads or Tails).</span></div>
             <div class="detail-row" style="margin-top:4px;"><span class="detail-label">Usage:</span><span class="usage-badge">-coin</span></div>
-            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge">عملة, قرعة</span></div>
+            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-coin">عملة, قرعة</span></div>
           </div>
           <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="alert('Edit Coin')"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-            <button class="btn-action btn-remove" onclick="alert('Remove Coin')"><i class="fa-solid fa-trash-can"></i> Remove</button>
+            <button class="btn-action btn-edit" onclick="editAliases('Coin', 'alias-coin')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
+            <button class="btn-action btn-remove" onclick="removeCard('card-coin')"><i class="fa-solid fa-trash-can"></i> Remove</button>
           </div>
         </div>
 
         <!-- 11. Balance -->
-        <div class="cmd-card">
+        <div class="cmd-card" id="card-balance">
           <div class="cmd-header">
             <div class="cmd-title-group">
               <div class="cmd-icon-box c-emerald"><i class="fa-solid fa-wallet"></i></div>
@@ -540,16 +539,16 @@
             <div class="detail-row"><span class="detail-label">Developer:</span><span class="detail-val">Mohammed Alhajri</span></div>
             <div class="detail-row"><span class="detail-label">Description:</span><span class="detail-val">Shows your current economy balance.</span></div>
             <div class="detail-row" style="margin-top:4px;"><span class="detail-label">Usage:</span><span class="usage-badge">-bal [@user]</span></div>
-            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge">رصيد, فلوس</span></div>
+            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-balance">رصيد, فلوس</span></div>
           </div>
           <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="alert('Edit Balance')"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-            <button class="btn-action btn-remove" onclick="alert('Remove Balance')"><i class="fa-solid fa-trash-can"></i> Remove</button>
+            <button class="btn-action btn-edit" onclick="editAliases('Balance', 'alias-balance')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
+            <button class="btn-action btn-remove" onclick="removeCard('card-balance')"><i class="fa-solid fa-trash-can"></i> Remove</button>
           </div>
         </div>
 
         <!-- 12. Daily -->
-        <div class="cmd-card">
+        <div class="cmd-card" id="card-daily">
           <div class="cmd-header">
             <div class="cmd-title-group">
               <div class="cmd-icon-box c-emerald"><i class="fa-solid fa-calendar-check"></i></div>
@@ -561,16 +560,16 @@
             <div class="detail-row"><span class="detail-label">Developer:</span><span class="detail-val">Mohammed Alhajri</span></div>
             <div class="detail-row"><span class="detail-label">Description:</span><span class="detail-val">Claims daily economy reward.</span></div>
             <div class="detail-row" style="margin-top:4px;"><span class="detail-label">Usage:</span><span class="usage-badge">-daily</span></div>
-            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge">راتب, يومية</span></div>
+            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-daily">راتب, يومية</span></div>
           </div>
           <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="alert('Edit Daily')"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-            <button class="btn-action btn-remove" onclick="alert('Remove Daily')"><i class="fa-solid fa-trash-can"></i> Remove</button>
+            <button class="btn-action btn-edit" onclick="editAliases('Daily', 'alias-daily')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
+            <button class="btn-action btn-remove" onclick="removeCard('card-daily')"><i class="fa-solid fa-trash-can"></i> Remove</button>
           </div>
         </div>
 
         <!-- 13. Avatar -->
-        <div class="cmd-card">
+        <div class="cmd-card" id="card-avatar">
           <div class="cmd-header">
             <div class="cmd-title-group">
               <div class="cmd-icon-box c-pink"><i class="fa-solid fa-image"></i></div>
@@ -582,16 +581,16 @@
             <div class="detail-row"><span class="detail-label">Developer:</span><span class="detail-val">Mohammed Alhajri</span></div>
             <div class="detail-row"><span class="detail-label">Description:</span><span class="detail-val">Displays full resolution avatar image.</span></div>
             <div class="detail-row" style="margin-top:4px;"><span class="detail-label">Usage:</span><span class="usage-badge">-avatar [@user]</span></div>
-            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge">افتار, صورة</span></div>
+            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-avatar">افتار, صورة</span></div>
           </div>
           <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="alert('Edit Avatar')"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-            <button class="btn-action btn-remove" onclick="alert('Remove Avatar')"><i class="fa-solid fa-trash-can"></i> Remove</button>
+            <button class="btn-action btn-edit" onclick="editAliases('Avatar', 'alias-avatar')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
+            <button class="btn-action btn-remove" onclick="removeCard('card-avatar')"><i class="fa-solid fa-trash-can"></i> Remove</button>
           </div>
         </div>
 
         <!-- 14. User -->
-        <div class="cmd-card">
+        <div class="cmd-card" id="card-user">
           <div class="cmd-header">
             <div class="cmd-title-group">
               <div class="cmd-icon-box c-indigo"><i class="fa-solid fa-id-card"></i></div>
@@ -603,16 +602,16 @@
             <div class="detail-row"><span class="detail-label">Developer:</span><span class="detail-val">Mohammed Alhajri</span></div>
             <div class="detail-row"><span class="detail-label">Description:</span><span class="detail-val">Shows full profile info and join dates.</span></div>
             <div class="detail-row" style="margin-top:4px;"><span class="detail-label">Usage:</span><span class="usage-badge">-user [@user]</span></div>
-            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge">معلومات, هوية</span></div>
+            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-user">معلومات, هوية</span></div>
           </div>
           <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="alert('Edit User')"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-            <button class="btn-action btn-remove" onclick="alert('Remove User')"><i class="fa-solid fa-trash-can"></i> Remove</button>
+            <button class="btn-action btn-edit" onclick="editAliases('User Info', 'alias-user')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
+            <button class="btn-action btn-remove" onclick="removeCard('card-user')"><i class="fa-solid fa-trash-can"></i> Remove</button>
           </div>
         </div>
 
         <!-- 15. Server -->
-        <div class="cmd-card">
+        <div class="cmd-card" id="card-server">
           <div class="cmd-header">
             <div class="cmd-title-group">
               <div class="cmd-icon-box c-blue"><i class="fa-solid fa-server"></i></div>
@@ -624,16 +623,16 @@
             <div class="detail-row"><span class="detail-label">Developer:</span><span class="detail-val">Mohammed Alhajri</span></div>
             <div class="detail-row"><span class="detail-label">Description:</span><span class="detail-val">Displays statistics about current server.</span></div>
             <div class="detail-row" style="margin-top:4px;"><span class="detail-label">Usage:</span><span class="usage-badge">-server</span></div>
-            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge">سيرفر</span></div>
+            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-server">سيرفر</span></div>
           </div>
           <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="alert('Edit Server')"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-            <button class="btn-action btn-remove" onclick="alert('Remove Server')"><i class="fa-solid fa-trash-can"></i> Remove</button>
+            <button class="btn-action btn-edit" onclick="editAliases('Server Info', 'alias-server')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
+            <button class="btn-action btn-remove" onclick="removeCard('card-server')"><i class="fa-solid fa-trash-can"></i> Remove</button>
           </div>
         </div>
 
         <!-- 16. Lock -->
-        <div class="cmd-card">
+        <div class="cmd-card" id="card-lock">
           <div class="cmd-header">
             <div class="cmd-title-group">
               <div class="cmd-icon-box c-red"><i class="fa-solid fa-lock"></i></div>
@@ -645,16 +644,16 @@
             <div class="detail-row"><span class="detail-label">Developer:</span><span class="detail-val">Mohammed Alhajri</span></div>
             <div class="detail-row"><span class="detail-label">Description:</span><span class="detail-val">Locks text channel to prevent messages.</span></div>
             <div class="detail-row" style="margin-top:4px;"><span class="detail-label">Usage:</span><span class="usage-badge">-lock [#channel]</span></div>
-            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge">قفل</span></div>
+            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-lock">قفل</span></div>
           </div>
           <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="alert('Edit Lock')"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-            <button class="btn-action btn-remove" onclick="alert('Remove Lock')"><i class="fa-solid fa-trash-can"></i> Remove</button>
+            <button class="btn-action btn-edit" onclick="editAliases('Lock', 'alias-lock')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
+            <button class="btn-action btn-remove" onclick="removeCard('card-lock')"><i class="fa-solid fa-trash-can"></i> Remove</button>
           </div>
         </div>
 
         <!-- 17. Unlock -->
-        <div class="cmd-card">
+        <div class="cmd-card" id="card-unlock">
           <div class="cmd-header">
             <div class="cmd-title-group">
               <div class="cmd-icon-box c-emerald"><i class="fa-solid fa-lock-open"></i></div>
@@ -666,16 +665,16 @@
             <div class="detail-row"><span class="detail-label">Developer:</span><span class="detail-val">Mohammed Alhajri</span></div>
             <div class="detail-row"><span class="detail-label">Description:</span><span class="detail-val">Unlocks locked text channel.</span></div>
             <div class="detail-row" style="margin-top:4px;"><span class="detail-label">Usage:</span><span class="usage-badge">-unlock [#channel]</span></div>
-            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge">فتح</span></div>
+            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-unlock">فتح</span></div>
           </div>
           <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="alert('Edit Unlock')"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-            <button class="btn-action btn-remove" onclick="alert('Remove Unlock')"><i class="fa-solid fa-trash-can"></i> Remove</button>
+            <button class="btn-action btn-edit" onclick="editAliases('Unlock', 'alias-unlock')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
+            <button class="btn-action btn-remove" onclick="removeCard('card-unlock')"><i class="fa-solid fa-trash-can"></i> Remove</button>
           </div>
         </div>
 
         <!-- 18. Say -->
-        <div class="cmd-card">
+        <div class="cmd-card" id="card-say">
           <div class="cmd-header">
             <div class="cmd-title-group">
               <div class="cmd-icon-box c-blue"><i class="fa-solid fa-comment-dots"></i></div>
@@ -687,16 +686,16 @@
             <div class="detail-row"><span class="detail-label">Developer:</span><span class="detail-val">Mohammed Alhajri</span></div>
             <div class="detail-row"><span class="detail-label">Description:</span><span class="detail-val">Makes the bot repeat your text message.</span></div>
             <div class="detail-row" style="margin-top:4px;"><span class="detail-label">Usage:</span><span class="usage-badge">-say {message}</span></div>
-            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge">قول, تكلم</span></div>
+            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-say">قول, تكلم</span></div>
           </div>
           <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="alert('Edit Say')"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-            <button class="btn-action btn-remove" onclick="alert('Remove Say')"><i class="fa-solid fa-trash-can"></i> Remove</button>
+            <button class="btn-action btn-edit" onclick="editAliases('Say', 'alias-say')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
+            <button class="btn-action btn-remove" onclick="removeCard('card-say')"><i class="fa-solid fa-trash-can"></i> Remove</button>
           </div>
         </div>
 
         <!-- 19. Embed -->
-        <div class="cmd-card">
+        <div class="cmd-card" id="card-embed">
           <div class="cmd-header">
             <div class="cmd-title-group">
               <div class="cmd-icon-box c-purple"><i class="fa-solid fa-layer-group"></i></div>
@@ -708,16 +707,16 @@
             <div class="detail-row"><span class="detail-label">Developer:</span><span class="detail-val">Mohammed Alhajri</span></div>
             <div class="detail-row"><span class="detail-label">Description:</span><span class="detail-val">Sends customizable styled embed frame.</span></div>
             <div class="detail-row" style="margin-top:4px;"><span class="detail-label">Usage:</span><span class="usage-badge">-embed {text}</span></div>
-            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge">امبد</span></div>
+            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-embed">امبد</span></div>
           </div>
           <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="alert('Edit Embed')"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-            <button class="btn-action btn-remove" onclick="alert('Remove Embed')"><i class="fa-solid fa-trash-can"></i> Remove</button>
+            <button class="btn-action btn-edit" onclick="editAliases('Embed', 'alias-embed')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
+            <button class="btn-action btn-remove" onclick="removeCard('card-embed')"><i class="fa-solid fa-trash-can"></i> Remove</button>
           </div>
         </div>
 
         <!-- 20. Slowmode -->
-        <div class="cmd-card">
+        <div class="cmd-card" id="card-slowmode">
           <div class="cmd-header">
             <div class="cmd-title-group">
               <div class="cmd-icon-box c-teal"><i class="fa-solid fa-gauge-simple-high"></i></div>
@@ -729,16 +728,16 @@
             <div class="detail-row"><span class="detail-label">Developer:</span><span class="detail-val">Mohammed Alhajri</span></div>
             <div class="detail-row"><span class="detail-label">Description:</span><span class="detail-val">Sets slowmode delay on current channel.</span></div>
             <div class="detail-row" style="margin-top:4px;"><span class="detail-label">Usage:</span><span class="usage-badge">-slowmode {seconds}</span></div>
-            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge">بطء</span></div>
+            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-slowmode">بطء</span></div>
           </div>
           <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="alert('Edit Slowmode')"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-            <button class="btn-action btn-remove" onclick="alert('Remove Slowmode')"><i class="fa-solid fa-trash-can"></i> Remove</button>
+            <button class="btn-action btn-edit" onclick="editAliases('Slowmode', 'alias-slowmode')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
+            <button class="btn-action btn-remove" onclick="removeCard('card-slowmode')"><i class="fa-solid fa-trash-can"></i> Remove</button>
           </div>
         </div>
 
         <!-- 21. Ticket -->
-        <div class="cmd-card">
+        <div class="cmd-card" id="card-ticket">
           <div class="cmd-header">
             <div class="cmd-title-group">
               <div class="cmd-icon-box c-indigo"><i class="fa-solid fa-ticket"></i></div>
@@ -750,16 +749,16 @@
             <div class="detail-row"><span class="detail-label">Developer:</span><span class="detail-val">Mohammed Alhajri</span></div>
             <div class="detail-row"><span class="detail-label">Description:</span><span class="detail-val">Creates support ticket channel for players.</span></div>
             <div class="detail-row" style="margin-top:4px;"><span class="detail-label">Usage:</span><span class="usage-badge">-ticket setup</span></div>
-            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge">تذكرة, الدعم</span></div>
+            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-ticket">تذكرة, الدعم</span></div>
           </div>
           <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="alert('Edit Ticket')"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-            <button class="btn-action btn-remove" onclick="alert('Remove Ticket')"><i class="fa-solid fa-trash-can"></i> Remove</button>
+            <button class="btn-action btn-edit" onclick="editAliases('Ticket', 'alias-ticket')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
+            <button class="btn-action btn-remove" onclick="removeCard('card-ticket')"><i class="fa-solid fa-trash-can"></i> Remove</button>
           </div>
         </div>
 
         <!-- 22. Ping -->
-        <div class="cmd-card">
+        <div class="cmd-card" id="card-ping">
           <div class="cmd-header">
             <div class="cmd-title-group">
               <div class="cmd-icon-box c-emerald"><i class="fa-solid fa-signal"></i></div>
@@ -771,16 +770,16 @@
             <div class="detail-row"><span class="detail-label">Developer:</span><span class="detail-val">Mohammed Alhajri</span></div>
             <div class="detail-row"><span class="detail-label">Description:</span><span class="detail-val">Checks bot response time and API latency.</span></div>
             <div class="detail-row" style="margin-top:4px;"><span class="detail-label">Usage:</span><span class="usage-badge">-ping</span></div>
-            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge">سرعة, بنج</span></div>
+            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-ping">سرعة, بنج</span></div>
           </div>
           <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="alert('Edit Ping')"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-            <button class="btn-action btn-remove" onclick="alert('Remove Ping')"><i class="fa-solid fa-trash-can"></i> Remove</button>
+            <button class="btn-action btn-edit" onclick="editAliases('Ping', 'alias-ping')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
+            <button class="btn-action btn-remove" onclick="removeCard('card-ping')"><i class="fa-solid fa-trash-can"></i> Remove</button>
           </div>
         </div>
 
         <!-- 23. Bot Info -->
-        <div class="cmd-card">
+        <div class="cmd-card" id="card-botinfo">
           <div class="cmd-header">
             <div class="cmd-title-group">
               <div class="cmd-icon-box c-purple"><i class="fa-solid fa-robot"></i></div>
@@ -792,16 +791,16 @@
             <div class="detail-row"><span class="detail-label">Developer:</span><span class="detail-val">Mohammed Alhajri</span></div>
             <div class="detail-row"><span class="detail-label">Description:</span><span class="detail-val">Displays bot statistics and system uptime.</span></div>
             <div class="detail-row" style="margin-top:4px;"><span class="detail-label">Usage:</span><span class="usage-badge">-botinfo</span></div>
-            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge">البوت</span></div>
+            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-botinfo">البوت</span></div>
           </div>
           <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="alert('Edit Bot Info')"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-            <button class="btn-action btn-remove" onclick="alert('Remove Bot Info')"><i class="fa-solid fa-trash-can"></i> Remove</button>
+            <button class="btn-action btn-edit" onclick="editAliases('Bot Info', 'alias-botinfo')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
+            <button class="btn-action btn-remove" onclick="removeCard('card-botinfo')"><i class="fa-solid fa-trash-can"></i> Remove</button>
           </div>
         </div>
 
         <!-- 24. Help -->
-        <div class="cmd-card">
+        <div class="cmd-card" id="card-help">
           <div class="cmd-header">
             <div class="cmd-title-group">
               <div class="cmd-icon-box c-indigo"><i class="fa-solid fa-circle-question"></i></div>
@@ -813,11 +812,11 @@
             <div class="detail-row"><span class="detail-label">Developer:</span><span class="detail-val">Mohammed Alhajri</span></div>
             <div class="detail-row"><span class="detail-label">Description:</span><span class="detail-val">Displays list of available commands menu.</span></div>
             <div class="detail-row" style="margin-top:4px;"><span class="detail-label">Usage:</span><span class="usage-badge">-help</span></div>
-            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge">مساعدة, اوامر</span></div>
+            <div class="detail-row" style="margin-top:2px;"><span class="detail-label">Aliases:</span><span class="alias-badge" id="alias-help">مساعدة, اوامر</span></div>
           </div>
           <div class="cmd-actions">
-            <button class="btn-action btn-edit" onclick="alert('Edit Help')"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-            <button class="btn-action btn-remove" onclick="alert('Remove Help')"><i class="fa-solid fa-trash-can"></i> Remove</button>
+            <button class="btn-action btn-edit" onclick="editAliases('Help', 'alias-help')"><i class="fa-solid fa-pen-to-square"></i> Edit Aliases</button>
+            <button class="btn-action btn-remove" onclick="removeCard('card-help')"><i class="fa-solid fa-trash-can"></i> Remove</button>
           </div>
         </div>
 
@@ -842,6 +841,22 @@
         selectedTab.classList.add('active');
       }
       element.classList.add('active');
+    }
+
+    function editAliases(commandName, elementId) {
+      const aliasElement = document.getElementById(elementId);
+      const currentVal = aliasElement.innerText;
+      const newVal = prompt(`تعديل اختصارات (Aliases) الأمر (${commandName}):`, currentVal);
+      if (newVal !== null && newVal.trim() !== "") {
+        aliasElement.innerText = newVal;
+      }
+    }
+
+    function removeCard(cardId) {
+      if (confirm("هل أنت تأكد من إزالة هذا الأمر من الواجهة؟")) {
+        const card = document.getElementById(cardId);
+        if (card) card.remove();
+      }
     }
   </script>
 </body>
