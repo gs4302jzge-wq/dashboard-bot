@@ -1,3 +1,4 @@
+require('dotenv').config();
 const { handleWelcome } = require("./welcomeService");
 const { Client, GatewayIntentBits } = require('discord.js');
 const express = require('express');
@@ -96,7 +97,7 @@ const client = new Client({
 });
 
 app.listen(PORT, () => console.log(`🚀 New Dashboard active on port ${PORT}`));
-client.login(process.env.DISCORD_TOKEN);
+client.login(process.env.BOT_TOKEN || process.env.DISCORD_TOKEN);
 
 client.on("guildMemberAdd", async (member) => { await handleWelcome(member); });
 
