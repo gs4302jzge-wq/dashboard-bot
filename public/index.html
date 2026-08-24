@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم نظام الترحيب الاحترافية</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #0f111a; color: #fff; font-family: system-ui, sans-serif; }
+        .card-custom { background: #1a1d2e; border-radius: 16px; border: 1px solid #2a2e45; padding: 25px; }
+        .form-control, .form-select { background-color: #0f111a; border-color: #2a2e45; color: #fff; }
+        .form-control:focus, .form-select:focus { background-color: #151824; color: #fff; border-color: #5865F2; }
+        .btn-primary { background-color: #5865F2; border: none; padding: 12px 28px; font-weight: bold; border-radius: 10px; }
+        .btn-primary:hover { background-color: #4752c4; }
+    </style>
+</head>
+<body class="py-5">
+    <div class="container" style="max-width: 900px;">
+        <h2 class="text-center mb-4 fw-bold">⚙️ لوحة إعدادات نظام الترحيب</h2>
+        
+        <form id="welcomeForm" enctype="multipart/form-data">
+            <div class="card-custom mb-4">
+                <div class="form-check form-switch fs-5 mb-4">
+                    <input class="form-check-input" type="checkbox" id="welcomeEnabled" name="welcomeEnabled">
+                    <label class="form-check-label fw-bold" for="welcomeEnabled">تفعيل نظام الترحيب والصورة</label>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">اختر قناة الترحيب:</label>
+                    <select class="form-select" id="welcomeChannelId" name="welcomeChannelId">
+                        <option value="">جاري تحميل القنوات...</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">رسالة الترحيب النصية:</label>
+                    <input type="text" class="form-control" id="welcomeMsg" name="welcomeMsg" placeholder="Welcome {user} to {server}!">
+                </div>
+            </div>
+
+            <div class="card-custom mb-4">
+                <h4 class="mb-3 text-primary">🖼️ تخصيص بطاقة الترحيب (Canvas)</h4>
+                
+                <div class="mb-3">
+                    <label class="form-label fw-bold">رفع صورة خلفية للكرت (Upload Custom Background):</label>
+                    <input type="file" class="form-control" id="bgImage" name="bgImage" accept="image/*">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">النص داخل البطاقة:</label>
+                    <input type="text" class="form-control" id="textContent" name="textContent" placeholder="Welcome to Our Server">
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">لون النص الرئيسي:</label>
+                        <input type="color" class="form-control form-control-color w-100" id="textColor" name="textColor">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">لون اسم المستخدم:</label>
+                        <input type="color" class="form-control form-control-color w-100" id="usernameColor" name="usernameColor">
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 fs-5">💾 حفظ التغييرات وتطبيقها فوراً</button>
+        </form>
+    </div>
+
+    <script>
+        async function loadData() {
+            // جلب الإعدادات
+            const resConfig = await fetch('/api/config');
+            const config = await resConfig.json();
+
+            document.getElementById('welcomeEnabled').checked = config.welcomeEnabled !== false;
+            document.getElementById('welcomeMsg').value = config.welcomeMsg || '';
+            document.getElementById('textContent').value = config.textContent || '';
+            document.getElementById('textColor').value = config.textColor || '#ffffff';
+            document.getElementById('usernameColor').value = config.usernameColor || '#a0a5cc';
+
+            // جلب القنوات
+            const resChannels = await fetch('/api/channels');
+            const channels = await resChannels.json();
+            const channelSelect = document.getElementById('welcomeChannelId');
+            channelSelect.innerHTML = '<option value="">-- اختر القناة --</option>';
+            
+            channels.forEach(ch => {
+                const opt = document.createElement('option');
+                opt.value = ch.id;
+                opt.textContent = `# ${ch.name}`;
+                if (ch.id === config.welcomeChannelId) opt.selected = true;
+                channelSelect.appendChild(opt);
+            });
+        }
+
+        document.getElementById('welcomeForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            formData.set('welcomeEnabled', document.getElementById('welcomeEnabled').checked);
+
+            const res = await fetch('/api/config', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert('✅ تم حفظ التغييرات بنجاح ورفع النظام الجديد!');
+            }
+        };
+
+        loadData();
+    </script>
+</body>
+</html>
