@@ -1,4 +1,6 @@
 const { Client, GatewayIntentBits, AttachmentBuilder } = require('discord.js');
+const fs = require('fs');
+const path = require('path');
 const { renderProbotCard } = require('./modules/probotWelcome');
 
 const client = new Client({
@@ -10,65 +12,62 @@ const client = new Client({
     ]
 });
 
+// مسار حفظ إعدادات الترحيب محلياً
+const CONFIG_PATH = path.join(__dirname, 'welcomeConfig.json');
+
+// دالة جلب الإعدادات المحفوظة
+function getWelcomeConfig() {
+    try {
+        if (fs.existsSync(CONFIG_PATH)) {
+            const data = fs.readFileSync(CONFIG_PATH, 'utf8');
+            return JSON.parse(data);
+        }
+    } catch (e) {
+        console.error('خطأ في قراءة ملف الإعدادات:', e);
+    }
+    return global.welcomeConfig || {};
+}
+
 client.on('ready', () => {
     console.log(`Bot logged in as ${client.user.tag}`);
 });
 
-// === حدث انضمام عضو جديد (الترحيب) ===
+// === حدث الترحيب عند الانضمام ===
 client.on('guildMemberAdd', async (member) => {
-    const config = global.welcomeConfig || {};
+    // جلب الإعدادات المحدثة المباشرة
+    const config = getWelcomeConfig();
 
-    // 1. التحقق من تفعيل مفتاح الترحيب الرئيسي
-    if (config.welcomeEnabled === false) return;
-
-    // 2. تحديد روم الترحيب
-    const channelId = config.welcomeChannelId || process.env.WELCOME_CHANNEL_ID;
+    // 1. تحديد الروم (أولوية للروم المحدد في اللوحة)
+    const channelId = config.welcomeChannelId || config.channelId || process.env.WELCOME_CHANNEL_ID;
     const channel = member.guild.channels.cache.get(channelId);
-    if (!channel) return;
 
-    // 3. تجهيز نص الترحيب
-    const messageContent = (config.welcomeMsg || 'Welcome {user} to {server}!')
+    if (!channel) {
+        console.log('لم يتم العثور على القناة الترحيبية المحددة.');
+        return;
+    }
+
+    // 2. تجهيز النص
+    const rawText = config.welcomeMsg || config.text || 'Welcome {user} to {server}!';
+    const messageContent = rawText
         .replace('{user}', `<@${member.id}>`)
         .replace('{username}', member.user.username)
         .replace('{memberCount}', member.guild.memberCount)
         .replace('{server}', member.guild.name);
 
-    // 4. التحقق من مفتاح إرسال الصورة
-    const shouldSendImage = config.welcomeImageEnabled !== false;
+    // 3. محاولة رسم وإرسال الصورة دائماً إلا إذا تم تعطيلها صراحة
+    try {
+        const buffer = await renderProbotCard(config, {
+            avatarUrl: member.user.displayAvatarURL({ extension: 'png', size: 256 }),
+            username: member.user.username
+        });
 
-    if (shouldSendImage) {
-        try {
-            const buffer = await renderProbotCard(config, {
-                avatarUrl: member.user.displayAvatarURL({ extension: 'png', size: 256 }),
-                username: member.user.username
-            });
-
-            const attachment = new AttachmentBuilder(buffer, { name: 'welcome.png' });
-            await channel.send({ content: messageContent, files: [attachment] });
-        } catch (err) {
-            console.error('خطأ في إنشاء أو إرسال الصورة، يتم إرسال النص فقط:', err);
-            await channel.send({ content: messageContent });
-        }
-    } else {
+        const attachment = new AttachmentBuilder(buffer, { name: 'welcome.png' });
+        await channel.send({ content: messageContent, files: [attachment] });
+        console.log('تم إرسال الصورة والنص بنجاح!');
+    } catch (err) {
+        console.error('تعذر إنشاء أو إرسال الصورة، جاري إرسال النص فقط:', err);
         await channel.send({ content: messageContent });
     }
-});
-
-// === حدث خروج عضو (المغادرة) ===
-client.on('guildMemberRemove', async (member) => {
-    const config = global.leaveConfig || {};
-
-    if (config.leaveEnabled === false) return;
-
-    const channelId = config.leaveChannelId || process.env.LEAVE_CHANNEL_ID;
-    const channel = member.guild.channels.cache.get(channelId);
-    if (!channel) return;
-
-    const leaveMsg = (config.leaveMsg || '{username} left the server.')
-        .replace('{username}', member.user.username)
-        .replace('{server}', member.guild.name);
-
-    await channel.send({ content: leaveMsg });
 });
 
 client.login(process.env.DISCORD_TOKEN);
