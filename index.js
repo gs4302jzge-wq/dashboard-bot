@@ -882,3 +882,23 @@ app.get('/settings', (req, res) => {
 app.listen(PORT, () => {
   console.log(`🌐 Dashboard live on port ${PORT}`);
 });
+
+<div style="background:#18191c; border:2px solid #5865F2; border-radius:8px; padding:15px; margin:20px 0; color:#fff;">
+  <h3 style="color:#5865F2; margin-top:0;">🎨 إعدادات الترحيب والأفاتار</h3>
+  <div style="margin-bottom:10px;">
+    <label style="display:block; font-weight:bold;">📁 رفع صورة خلفية جديدة:</label>
+    <input type="file" name="bgImage" accept="image/*" style="background:#2b2d31; color:#fff; padding:6px; width:100%; border-radius:4px;">
+  </div>
+  <div style="margin-bottom:10px;">
+    <label style="display:block; font-weight:bold;">↔️ موقع الأفاتار X:</label>
+    <input type="range" name="avatarX" min="0" max="800" value="400" style="width:100%;">
+  </div>
+  <div style="margin-bottom:10px;">
+    <label style="display:block; font-weight:bold;">↕️ موقع الأفاتار Y:</label>
+    <input type="range" name="avatarY" min="0" max="360" value="120" style="width:100%;">
+  </div>
+  <div style="margin-bottom:10px;">
+    <label style="display:block; font-weight:bold;">🔍 حجم الأفاتار:</label>
+    <input type="range" name="avatarRadius" min="20" max="150" value="60" style="width:100%;">
+  </div>
+</div>
