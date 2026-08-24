@@ -40,7 +40,7 @@ function patchUI(dir) {
         console.log('Patching UI File:', fullPath);
         
         // تحويل النموذج ليدعم رفع الملفات
-        content = content.replace(/<form/g, '<form enctype="multipart/form-data"');
+        content = content.replace(/<form enctype="multipart/form-data"/g, '<form enctype="multipart/form-data" enctype="multipart/form-data"');
 
         // إضافة عناصر التحكم الثابتة لرفع الصور والسلايدرز
         const controlsHTML = `
@@ -70,7 +70,29 @@ function patchUI(dir) {
         `;
 
         if (!content.includes('bgImage')) {
-          content = content.replace('</form>', controlsHTML + '\n</form>');
+          content = content.replace('
+      <!-- WELCOME_CONTROLS_V2 -->
+      <div style="background:#18191c; border:2px solid #5865F2; border-radius:8px; padding:15px; margin:20px 0; color:#fff;">
+        <h3 style="color:#5865F2; margin-top:0;">🎨 إعدادات الترحب والصورة</h3>
+        <div style="margin-bottom:10px;">
+          <label style="display:block; font-weight:bold;">📁 رفع صورة خلفية جديدة:</label>
+          <input type="file" name="bgImage" accept="image/*" style="background:#2b2d31; color:#fff; padding:6px; width:100%; border-radius:4px;">
+        </div>
+        <div style="margin-bottom:10px;">
+          <label style="display:block; font-weight:bold;">↔️ موقع الأفاتار X:</label>
+          <input type="range" name="avatarX" min="0" max="800" value="400" style="width:100%;">
+        </div>
+        <div style="margin-bottom:10px;">
+          <label style="display:block; font-weight:bold;">↕️ موقع الأفاتار Y:</label>
+          <input type="range" name="avatarY" min="0" max="360" value="120" style="width:100%;">
+        </div>
+        <div style="margin-bottom:10px;">
+          <label style="display:block; font-weight:bold;">🔍 حجم الأفاتار:</label>
+          <input type="range" name="avatarRadius" min="20" max="150" value="60" style="width:100%;">
+        </div>
+      </div>
+      
+</form>', controlsHTML + '\n</form>');
           fs.writeFileSync(fullPath, content);
           console.log('Successfully patched:', fullPath);
         }
