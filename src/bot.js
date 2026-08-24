@@ -1,6 +1,4 @@
 const { Client, GatewayIntentBits, AttachmentBuilder } = require('discord.js');
-const fs = require('fs');
-const path = require('path');
 const { renderProbotCard } = require('./modules/probotWelcome');
 
 const client = new Client({
@@ -12,60 +10,39 @@ const client = new Client({
     ]
 });
 
-// مسار حفظ إعدادات الترحيب محلياً
-const CONFIG_PATH = path.join(__dirname, 'welcomeConfig.json');
-
-// دالة جلب الإعدادات المحفوظة
-function getWelcomeConfig() {
-    try {
-        if (fs.existsSync(CONFIG_PATH)) {
-            const data = fs.readFileSync(CONFIG_PATH, 'utf8');
-            return JSON.parse(data);
-        }
-    } catch (e) {
-        console.error('خطأ في قراءة ملف الإعدادات:', e);
-    }
-    return global.welcomeConfig || {};
-}
-
 client.on('ready', () => {
-    console.log(`Bot logged in as ${client.user.tag}`);
+    console.log(`✅ Bot ready as: ${client.user.tag}`);
 });
 
-// === حدث الترحيب عند الانضمام ===
 client.on('guildMemberAdd', async (member) => {
-    // جلب الإعدادات المحدثة المباشرة
-    const config = getWelcomeConfig();
+    console.log(`👤 New member joined: ${member.user.username}`);
 
-    // 1. تحديد الروم (أولوية للروم المحدد في اللوحة)
-    const channelId = config.welcomeChannelId || config.channelId || process.env.WELCOME_CHANNEL_ID;
-    const channel = member.guild.channels.cache.get(channelId);
+    // جلب القناة من البيئة أو الإعدادات
+    const channelId = process.env.WELCOME_CHANNEL_ID || global.welcomeConfig?.welcomeChannelId;
+    const channel = member.guild.channels.cache.get(channelId) || member.guild.systemChannel;
 
     if (!channel) {
-        console.log('لم يتم العثور على القناة الترحيبية المحددة.');
+        console.error('❌ لم يتم العثور على قناة الترحيب.');
         return;
     }
 
-    // 2. تجهيز النص
-    const rawText = config.welcomeMsg || config.text || 'Welcome {user} to {server}!';
-    const messageContent = rawText
-        .replace('{user}', `<@${member.id}>`)
-        .replace('{username}', member.user.username)
-        .replace('{memberCount}', member.guild.memberCount)
-        .replace('{server}', member.guild.name);
+    const messageContent = `Welcome <@${member.id}> to **${member.guild.name}**!`;
 
-    // 3. محاولة رسم وإرسال الصورة دائماً إلا إذا تم تعطيلها صراحة
     try {
-        const buffer = await renderProbotCard(config, {
+        // إنشاء بطاقة الترحيب
+        const buffer = await renderProbotCard(global.welcomeConfig || {}, {
             avatarUrl: member.user.displayAvatarURL({ extension: 'png', size: 256 }),
             username: member.user.username
         });
 
         const attachment = new AttachmentBuilder(buffer, { name: 'welcome.png' });
+
+        // إرسال النص مع المرفق
         await channel.send({ content: messageContent, files: [attachment] });
-        console.log('تم إرسال الصورة والنص بنجاح!');
+        console.log('🖼️ تم إرسال صورة الترحيب بنجاح!');
     } catch (err) {
-        console.error('تعذر إنشاء أو إرسال الصورة، جاري إرسال النص فقط:', err);
+        console.error('❌ خطأ أثناء إرسال الصورة:', err);
+        // في حال وجود خلل في الصلاحيات يتم إرسال النص
         await channel.send({ content: messageContent });
     }
 });
