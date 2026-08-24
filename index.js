@@ -649,3 +649,8 @@ app.listen(PORT, () => {
   console.log(`🌐 Dashboard live on port ${PORT}`);
 });
 
+
+app.get('/', (req, res) => {
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.sendFile(require('path').join(__dirname, 'public', 'index.html'));
+});
