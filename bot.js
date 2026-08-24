@@ -82,7 +82,8 @@ app.get('/api/channels', (req, res) => {
 
 // فتح الواجهة الجديدة عند الدخول للموقع مباشرة
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public/index.html'));
+    res.setHeader('Content-Type', 'text/html');
+  res.sendFile(path.join(__dirname, 'public/index.html'));
 });
 
 const client = new Client({
