@@ -2,30 +2,39 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OSCORP RP - Ultra Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>OSCORP RP - NextGen Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; -webkit-tap-highlight-color: transparent; }
     
+    :root {
+      --primary: #6366f1;
+      --primary-glow: rgba(99, 102, 241, 0.4);
+      --accent: #a855f7;
+      --bg-dark: #070913;
+      --card-bg: rgba(18, 24, 43, 0.7);
+      --border: rgba(255, 255, 255, 0.08);
+    }
+
     body {
-      background: #090d16;
+      background: var(--bg-dark);
       background-image: 
-        radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.15) 0px, transparent 50%);
-      color: #f1f5f9;
+        radial-gradient(circle at 10% 10%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(168, 85, 247, 0.12) 0%, transparent 40%);
+      color: #f8fafc;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
     }
 
-    /* Header */
+    /* Navbar Header */
     .header {
-      background: rgba(15, 23, 42, 0.85);
+      background: rgba(11, 15, 25, 0.85);
       backdrop-filter: blur(16px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      padding: 16px 30px;
+      border-bottom: 1px solid var(--border);
+      padding: 14px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -35,84 +44,88 @@
     }
 
     .brand {
-      font-size: 24px;
+      font-size: 22px;
       font-weight: 900;
-      background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+      background: linear-gradient(135deg, #818cf8 0%, #c084fc 50%, #f472b6 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       display: flex;
       align-items: center;
-      gap: 12px;
-      letter-spacing: 1px;
+      gap: 10px;
+      letter-spacing: 0.5px;
     }
 
     .status-badge {
-      background: rgba(34, 197, 94, 0.15);
+      background: rgba(34, 197, 94, 0.12);
       color: #4ade80;
-      border: 1px solid rgba(34, 197, 94, 0.3);
-      padding: 6px 14px;
-      border-radius: 30px;
-      font-size: 13px;
-      font-weight: 700;
+      border: 1px solid rgba(34, 197, 94, 0.25);
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 800;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
+      box-shadow: 0 0 12px rgba(34, 197, 94, 0.2);
     }
 
-    .status-badge i { font-size: 8px; color: #22c55e; animation: pulse 1.5s infinite; }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+    .status-badge i { font-size: 7px; color: #22c55e; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.8); } }
 
     .layout {
       display: flex;
       flex: 1;
-      max-width: 1450px;
+      max-width: 1400px;
       width: 100%;
       margin: 0 auto;
     }
 
-    /* Sidebar Navigation */
+    /* Sidebar Navigation Desktop */
     .sidebar {
-      width: 280px;
-      background: rgba(15, 23, 42, 0.4);
-      border-left: 1px solid rgba(255, 255, 255, 0.05);
-      padding: 25px 16px;
+      width: 270px;
+      background: rgba(11, 15, 25, 0.5);
+      border-left: 1px solid var(--border);
+      padding: 20px 14px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
     }
 
     .nav-link {
       display: flex;
       align-items: center;
-      gap: 14px;
-      padding: 14px 20px;
+      gap: 12px;
+      padding: 12px 16px;
       color: #94a3b8;
-      text-decoration: none;
       border-radius: 14px;
       font-weight: 700;
-      font-size: 15px;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      font-size: 14px;
+      transition: all 0.25s ease;
       cursor: pointer;
+      user-select: none;
     }
 
-    .nav-link i { font-size: 18px; width: 22px; text-align: center; }
+    .nav-link i { font-size: 18px; width: 22px; text-align: center; color: #64748b; transition: 0.25s; }
 
     .nav-link:hover {
-      background: rgba(255, 255, 255, 0.06);
-      color: #f8fafc;
-      transform: translateX(-4px);
+      background: rgba(255, 255, 255, 0.04);
+      color: #f1f5f9;
     }
+
+    .nav-link:hover i { color: #818cf8; }
 
     .nav-link.active {
       background: linear-gradient(135deg, #6366f1, #4f46e5);
       color: #ffffff;
-      box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.5);
+      box-shadow: 0 8px 20px -4px var(--primary-glow);
     }
+
+    .nav-link.active i { color: #ffffff; }
 
     /* Main Content */
     .main-content {
       flex: 1;
-      padding: 35px;
+      padding: 24px;
       display: flex;
       justify-content: center;
       align-items: flex-start;
@@ -121,220 +134,229 @@
     .tab-content {
       display: none;
       width: 100%;
-      max-width: 750px;
-      animation: fadeIn 0.4s ease;
+      max-width: 720px;
+      animation: tabFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .tab-content.active { display: block; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes tabFadeIn { from { opacity: 0; transform: translateY(12px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
 
-    /* Glassmorphism Card */
+    /* Card Box */
     .card {
-      background: rgba(30, 41, 59, 0.5);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 24px;
-      padding: 35px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      background: var(--card-bg);
+      backdrop-filter: blur(24px);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 28px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
     }
 
     .card-header {
-      margin-bottom: 28px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      padding-bottom: 18px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 16px;
       display: flex;
       align-items: center;
       gap: 14px;
     }
 
-    .card-header i {
-      font-size: 24px;
-      color: #818cf8;
-      background: rgba(99, 102, 241, 0.15);
-      padding: 12px;
+    .card-icon {
+      width: 48px;
+      height: 48px;
       border-radius: 14px;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2));
+      border: 1px solid rgba(129, 140, 248, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: #a78bfa;
     }
 
-    .card-title {
-      font-size: 22px;
-      font-weight: 800;
-      color: #f8fafc;
-    }
+    .card-title { font-size: 20px; font-weight: 800; color: #f8fafc; }
+    .card-subtitle { font-size: 13px; color: #94a3b8; margin-top: 2px; }
 
-    .card-subtitle {
-      font-size: 13px;
-      color: #94a3b8;
-      margin-top: 2px;
-    }
-
-    /* Grid for Stats */
+    /* Stats Grid */
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px;
-      margin-bottom: 25px;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
     }
 
     .stat-box {
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      background: rgba(11, 15, 25, 0.6);
+      border: 1px solid var(--border);
       border-radius: 16px;
-      padding: 20px;
+      padding: 16px;
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 14px;
     }
 
-    .stat-box i { font-size: 28px; color: #a855f7; }
-    .stat-val { font-size: 22px; font-weight: 800; color: #fff; }
-    .stat-lbl { font-size: 13px; color: #94a3b8; }
+    .stat-box i { font-size: 24px; color: #a78bfa; }
+    .stat-val { font-size: 20px; font-weight: 800; color: #fff; }
+    .stat-lbl { font-size: 12px; color: #94a3b8; }
 
-    /* Form Elements */
-    .form-group { margin-bottom: 24px; }
+    /* Form Inputs */
+    .form-group { margin-bottom: 20px; }
     .form-group label {
-      display: block;
-      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
       font-weight: 700;
       color: #cbd5e1;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
 
+    .form-control {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 12px;
+      background: rgba(11, 15, 25, 0.7);
+      border: 1px solid var(--border);
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+      transition: 0.2s;
+    }
+
+    .form-control:focus { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2); }
+
+    /* Custom File Input */
     .file-input-wrapper {
       position: relative;
-      background: rgba(15, 23, 42, 0.7);
+      background: rgba(11, 15, 25, 0.6);
       border: 2px dashed rgba(255, 255, 255, 0.15);
-      border-radius: 16px;
-      padding: 25px;
+      border-radius: 14px;
+      padding: 20px;
       text-align: center;
-      transition: all 0.3s ease;
       cursor: pointer;
+      transition: 0.2s;
     }
 
-    .file-input-wrapper:hover {
-      border-color: #6366f1;
-      background: rgba(99, 102, 241, 0.05);
-    }
+    .file-input-wrapper:hover { border-color: #6366f1; background: rgba(99, 102, 241, 0.05); }
+    .file-input-wrapper input[type="file"] { position: absolute; top:0; left:0; width:100%; height:100%; opacity:0; cursor:pointer; }
 
-    .file-input-wrapper input[type="file"] {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;
-    }
-
-    .range-wrap {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-
+    /* Range Sliders */
+    .range-wrap { display: flex; align-items: center; gap: 12px; }
     input[type="range"] {
       -webkit-appearance: none;
       flex: 1;
-      height: 10px;
-      background: rgba(15, 23, 42, 0.9);
-      border-radius: 8px;
+      height: 8px;
+      background: rgba(11, 15, 25, 0.8);
+      border-radius: 6px;
       outline: none;
     }
 
     input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
-      width: 24px;
-      height: 24px;
+      width: 20px;
+      height: 20px;
       border-radius: 50%;
       background: linear-gradient(135deg, #6366f1, #a855f7);
       cursor: pointer;
-      box-shadow: 0 0 15px rgba(99, 102, 241, 0.8);
-      transition: transform 0.2s ease;
+      box-shadow: 0 0 10px rgba(99, 102, 241, 0.7);
     }
 
-    input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.25); }
-
     .range-val {
-      background: rgba(99, 102, 241, 0.2);
+      background: rgba(99, 102, 241, 0.15);
       color: #818cf8;
-      padding: 4px 12px;
+      padding: 3px 10px;
       border-radius: 8px;
       font-weight: 700;
-      font-size: 14px;
-      min-width: 45px;
+      font-size: 13px;
+      min-width: 40px;
       text-align: center;
     }
 
-    /* Plugin List */
+    /* Limit Warning Badge */
+    .limit-alert {
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #f87171;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    /* Plugin Card Item */
     .plugin-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: rgba(15, 23, 42, 0.6);
-      padding: 16px 20px;
-      border-radius: 16px;
-      margin-bottom: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      background: rgba(11, 15, 25, 0.5);
+      padding: 14px 18px;
+      border-radius: 14px;
+      margin-bottom: 10px;
+      border: 1px solid var(--border);
     }
 
-    .switch {
-      position: relative; display: inline-block; width: 50px; height: 26px;
-    }
-
+    .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
     .switch input { opacity: 0; width: 0; height: 0; }
     .slider {
       position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
-      background-color: #334155; transition: .4s; border-radius: 34px;
+      background-color: #334155; transition: .3s; border-radius: 30px;
     }
-
     .slider:before {
-      position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px;
-      background-color: white; transition: .4s; border-radius: 50%;
+      position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px;
+      background-color: white; transition: .3s; border-radius: 50%;
     }
-
     input:checked + .slider { background-color: #6366f1; }
-    input:checked + .slider:before { transform: translateX(24px); }
+    input:checked + .slider:before { transform: translateX(20px); }
 
-    /* Buttons */
+    /* Action Buttons */
     .btn-submit {
       width: 100%;
-      padding: 16px;
+      padding: 14px;
       border: none;
-      border-radius: 14px;
-      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      border-radius: 12px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
       color: white;
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 800;
       cursor: pointer;
-      box-shadow: 0 12px 30px -6px rgba(99, 102, 241, 0.6);
-      transition: all 0.3s ease;
-      margin-top: 15px;
+      box-shadow: 0 10px 25px -4px var(--primary-glow);
+      transition: all 0.25s ease;
+      margin-top: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
+      gap: 8px;
     }
 
-    .btn-submit:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 18px 36px -6px rgba(99, 102, 241, 0.8);
-    }
+    .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 14px 30px -4px rgba(99, 102, 241, 0.8); }
 
-    /* Mobile Responsive */
-    @media (max-width: 850px) {
+    /* Responsive Design for Mobile */
+    @media (max-width: 820px) {
       .layout { flex-direction: column; }
       .sidebar {
         width: 100%;
         border-left: none;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        border-bottom: 1px solid var(--border);
         flex-direction: row;
         overflow-x: auto;
-        padding: 12px;
+        padding: 10px;
+        gap: 6px;
       }
-      .nav-link { white-space: nowrap; padding: 10px 16px; font-size: 14px; }
-      .main-content { padding: 16px; }
-      .card { padding: 22px; border-radius: 18px; }
+      .nav-link { white-space: nowrap; padding: 8px 14px; font-size: 13px; border-radius: 10px; }
+      .main-content { padding: 14px; }
+      .card { padding: 20px; border-radius: 16px; }
     }
   </style>
 </head>
 <body>
 
+  <!-- Header Banner -->
   <header class="header">
     <div class="brand">
-      <i class="fa-solid fa-shield-halved"></i> OSCORP RP
+      <i class="fa-solid fa-shield-cat"></i> OSCORP RP
     </div>
     <div class="status-badge">
       <i class="fa-solid fa-circle"></i> Bot Active
@@ -342,16 +364,19 @@
   </header>
 
   <div class="layout">
-    <!-- Sidebar -->
+    <!-- Navigation Tabs -->
     <aside class="sidebar">
       <div class="nav-link active" onclick="switchTab('dashboard', this)">
-        <i class="fa-solid fa-chart-pie"></i> Dashboard
+        <i class="fa-solid fa-chart-line"></i> Dashboard
       </div>
       <div class="nav-link" onclick="switchTab('welcome', this)">
-        <i class="fa-solid fa-hand-wave"></i> Welcome System
+        <i class="fa-solid fa-address-card"></i> Welcome System
+      </div>
+      <div class="nav-link" onclick="switchTab('commands', this)">
+        <i class="fa-solid fa-terminal"></i> Commands & Aliases
       </div>
       <div class="nav-link" onclick="switchTab('plugins', this)">
-        <i class="fa-solid fa-puzzle-piece"></i> Plugins
+        <i class="fa-solid fa-cubes-stacked"></i> Plugins
       </div>
       <div class="nav-link" onclick="switchTab('guild', this)">
         <i class="fa-solid fa-server"></i> Guild Support
@@ -361,31 +386,31 @@
       </div>
     </aside>
 
-    <!-- Main Section -->
+    <!-- Main Section Content -->
     <main class="main-content">
 
-      <!-- 1. Dashboard Tab -->
+      <!-- 1. Dashboard -->
       <div id="tab-dashboard" class="tab-content active">
         <div class="card">
           <div class="card-header">
-            <i class="fa-solid fa-chart-pie"></i>
+            <div class="card-icon"><i class="fa-solid fa-chart-line"></i></div>
             <div>
-              <div class="card-title">لوحة الإحصائيات العامة</div>
-              <div class="card-subtitle">مراقبة أداء البوت والسيرفر المباشر</div>
+              <div class="card-title">لوحة الإحصائيات المباشرة</div>
+              <div class="card-subtitle">مراقبة الأداء وأنشطة البوت بالسيرفر</div>
             </div>
           </div>
           <div class="stats-grid">
             <div class="stat-box">
               <i class="fa-solid fa-users"></i>
               <div>
-                <div class="stat-val">12,450</div>
+                <div class="stat-val">14,280</div>
                 <div class="stat-lbl">إجمالي الأعضاء</div>
               </div>
             </div>
             <div class="stat-box">
               <i class="fa-solid fa-bolt"></i>
               <div>
-                <div class="stat-val">24 ms</div>
+                <div class="stat-val">18 ms</div>
                 <div class="stat-lbl">سرعة الاستجابة</div>
               </div>
             </div>
@@ -393,29 +418,29 @@
         </div>
       </div>
 
-      <!-- 2. Welcome System Tab -->
+      <!-- 2. Welcome System -->
       <div id="tab-welcome" class="tab-content">
         <div class="card">
           <div class="card-header">
-            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <div class="card-icon"><i class="fa-solid fa-address-card"></i></div>
             <div>
-              <div class="card-title">إعدادات الترحيب والأفاتار</div>
-              <div class="card-subtitle">خصص بطاقة الترحيب الخاصة بالسيرفر</div>
+              <div class="card-title">إعدادات بطاقة الترحيب</div>
+              <div class="card-subtitle">خصص الأفاتار والصورة للخلفية بدقة</div>
             </div>
           </div>
 
           <form action="/update-welcome" method="POST" enctype="multipart/form-data">
             <div class="form-group">
-              <label><i class="fa-solid fa-image"></i> رفع صورة خلفية جديدة:</label>
+              <label><i class="fa-solid fa-file-image"></i> صورة خلفية الترحيب:</label>
               <div class="file-input-wrapper">
-                <i class="fa-solid fa-cloud-arrow-up" style="font-size: 32px; color: #818cf8; margin-bottom: 8px;"></i>
-                <div style="color: #cbd5e1; font-weight: 700;">اضغط هنا لاختيار صورة الخلفية</div>
+                <i class="fa-solid fa-cloud-arrow-up" style="font-size: 28px; color: #818cf8; margin-bottom: 6px;"></i>
+                <div style="color: #cbd5e1; font-weight: 700; font-size: 13px;">اضغط هنا لاختيار الصورة</div>
                 <input type="file" name="bgImage" accept="image/*">
               </div>
             </div>
 
             <div class="form-group">
-              <label><i class="fa-solid fa-arrows-left-right"></i> موقع الأفاتار (الأفقي X):</label>
+              <label><i class="fa-solid fa-arrows-left-right"></i> موقع الأفاتار X:</label>
               <div class="range-wrap">
                 <input type="range" name="avatarX" min="0" max="800" value="400" oninput="this.nextElementSibling.innerText = this.value">
                 <span class="range-val">400</span>
@@ -423,7 +448,7 @@
             </div>
 
             <div class="form-group">
-              <label><i class="fa-solid fa-arrows-up-down"></i> موقع الأفاتار (العمودي Y):</label>
+              <label><i class="fa-solid fa-arrows-up-down"></i> موقع الأفاتار Y:</label>
               <div class="range-wrap">
                 <input type="range" name="avatarY" min="0" max="360" value="120" oninput="this.nextElementSibling.innerText = this.value">
                 <span class="range-val">120</span>
@@ -431,7 +456,7 @@
             </div>
 
             <div class="form-group">
-              <label><i class="fa-solid fa-maximize"></i> حجم الأفاتار:</label>
+              <label><i class="fa-solid fa-maximize"></i> قطر الأفاتار:</label>
               <div class="range-wrap">
                 <input type="range" name="avatarRadius" min="20" max="150" value="60" oninput="this.nextElementSibling.innerText = this.value">
                 <span class="range-val">60</span>
@@ -445,60 +470,105 @@
         </div>
       </div>
 
-      <!-- 3. Plugins Tab -->
+      <!-- 3. Bot Commands & Aliases (Limit 5 Only) -->
+      <div id="tab-commands" class="tab-content">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon"><i class="fa-solid fa-terminal"></i></div>
+            <div>
+              <div class="card-title">Bot Commands & Aliases</div>
+              <div class="card-subtitle">إدارة الأوامر والأسماء المستعارة المتاحة</div>
+            </div>
+          </div>
+
+          <div class="limit-alert">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span>YOU REACHED 5 LIMITS ONLY (أقصى حد مسموح به هو 5 أوامر فقط)</span>
+          </div>
+
+          <div class="form-group">
+            <label><i class="fa-solid fa-code"></i> Command 1 (الترحيب):</label>
+            <input type="text" class="form-control" value="!welcome | Alias: !w">
+          </div>
+          <div class="form-group">
+            <label><i class="fa-solid fa-code"></i> Command 2 (الرتب):</label>
+            <input type="text" class="form-control" value="!role | Alias: !r">
+          </div>
+          <div class="form-group">
+            <label><i class="fa-solid fa-code"></i> Command 3 (الحظر):</label>
+            <input type="text" class="form-control" value="!ban | Alias: !b">
+          </div>
+          <div class="form-group">
+            <label><i class="fa-solid fa-code"></i> Command 4 (الطرد):</label>
+            <input type="text" class="form-control" value="!kick | Alias: !k">
+          </div>
+          <div class="form-group">
+            <label><i class="fa-solid fa-code"></i> Command 5 (المساعدة):</label>
+            <input type="text" class="form-control" value="!help | Alias: !h">
+          </div>
+
+          <button type="button" class="btn-submit" onclick="alert('تم حفظ الأوامر بنجاح!')">
+            <i class="fa-solid fa-check-double"></i> حفظ الأوامر
+          </button>
+        </div>
+      </div>
+
+      <!-- 4. Plugins -->
       <div id="tab-plugins" class="tab-content">
         <div class="card">
           <div class="card-header">
-            <i class="fa-solid fa-puzzle-piece"></i>
+            <div class="card-icon"><i class="fa-solid fa-cubes-stacked"></i></div>
             <div>
               <div class="card-title">إدارة الإضافات (Plugins)</div>
-              <div class="card-subtitle">تفعيل وتعطيل ميزات البوت تلقائياً</div>
+              <div class="card-subtitle">تفعيل وإيقاف وظائف البوت المتقدمة</div>
             </div>
           </div>
+
           <div class="plugin-item">
             <div>
-              <div style="font-weight: 700;">Auto Moderation</div>
+              <div style="font-weight: 800;">Auto Moderation</div>
               <div style="font-size: 12px; color: #94a3b8;">الحماية التلقائية من السخام والروابط</div>
             </div>
             <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
           </div>
+
           <div class="plugin-item">
             <div>
-              <div style="font-weight: 700;">Leveling System</div>
-              <div style="font-size: 12px; color: #94a3b8;">نظام المستويات والخبرة للأعضاء</div>
+              <div style="font-weight: 800;">Leveling System</div>
+              <div style="font-size: 12px; color: #94a3b8;">نظام الخبرة والتفاعل للأعضاء</div>
             </div>
             <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
           </div>
         </div>
       </div>
 
-      <!-- 4. Guild Support Tab -->
+      <!-- 5. Guild Support -->
       <div id="tab-guild" class="tab-content">
         <div class="card">
           <div class="card-header">
-            <i class="fa-solid fa-headset"></i>
+            <div class="card-icon"><i class="fa-solid fa-server"></i></div>
             <div>
-              <div class="card-title">الدعم الفني والخيارات</div>
-              <div class="card-subtitle">مساعدة وإعدادات سيرفرات الدعم</div>
+              <div class="card-title">الدعم الفني للسيرفر</div>
+              <div class="card-subtitle">إدارة خيارات الدعم التلقائي والسيرفرات</div>
             </div>
           </div>
-          <p style="color: #94a3b8; font-size: 14px;">إذا كنت تواجِه أي مشكلة في تشغيل البوت داخل السيرفر، تواصل معنا عبر تذاكر الدعم المباشرة.</p>
+          <p style="color: #94a3b8; font-size: 13px; line-height: 1.6;">تستطيع عبر هذا القسم التحكم بروابط التذاكر وحالة المساعدة الفورية المتاحة في سيرفر OSCORP RP.</p>
         </div>
       </div>
 
-      <!-- 5. Settings Tab -->
+      <!-- 6. Settings -->
       <div id="tab-settings" class="tab-content">
         <div class="card">
           <div class="card-header">
-            <i class="fa-solid fa-gear"></i>
+            <div class="card-icon"><i class="fa-solid fa-sliders"></i></div>
             <div>
               <div class="card-title">إعدادات النظام العامة</div>
-              <div class="card-subtitle">التحكم في بادئة الأوامر (Prefix) واللغة</div>
+              <div class="card-subtitle">تعديل الـ Prefix واللغات الأساسية</div>
             </div>
           </div>
           <div class="form-group">
-            <label>Prefix البوت:</label>
-            <input type="text" value="!" style="width:100%; padding: 12px; border-radius: 10px; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.1); color: #fff;">
+            <label><i class="fa-solid fa-font"></i> Prefix البوت الرئيسي:</label>
+            <input type="text" class="form-control" value="!">
           </div>
         </div>
       </div>
@@ -511,7 +581,10 @@
       document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
       document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
       
-      document.getElementById('tab-' + tabName).classList.add('active');
+      const selectedTab = document.getElementById('tab-' + tabName);
+      if (selectedTab) {
+        selectedTab.classList.add('active');
+      }
       element.classList.add('active');
     }
   </script>
