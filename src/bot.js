@@ -133,3 +133,53 @@ client.on('guildMemberRemove', async (member) => {
     const attachment = new AttachmentBuilder(buffer, { name: 'goodbye.png' });
     channel.send({ content: `غادر العضو ${member.user.tag}`, files: [attachment] });
 });
+
+// === ProBot Exact Welcome & Leave System ===
+const { renderProbotCard } = require('./modules/probotWelcome');
+const { AttachmentBuilder } = require('discord.js');
+
+client.on('guildMemberAdd', async (member) => {
+    const config = global.welcomeConfig || {}; 
+    if (!config.welcomeEnabled) return;
+
+    const channel = member.guild.channels.cache.get(config.welcomeChannelId || process.env.WELCOME_CHANNEL_ID);
+    if (!channel) return;
+
+    const buffer = await renderProbotCard(config, {
+        avatarUrl: member.user.displayAvatarURL({ extension: 'png', size: 256 }),
+        username: member.user.username
+    });
+
+    const attachment = new AttachmentBuilder(buffer, { name: 'welcome.png' });
+    const messageContent = (config.welcomeMsg || 'Welcome {user} to {server}!')
+        .replace('{user}', `<@${member.id}>`)
+        .replace('{username}', member.user.username)
+        .replace('{memberCount}', member.guild.memberCount)
+        .replace('{server}', member.guild.name);
+
+    if (config.sendAsDM) {
+        member.send({ content: messageContent, files: [attachment] }).catch(() => {});
+    } else {
+        channel.send({ content: messageContent, files: [attachment] });
+    }
+});
+
+client.on('guildMemberRemove', async (member) => {
+    const config = global.leaveConfig || {};
+    if (!config.leaveEnabled) return;
+
+    const channel = member.guild.channels.cache.get(config.leaveChannelId || process.env.LEAVE_CHANNEL_ID);
+    if (!channel) return;
+
+    const buffer = await renderProbotCard({ ...config, textContent: 'Goodbye & Good Luck!' }, {
+        avatarUrl: member.user.displayAvatarURL({ extension: 'png', size: 256 }),
+        username: member.user.username
+    });
+
+    const attachment = new AttachmentBuilder(buffer, { name: 'leave.png' });
+    const leaveMsg = (config.leaveMsg || '{username} left the server.')
+        .replace('{username}', member.user.username)
+        .replace('{server}', member.guild.name);
+
+    channel.send({ content: leaveMsg, files: [attachment] });
+});
