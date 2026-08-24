@@ -1,5 +1,6 @@
 {
   "welcomeEnabled": true,
   "welcomeImageEnabled": true,
-  "textContent": "Welcome to Our Server"
+  "sendImage": true,
+  "imageEnabled": true
 }
